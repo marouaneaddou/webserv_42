@@ -1,21 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   errors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aech-che <aech-che@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/19 11:35:09 by aech-che          #+#    #+#             */
-/*   Updated: 2024/05/09 11:35:01 by aech-che         ###   ########.fr       */
+/*   Created: 2024/05/09 11:27:44 by aech-che          #+#    #+#             */
+/*   Updated: 2024/05/09 15:06:15 by aech-che         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#ifndef ERRORS_HPP
+# define ERRORS_HPP
 
 #include "includes.hpp"
+#include "utils.hpp"
 
-#include "errors.hpp"
+
+class Errors
+{
+    public:
+        Errors();
+        ~Errors();
+        static int check_filename(char *file_name);
+        
+};
+
+
+
+
+
 
 
 

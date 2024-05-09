@@ -1,26 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aech-che <aech-che@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/19 11:35:09 by aech-che          #+#    #+#             */
-/*   Updated: 2024/05/09 11:35:01 by aech-che         ###   ########.fr       */
+/*   Created: 2024/05/09 14:40:27 by aech-che          #+#    #+#             */
+/*   Updated: 2024/05/09 15:20:48 by aech-che         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#ifndef UTILS_HPP
+# define UTILS_HPP
 
 #include "includes.hpp"
 
-#include "errors.hpp"
 
 
-
-
-
+class Utils
+{
+    public:
+        Utils();
+        ~Utils();
+        static std::vector<std::string> split(std::string s, std::string c);
+        
+};
 
 
 
