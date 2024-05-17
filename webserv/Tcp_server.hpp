@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <sys/_select.h>
 #include <vector>
+#include <fcntl.h>
 #include <iostream>
 
 
@@ -28,6 +29,7 @@ class TCPserver
         int start_server();
         void close_server();
         void start_listen(int i);
+        void set_non_blocking(int sock);
 
 
 

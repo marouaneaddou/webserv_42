@@ -18,6 +18,7 @@ class WebServ
         ~WebServ();
         void run_servers();
         void SetListeners();
+        void set_non_blocking(int sock);
         fd_set current_Rsockets, ready_Rsockets;
         fd_set current_Wsockets, ready_Wsockets;
 
