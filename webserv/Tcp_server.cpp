@@ -20,10 +20,12 @@ void TCPserver::exit_error(const std::string err_msg)
 int TCPserver::start_server()
 {
     int ssocket;
+    int optval = 1;
     for (int i = 0; i < _Port.size(); i++)
     {
         if ((ssocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
             exit_error("cannot create socket");
+        setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval));
         _Socket.push_back(ssocket);
     }
     for (int i = 0; i < _Socket.size(); i++)

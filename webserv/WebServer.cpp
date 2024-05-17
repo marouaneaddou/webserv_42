@@ -1,5 +1,6 @@
 #include "Webserver.hpp"
 #include <cstdlib>
+#include <sys/fcntl.h>
 #include <unistd.h>
 #include <vector>
 
@@ -49,7 +50,7 @@ void WebServ::run_servers()
                         if (errno != EWOULDBLOCK && errno != EAGAIN)
                             perror("Server failed to accept incoming connection");
                     }
-                    // set_non_blocking(new_socket);
+                    set_non_blocking(new_socket);
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
                     // FD_SET(new_socket, &current_Wsockets);
@@ -57,16 +58,16 @@ void WebServ::run_servers()
                 }
                 else
                 {
-                    if ((nbytes = read(idx, buf, sizeof buf)) <= 0)
+                    if ((nbytes = recv(idx, buf, sizeof buf, 0)) <= 0)
                     {
                         // got error or connection closed by client
                         if (nbytes == 0)
                             printf("selectserver: socket %d hung up\n", idx);
                         else
                             perror("read");
-                        std::cout << "here\n";
                         close(idx);
                         FD_CLR(idx, &current_Rsockets);
+                        continue;
                     }
                     buf[nbytes] = '\0';
                     buffer.append(buf);
@@ -77,10 +78,10 @@ void WebServ::run_servers()
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
-                int nbyte = write(idx, "hello world\n", 12);
-                // close(idx);
+                int nbyte = send(idx, "hello world\r\n", 13, 0);
                 FD_CLR(idx, &current_Wsockets);
-                FD_SET(idx, &current_Rsockets);
+                close(idx);
+                // FD_SET(idx, &current_Rsockets);
             }
         }
     }
@@ -103,12 +104,7 @@ void WebServ::SetListeners()
 }
 
 void WebServ::set_non_blocking(int sock) {
-    int flags = fcntl(sock, F_GETFL, 0);
-    if (flags == -1) {
-        perror("fcntl F_GETFL");
-        exit(EXIT_FAILURE);
-    }
-    if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1) {
+    if (fcntl(sock, F_SETFL | O_NONBLOCK) == -1) {
         perror("fcntl F_SETFL");
         exit(EXIT_FAILURE);
     }
