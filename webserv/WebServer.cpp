@@ -1,5 +1,6 @@
 #include "Webserver.hpp"
 #include <cstdlib>
+#include <map>
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <vector>
@@ -46,10 +47,7 @@ void WebServ::run_servers()
                     int new_socket = 0;
                     socklen_t _sockaddr_len = sizeof(_sockaddr);
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
-                    {
-                        if (errno != EWOULDBLOCK && errno != EAGAIN)
-                            perror("Server failed to accept incoming connection");
-                    }
+                        perror("Server failed to accept incoming connection");
                     set_non_blocking(new_socket);
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
@@ -58,6 +56,7 @@ void WebServ::run_servers()
                 }
                 else
                 {
+                    
                     if ((nbytes = recv(idx, buf, sizeof buf, 0)) <= 0)
                     {
                         // got error or connection closed by client
@@ -73,7 +72,6 @@ void WebServ::run_servers()
                     buffer.append(buf);
                     FD_CLR(idx, &current_Rsockets);
                     FD_SET(idx, &current_Wsockets);
-
                 }
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
