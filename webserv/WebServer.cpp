@@ -1,5 +1,6 @@
 #include "Webserver.hpp"
 #include <cstdlib>
+#include <map>
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <vector>
@@ -22,6 +23,7 @@ WebServ::~WebServ()
 void WebServ::run_servers()
 {
     int nbytes;
+    int pos;
     std::string buffer;
     char buf[100];
     for (int i = 0; i < _ports.size(); i++)
@@ -46,10 +48,7 @@ void WebServ::run_servers()
                     int new_socket = 0;
                     socklen_t _sockaddr_len = sizeof(_sockaddr);
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
-                    {
-                        if (errno != EWOULDBLOCK && errno != EAGAIN)
-                            perror("Server failed to accept incoming connection");
-                    }
+                        perror("Server failed to accept incoming connection");
                     set_non_blocking(new_socket);
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
@@ -58,6 +57,7 @@ void WebServ::run_servers()
                 }
                 else
                 {
+                    
                     if ((nbytes = recv(idx, buf, sizeof buf, 0)) <= 0)
                     {
                         // got error or connection closed by client
@@ -71,14 +71,15 @@ void WebServ::run_servers()
                     }
                     buf[nbytes] = '\0';
                     buffer.append(buf);
-                    if (buffer.find("\n\r") != -1) // Read with a small size in the buffer METHOD GET
-                    {
-                        std::cout << buffer << std::endl;
-                        buffer.clear();
-                        FD_CLR(idx, &current_Rsockets);
-                        FD_SET(idx, &current_Wsockets);
-                    }
-
+                    pos = buffer.find("\r\n");
+                    std::cout << pos << std::endl;
+                    std::string x = buffer.substr(0, pos);
+                    if (pos != -1)
+                        std::cout << pos << std::endl;
+                    std::cout << buffer[pos -1] << std::endl;
+                    std::cout << x << " " << buffer << std::endl;
+                    FD_CLR(idx, &current_Rsockets);
+                    FD_SET(idx, &current_Wsockets);
                 }
             }
             else if (FD_ISSET(idx, &ready_Wsockets))

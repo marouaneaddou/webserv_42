@@ -3,7 +3,8 @@
 #include "Tcp_server.hpp"
 #include <iostream>
 #include <vector>
-
+#include <map>
+# include "Client.hpp"
 class WebServ
 {
     private:
@@ -11,6 +12,7 @@ class WebServ
         std::vector<TCPserver *> _servers;
         std::vector<int> servers_fds;
         std::vector<int> clients_fds;
+        std::map<int, Client> _clients;
         struct sockaddr_in _sockaddr;
 
     public:
