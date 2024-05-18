@@ -23,7 +23,7 @@ void WebServ::run_servers()
 {
     int nbytes;
     std::string buffer;
-    char buf[4096];
+    char buf[100];
     for (int i = 0; i < _ports.size(); i++)
     {
         _servers.push_back(new TCPserver(_ports[i]));
@@ -71,8 +71,13 @@ void WebServ::run_servers()
                     }
                     buf[nbytes] = '\0';
                     buffer.append(buf);
-                    FD_CLR(idx, &current_Rsockets);
-                    FD_SET(idx, &current_Wsockets);
+                    if (buffer.find("\n\r") != -1) // Read with a small size in the buffer METHOD GET
+                    {
+                        std::cout << buffer << std::endl;
+                        buffer.clear();
+                        FD_CLR(idx, &current_Rsockets);
+                        FD_SET(idx, &current_Wsockets);
+                    }
 
                 }
             }
