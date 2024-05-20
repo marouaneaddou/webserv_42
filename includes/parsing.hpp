@@ -1,34 +1,48 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.hpp                                          :+:      :+:    :+:   */
+/*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aech-che <aech-che@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/09 14:40:27 by aech-che          #+#    #+#             */
-/*   Updated: 2024/05/13 15:52:32 by aech-che         ###   ########.fr       */
+/*   Created: 2024/05/10 15:27:43 by aech-che          #+#    #+#             */
+/*   Updated: 2024/05/13 15:55:31 by aech-che         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_HPP
-# define UTILS_HPP
+#ifndef PARSING_HPP
+# define PARSING_HPP
 
 #include "includes.hpp"
+#include "utils.hpp"
 
 
 
-class Utils
+
+
+
+
+class Parsing
 {
+    public:
+        Parsing();
+        ~Parsing();
+        static int parse_file(std::ifstream &infile, std::vector<std::string> &data);
 
-        public:
-                Utils();
-                ~Utils();
-                static std::vector<std::string> split(std::string s, std::string c);
-                static void count_servers(std::ifstream &infile);
 
 
 
 };
+
+
+
+
+
+
+
+
+
+
 
 
 
