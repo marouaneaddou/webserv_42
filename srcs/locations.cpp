@@ -1,28 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   locations.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aech-che <aech-che@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/19 11:35:09 by aech-che          #+#    #+#             */
-/*   Updated: 2024/05/11 11:43:21 by aech-che         ###   ########.fr       */
+/*   Created: 2024/05/19 11:22:03 by ayyouub.py        #+#    #+#             */
+/*   Updated: 2024/05/19 12:20:01 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#include "../includes/locations.hpp"
 
-#include "includes.hpp"
-
-
-
-
-
-
-
+Locations::Locations() 
+{
+    // True -> on
+    directory_listing = true;
+    cgi_bin = "/usr/bin/bash";
+    cgi_extension = ".sh";
+}
 
 
-
-
-#endif
+Locations::~Locations()
+{
+}
