@@ -1,6 +1,10 @@
 #include "HTTPRequest.hpp"
 #include <cstdlib>
 
+HTTPRequest::HTTPRequest()
+{
+
+}
 HTTPRequest::HTTPRequest(const std::string &raw_req) : _rawReq(raw_req)
 {
     parse_request_line(_rawReq);
@@ -9,30 +13,34 @@ HTTPRequest::HTTPRequest(const std::string &raw_req) : _rawReq(raw_req)
 
 HTTPRequest::~HTTPRequest(){};
 
-void HTTPRequest::parse_request_line(std::string _rawReq)
+void HTTPRequest::parse_request_line(std::string &_rawReq)
 {
+    _lineRequest = _rawReq;
     std::string oneline;
     std::istringstream iss(_rawReq);
     std::getline(iss, oneline);
-    std::vector<std::string> tokens = split(oneline, ' ');
-    _Method = tokens[0];
+    // std::vector<std::string> tokens = split(oneline, ' ');
+    std::string dele = " ";
+    std::vector<std::string> tokens = Utils::split(oneline, dele);
+    _method = tokens[0];
     _URL = tokens[1];
+    std::cout << tokens.size() << std::endl;
     http_version = tokens[2];
 }
 
-std::vector<std::string> HTTPRequest::split(const std::string& input, char delimiter) {
-    std::vector<std::string> tokens;
-    std::string token;
-    for (size_t i = 0; i < input.size(); ++i) {
-        if (input[i] != delimiter) {
-            token += input[i];
-        } else {
-            tokens.push_back(token);
-            token.clear();
-        }
-    }
-    return tokens;
-}
+// std::vector<std::string> HTTPRequest::split(const std::string& input, char delimiter) {
+//     std::vector<std::string> tokens;
+//     std::string token;
+//     for (size_t i = 0; i < input.size(); ++i) {
+//         if (input[i] != delimiter) {
+//             token += input[i];
+//         } else {
+//             tokens.push_back(token);
+//             token.clear();
+//         }
+//     }
+//     return tokens;
+// }
 
 void HTTPRequest::parse_headers_body(std::string _rawReq)
 {
@@ -59,6 +67,15 @@ void HTTPRequest::parse_headers_body(std::string _rawReq)
     }
 }
 
+void HTTPRequest::setHeader(std::string &buffer)
+{
+    _header = buffer;
+}
+
+std::string HTTPRequest::getHeader() const
+{
+    return _header;
+}
 
 // int HTTPRequest::check_req_format()
 // {

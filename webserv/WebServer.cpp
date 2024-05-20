@@ -5,13 +5,13 @@
 #include <unistd.h>
 #include <vector>
 
-
 WebServ::WebServ()
 {
     // fill infos from config class;
     std::vector<int> port;
     port.push_back(4223);
     _ports.push_back(port);
+
 }
 
 WebServ::~WebServ()
@@ -25,7 +25,9 @@ void WebServ::run_servers()
     int nbytes;
     int pos;
     std::string buffer;
-    char buf[100];
+    std::string line;
+    // bool check = false;
+    char buf[20];
     for (int i = 0; i < _ports.size(); i++)
     {
         _servers.push_back(new TCPserver(_ports[i]));
@@ -50,6 +52,8 @@ void WebServ::run_servers()
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
                         perror("Server failed to accept incoming connection");
                     set_non_blocking(new_socket);
+                    std::cout << new_socket << std::endl;
+                    _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
                     // FD_SET(new_socket, &current_Wsockets);
@@ -57,7 +61,6 @@ void WebServ::run_servers()
                 }
                 else
                 {
-                    
                     if ((nbytes = recv(idx, buf, sizeof buf, 0)) <= 0)
                     {
                         // got error or connection closed by client
@@ -70,21 +73,43 @@ void WebServ::run_servers()
                         continue;
                     }
                     buf[nbytes] = '\0';
-                    buffer.append(buf);
-                    pos = buffer.find("\r\n");
-                    std::cout << pos << std::endl;
-                    std::string x = buffer.substr(0, pos);
-                    if (pos != -1)
-                        std::cout << pos << std::endl;
-                    std::cout << buffer[pos -1] << std::endl;
-                    std::cout << x << " " << buffer << std::endl;
-                    FD_CLR(idx, &current_Rsockets);
-                    FD_SET(idx, &current_Wsockets);
+                    buffer.append(buf, nbytes);
+                    std::cout << buffer << std::endl;
+                    std::cout << "*****************************\n";
+                    if (buffer.find("\r\n\r\n") != -1)
+                    {
+                        line = buffer.substr(0, buffer.find("\r\n"));
+                        _clients.at(idx)->request->parse_request_line(line);
+                        buffer = buffer.substr(buffer.find("\r\n"));
+                        if (_clients.at(idx)->request->getMethod() != "POST")
+                        {
+                            _clients.at(idx)->request->setHeader(buffer);
+                            buffer.clear();
+                            FD_CLR(idx, &current_Rsockets);
+                            FD_SET(idx, &current_Wsockets);
+                        }
+                        else 
+                        {
+                            // line = buffer.substr(0, buffer.find("\r\n\r\n"));
+                            // buffer = buffer.substr(buffer.find("\r\n\r\n"));
+                            // std::cout << buffer << std::endl;
+                            // std::cout << "SGV" << std::endl;
+                        }
+                        // selectTypeOfMethod(buffer, idx);
+                    }
+                    // std::cout << buffer << std::endl;
                 }
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
-                int nbyte = send(idx, "hello world\r\n", 13, 0);
+                char* httpResponse = "HTTP/1.1 200 OK\r\n"
+                     "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
+                     "Server: Apache/2.4.41 (Ubuntu)\r\n"
+                     "Content-Type: text/plain; charset=UTF-8\r\n"
+                     "Content-Length: 13\r\n"
+                     "\r\n"
+                     "Hello, World!";
+                int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
                 // FD_SET(idx, &current_Rsockets);
@@ -116,3 +141,8 @@ void WebServ::set_non_blocking(int sock) {
     }
 }
 
+void WebServ::selectTypeOfMethod(std::string &buffer, int &fd)
+{
+    int pos = buffer.find("\r\n");
+    // _clients.at(fd)->request->
+}

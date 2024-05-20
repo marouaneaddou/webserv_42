@@ -25,6 +25,7 @@ int TCPserver::start_server()
     {
         if ((ssocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
             exit_error("cannot create socket");
+        
         setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval));
         _Socket.push_back(ssocket);
     }
