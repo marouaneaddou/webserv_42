@@ -9,7 +9,7 @@ WebServ::WebServ()
 {
     // fill infos from config class;
     std::vector<int> port;
-    port.push_back(4223);
+    port.push_back(4222);
     _ports.push_back(port);
 
 }
@@ -26,6 +26,7 @@ void WebServ::run_servers()
     int find;
     for (int i = 0; i < _ports.size(); i++)
     {
+        
         _servers.push_back(new TCPserver(_ports[i]));
     }
     SetListeners();
@@ -35,8 +36,10 @@ void WebServ::run_servers()
         ready_Wsockets = current_Wsockets;
         if (select(FD_SETSIZE, &ready_Rsockets, &ready_Wsockets, NULL, NULL) < 0)
             std::cerr << "Error in select(): " << strerror(errno) << std::endl;
+        
         for (int idx = 0; idx < FD_SETSIZE; idx++)
         {
+            
             if (FD_ISSET(idx, &ready_Rsockets))
             {
                 std::vector<int>::iterator it = std::find(servers_fds.begin(), servers_fds.end(), idx);
@@ -58,6 +61,7 @@ void WebServ::run_servers()
                 else
                 {
                     read_request(idx);
+                    // std::cout << _buffer << std::endl;
                     start_parsing(idx);
                 }
             }
@@ -75,6 +79,8 @@ void WebServ::run_servers()
                 int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
+                itClient it = _clients.find(idx);
+                _clients.erase(it);
                 // FD_SET(idx, &current_Rsockets);
             }
         }
@@ -96,6 +102,7 @@ void WebServ::read_request(int fd_R)
     }
     if (_nbytes < sizeof(_buf))
         _buf[_nbytes] = '\0';
+    std::cout << _nbytes << std::endl;
     _buffer.append(_buf, _nbytes);
     // if (_nbytes == 0)
     //     std::cout << "kamalt 9raya" << std::endl;
@@ -107,20 +114,29 @@ void WebServ::read_request(int fd_R)
 
 void WebServ::start_parsing(int fd_R)
 {
-    if (_buffer.find("\r\n\r\n") != -1)
+    if (_clients.at(fd_R)->getCheck() == false &&_buffer.find("\r\n\r\n") != -1)
     {
-        _firstline = _buffer.substr(0, _buffer.find("\r\n"));
+        // std::cout << "hna hna hna hna hna \n";
+        int findPos = _buffer.find("\r\n");
+        _clients.at(fd_R)->setCheck();
+        _firstline = _buffer.substr(0, findPos);
         _clients.at(fd_R)->_request->parse_request_line(_firstline);
-        _buffer = _buffer.substr(_buffer.find("\r\n"));
+        _buffer = _buffer.substr(findPos + 2);
         if (_clients.at(fd_R)->_request->getMethod() != "POST")
         {
             _clients.at(fd_R)->_request->setHeader(_buffer);
-            _buffer.clear();
             FD_CLR(fd_R, &current_Rsockets);
             FD_SET(fd_R, &current_Wsockets);
+            _buffer.clear();
         }
         else
         {
+            findPos = _buffer.find("\r\n\r\n");
+            _clients.at(fd_R)->_request->setHeader(_buffer.substr(0, findPos + 2));
+            // _clients.at(fd_R)->_request->setHeaders();
+            // std::cout << _clients.at(fd_R)->_request->getHeader();
+            _buffer = _buffer.substr(findPos + 4);
+            // std::cout << _buffer << std::endl;
             // line = buffer.substr(0, buffer.find("\r\n\r\n"));
             // buffer = buffer.substr(buffer.find("\r\n\r\n"));
             // std::cout << buffer << std::endl;
@@ -128,7 +144,7 @@ void WebServ::start_parsing(int fd_R)
         }
         // selectTypeOfMethod(buffer, idx);
     }
-    // std::cout << buffer << std::endl;
+
 }
 
 void WebServ::SetListeners()

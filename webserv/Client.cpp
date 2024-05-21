@@ -9,6 +9,7 @@
 Client::Client(int &new_socket)
 {
     socket = new_socket;
+    _check = false;
     _request = new Request();
     _response = new Response();
 };
@@ -16,5 +17,15 @@ Client::Client(int &new_socket)
 Client::~Client(){
     delete _request;
     delete _response;
+}
+
+void Client::setCheck()
+{
+    _check = true;
+}
+
+bool Client::getCheck() const
+{
+    return _check;
 }
 

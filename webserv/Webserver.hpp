@@ -10,6 +10,7 @@
 #include "StaticFileHandler.hpp"
 #include "PhpCgiHandler.hpp"
 
+typedef  std::map<int, Client *>::iterator itClient;
 
 class WebServ
 {

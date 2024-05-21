@@ -21,9 +21,10 @@ class Request
         void setURL();
         std::string getBody() const;
         void setBody();
-        void setHeader(std::string &buffer);
+        void setHeader(std::string buffer);
         std::string getHeader() const;
         std::map<std::string, std::string>& getHeaders() const;
+        void setHeaders();
         void parse_request_line(std::string &_rawReq);
         void parse_headers_body(std::string _rawReq);
 
