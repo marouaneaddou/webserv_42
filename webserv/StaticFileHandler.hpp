@@ -8,7 +8,7 @@ class StaticFileHandler : public RequestHandler {
 public:
     StaticFileHandler();
     ~StaticFileHandler();
-    void handleRequest(const Request* request, Response* response) override;
+    void handleRequest(const Request* request, Response* response);
 private:
     // Private members for handling static file requests.
 };

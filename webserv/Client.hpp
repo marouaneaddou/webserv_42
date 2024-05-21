@@ -1,10 +1,10 @@
 #pragma once
 
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include "Request.hpp"
-#include "Response.hpp"
+# include <iostream>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include "Request.hpp"
+# include "Response.hpp"
 
 class Request;
 class Client

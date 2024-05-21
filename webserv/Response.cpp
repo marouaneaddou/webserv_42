@@ -1,10 +1,15 @@
+
 #include "Response.hpp"
 
 Response::Response()
 {
     setStatus(200);
 }
-Response::~Response(){}
+
+Response::~Response()
+{
+    
+}
 
 void Response::setStatus(int status)
 {

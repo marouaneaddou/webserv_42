@@ -23,6 +23,7 @@ WebServ::~WebServ()
 void WebServ::run_servers()
 {
     int pos;
+    int find;
     for (int i = 0; i < _ports.size(); i++)
     {
         _servers.push_back(new TCPserver(_ports[i]));
@@ -63,15 +64,15 @@ void WebServ::run_servers()
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
                 RequestHandler* handler = createHandler(_clients.at(idx)->_request);
-                handler->handleRequest(_clients.at(idx)->_request, _clients.at(idx)->_response);
-                // char httpResponse[] = "HTTP/1.1 200 OK\r\n"
-                //      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                //      "Server: Apache/2.4.41 (Ubuntu)\r\n"
-                //      "Content-Type: text/plain; charset=UTF-8\r\n"
-                //      "Content-Length: 13\r\n"
-                //      "\r\n"
-                //      "Hello, World!";
-                // int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
+                // handler->handleRequest(_clients.at(idx)->_request, _clients.at(idx)->_response);
+                char httpResponse[] = "HTTP/1.1 200 OK\r\n"
+                     "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
+                     "Server: Apache/2.4.41 (Ubuntu)\r\n"
+                     "Content-Type: text/plain; charset=UTF-8\r\n"
+                     "Content-Length: 13\r\n"
+                     "\r\n"
+                     "Hello, World!";
+                int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
                 // FD_SET(idx, &current_Rsockets);
@@ -82,7 +83,7 @@ void WebServ::run_servers()
 
 void WebServ::read_request(int fd_R)
 {
-    if ((_nbytes = recv(fd_R, _buf, sizeof _buf, 0)) <= 0)
+    if ((_nbytes = recv(fd_R, _buf, sizeof(_buf), 0)) <= 0)
     {
         // got error or connection closed by client
         if (_nbytes == 0)
@@ -93,10 +94,15 @@ void WebServ::read_request(int fd_R)
         FD_CLR(fd_R, &current_Rsockets);
         // continue;
     }
-    _buf[_nbytes] = '\0';
+    if (_nbytes < sizeof(_buf))
+        _buf[_nbytes] = '\0';
     _buffer.append(_buf, _nbytes);
-    std::cout << _buffer << std::endl;
-    std::cout << "*****************************\n";
+    // if (_nbytes == 0)
+    //     std::cout << "kamalt 9raya" << std::endl;
+    // std::cout << "nbyt " << _nbytes << std::endl;
+    // if (_buffer.find("0") != -1)
+    //     std::cout << _buffer << std::endl;
+    // std::cout << "*****************************\n";
 }
 
 void WebServ::start_parsing(int fd_R)

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <iostream>
-#include <map>
+# include <iostream>
+# include <map>
+
 class Response {
 public:
     Response();

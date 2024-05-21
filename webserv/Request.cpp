@@ -57,3 +57,8 @@ std::string Request::getHeader() const
 {
     return _header;
 }
+
+std::string Request::getURL() const
+{
+    return _URL;
+}
