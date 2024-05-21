@@ -1,8 +1,14 @@
 #pragma once
 #include "Response.hpp"
-#include "HTTPRequest.hpp"
+#include "Request.hpp"
 
 class RequestHandler {
 public:
-    virtual Response handleRequest(const HTTPRequest& request) = 0;
+    RequestHandler();
+    virtual ~RequestHandler() {}
+    virtual void handleRequest(const Request* request, Response* response) = 0;
+protected:
+    bool is_req_well_formed(const Request* request, Response* response);
+    bool req_uri_location(const Request* request, Response* response);
+    //  other checking methods ...
 };

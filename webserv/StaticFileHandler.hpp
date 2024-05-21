@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Response.hpp"
-#include "HTTPRequest.hpp"
+#include "Request.hpp"
 #include "RequestHandler.hpp"
 
 class StaticFileHandler : public RequestHandler {
 public:
-    Response handleRequest(const HTTPRequest& request) override;
+    StaticFileHandler();
+    ~StaticFileHandler();
+    void handleRequest(const Request* request, Response* response) override;
 private:
     // Private members for handling static file requests.
 };
