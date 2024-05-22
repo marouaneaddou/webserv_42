@@ -61,8 +61,20 @@ void WebServ::run_servers()
                 else
                 {
                     read_request(idx);
-                    // std::cout << _buffer << std::endl;
                     start_parsing(idx);
+                    if (_clients[idx]->_request->getHeader("Content-Length")  != _clients[idx]->_request->getEndHeaders())
+                    {
+                        _clients[idx]->_request->findBoundry();
+                        std::cout <<_buffer.find(_clients[idx]->_request->getHeader("boundary")->second) << std::endl;
+                        if (_buffer.find(_clients[idx]->_request->getHeader("boundary")->second) != -1)
+                        {
+                            FD_CLR(idx, &current_Rsockets);
+                            FD_SET(idx, &current_Wsockets);
+                            _clients[idx]->_request->setBody(_buffer);
+                            std::cout << _clients[idx]->_request->getBody();
+                            _buffer.clear();
+                        }
+                    }
                 }
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
@@ -100,23 +112,17 @@ void WebServ::read_request(int fd_R)
         FD_CLR(fd_R, &current_Rsockets);
         // continue;
     }
+
     if (_nbytes < sizeof(_buf))
         _buf[_nbytes] = '\0';
     std::cout << _nbytes << std::endl;
     _buffer.append(_buf, _nbytes);
-    // if (_nbytes == 0)
-    //     std::cout << "kamalt 9raya" << std::endl;
-    // std::cout << "nbyt " << _nbytes << std::endl;
-    // if (_buffer.find("0") != -1)
-    //     std::cout << _buffer << std::endl;
-    // std::cout << "*****************************\n";
 }
 
 void WebServ::start_parsing(int fd_R)
 {
     if (_clients.at(fd_R)->getCheck() == false &&_buffer.find("\r\n\r\n") != -1)
     {
-        // std::cout << "hna hna hna hna hna \n";
         int findPos = _buffer.find("\r\n");
         _clients.at(fd_R)->setCheck();
         _firstline = _buffer.substr(0, findPos);
@@ -133,16 +139,8 @@ void WebServ::start_parsing(int fd_R)
         {
             findPos = _buffer.find("\r\n\r\n");
             _clients.at(fd_R)->_request->setHeader(_buffer.substr(0, findPos + 2));
-            // _clients.at(fd_R)->_request->setHeaders();
-            // std::cout << _clients.at(fd_R)->_request->getHeader();
             _buffer = _buffer.substr(findPos + 4);
-            // std::cout << _buffer << std::endl;
-            // line = buffer.substr(0, buffer.find("\r\n\r\n"));
-            // buffer = buffer.substr(buffer.find("\r\n\r\n"));
-            // std::cout << buffer << std::endl;
-            // std::cout << "SGV" << std::endl;
         }
-        // selectTypeOfMethod(buffer, idx);
     }
 
 }

@@ -67,19 +67,51 @@ std::string Request::getURL() const
 void Request::setHeaders()
 {
     size_t pos = 0;
+    size_t separator_pos = 0;
+    std::string line;
     while ((pos = _header.find("\r\n")) != std::string::npos) {
-        std::string line = _header.substr(0, pos);
-        size_t separator_pos = line.find(": ");
-        if (separator_pos != std::string::npos) {
-            std::string key = line.substr(0, separator_pos);
-            std::string value = line.substr(separator_pos + 2);
-            _headers[key] = value;
-        }
+
+        line = _header.substr(0, pos);
+        separator_pos = line.find(": ");
+        if (separator_pos != std::string::npos)
+            _headers[line.substr(0, separator_pos)] = line.substr(separator_pos + 2);
         _header.erase(0, pos + 2);
     }
-    for (auto ut : _headers)
-    {
-        std::cout << ut.first << " "  <<  ut.second <<std::endl;
-    }
-    // std::cout << _header << std::endl;
+}
+
+itHeaders Request::getHeader(const char* key) const
+{
+    return _headers.find(key);
+}
+
+itHeaders Request::getStartHeaders() const
+{
+    return _headers.begin();
+}
+
+itHeaders Request::getEndHeaders() const
+{
+    return _headers.end();
+}
+
+void Request::findBoundry()
+{
+    itHeaders it = _headers.find("Content-Type");
+    std::string boundry = it->second.substr(it->second.find("=") + 1);
+    boundry += "--";
+    _headers["boundry"] = boundry;
+    // for (auto ut : _headers)
+    // {
+    //     std::cout << ut.first << "============="  <<  ut.second <<std::endl;
+    // }
+}
+
+void Request::setBody(std::string &buffer)
+{
+    _body = buffer;
+}
+
+std::string Request::getBody() const
+{
+    return _body;
 }
