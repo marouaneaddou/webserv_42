@@ -2,6 +2,7 @@
 #define WEBSERVER_HPP
 
 #include "Tcp_server.hpp"
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -10,7 +11,7 @@
 #include "StaticFileHandler.hpp"
 #include "PhpCgiHandler.hpp"
 #include "../includes/servers.hpp"
-
+# include <algorithm>
 typedef  std::map<int, Client *>::iterator itClient;
 
 class WebServ

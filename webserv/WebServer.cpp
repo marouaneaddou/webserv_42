@@ -7,7 +7,7 @@
 
 WebServ::WebServ()
 {
-    std::vector<Servers> Confs;
+    // std::vector<Servers> Confs;
 
     
     // fill infos from config class;
@@ -65,17 +65,17 @@ void WebServ::run_servers()
                 {
                     read_request(idx);
                     start_parsing(idx);
-                    if (_clients[idx]->_request->getHeader("Content-Length")  != _clients[idx]->_request->getEndHeaders())
+                    if (_clients[idx]->_request->getHeader("Content-Type")  != _clients[idx]->_request->getEndHeaders())
                     {
                         _clients[idx]->_request->findBoundry();
-                        std::cout <<_buffer.find(_clients[idx]->_request->getHeader("boundary")->second) << std::endl;
+                        // std::cout <<"buffer bondery" << _buffer.find(_clients[idx]->_request->getHeader("boundary")->second) << std::endl;
                         if (_buffer.find(_clients[idx]->_request->getHeader("boundary")->second) != -1)
                         {
-                            FD_CLR(idx, &current_Rsockets);
-                            FD_SET(idx, &current_Wsockets);
                             _clients[idx]->_request->setBody(_buffer);
                             std::cout << _clients[idx]->_request->getBody();
                             _buffer.clear();
+                            FD_CLR(idx, &current_Rsockets);
+                            FD_SET(idx, &current_Wsockets);
                         }
                     }
                 }
@@ -120,6 +120,7 @@ void WebServ::read_request(int fd_R)
         _buf[_nbytes] = '\0';
     std::cout << _nbytes << std::endl;
     _buffer.append(_buf, _nbytes);
+
 }
 
 void WebServ::start_parsing(int fd_R)
@@ -162,8 +163,10 @@ void WebServ::SetListeners()
     }
 }
 
-void WebServ::set_non_blocking(int sock) {
-    if (fcntl(sock, F_SETFL | O_NONBLOCK) == -1) {
+void WebServ::set_non_blocking(int sock) 
+{
+    if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1) 
+    {
         perror("fcntl F_SETFL");
         exit(EXIT_FAILURE);
     }

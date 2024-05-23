@@ -77,6 +77,10 @@ void Request::setHeaders()
             _headers[line.substr(0, separator_pos)] = line.substr(separator_pos + 2);
         _header.erase(0, pos + 2);
     }
+    for (auto ut : _headers)
+    {
+        std::cout << ut.first << "============="  <<  ut.second <<std::endl;
+    }
 }
 
 itHeaders Request::getHeader(const char* key) const
@@ -99,7 +103,8 @@ void Request::findBoundry()
     itHeaders it = _headers.find("Content-Type");
     std::string boundry = it->second.substr(it->second.find("=") + 1);
     boundry += "--";
-    _headers["boundry"] = boundry;
+    _headers["boundary"] = boundry;
+    std::cout << boundry << std::endl;
     // for (auto ut : _headers)
     // {
     //     std::cout << ut.first << "============="  <<  ut.second <<std::endl;

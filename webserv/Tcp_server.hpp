@@ -4,7 +4,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/_select.h>
+// #include <sys/_select.h>
+#include <cstring>
 #include <vector>
 #include <fcntl.h>
 #include <iostream>
