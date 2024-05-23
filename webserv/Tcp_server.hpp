@@ -21,6 +21,8 @@ class TCPserver
         void exit_error(const std::string err_msg);
         std::vector<int> getSocket() ;
         std::vector<int> getCliSocket() ;
+        // const & Config getConfig();
+
     private:
         int _backlogs;
         std::vector<int> _Port;

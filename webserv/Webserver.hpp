@@ -9,6 +9,7 @@
 #include "RequestHandler.hpp"
 #include "StaticFileHandler.hpp"
 #include "PhpCgiHandler.hpp"
+#include "../includes/servers.hpp"
 
 typedef  std::map<int, Client *>::iterator itClient;
 

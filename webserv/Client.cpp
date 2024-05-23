@@ -6,12 +6,12 @@
 //     _sockaddr = new_addr;
 // }
 
-Client::Client(int &new_socket)
+Client::Client(int &new_socket /*class config*/)
 {
     socket = new_socket;
     _check = false;
-    _request = new Request();
-    _response = new Response();
+    _request = new Request(/*class config*/);
+    _response = new Response(/*class config*/);
 };
 
 Client::~Client(){

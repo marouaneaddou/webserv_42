@@ -7,7 +7,11 @@
 
 WebServ::WebServ()
 {
+    std::vector<Servers> Confs;
+
+    
     // fill infos from config class;
+    //vector of classes serverconf 
     std::vector<int> port;
     port.push_back(4222);
     _ports.push_back(port);
@@ -24,6 +28,7 @@ void WebServ::run_servers()
 {
     int pos;
     int find;
+    /*class config*/
     for (int i = 0; i < _ports.size(); i++)
     {
         
@@ -51,11 +56,9 @@ void WebServ::run_servers()
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
                         perror("Server failed to accept incoming connection");
                     set_non_blocking(new_socket);
-                    std::cout << new_socket << std::endl;
                     _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
-                    // FD_SET(new_socket, &current_Wsockets);
                     printf("New connection accepted.\n");
                 }
                 else
@@ -80,7 +83,7 @@ void WebServ::run_servers()
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
                 RequestHandler* handler = createHandler(_clients.at(idx)->_request);
-                // handler->handleRequest(_clients.at(idx)->_request, _clients.at(idx)->_response);
+                handler->handleRequest(_clients.at(idx)->_request, _clients.at(idx)->_response);
                 char httpResponse[] = "HTTP/1.1 200 OK\r\n"
                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
                      "Server: Apache/2.4.41 (Ubuntu)\r\n"
