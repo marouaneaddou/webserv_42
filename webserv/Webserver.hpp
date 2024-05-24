@@ -18,7 +18,7 @@ class WebServ
 {
     private:
         int _nbytes;
-        char _buf[1000000];
+        char _buf[400];
         std::string _buffer;
         std::string _firstline;
         std::vector <std::vector<int> > _ports;
@@ -32,13 +32,14 @@ class WebServ
     public:
         WebServ();
         ~WebServ();
+        
         void run_servers();
         void SetListeners();
         void set_non_blocking(int sock);
         void selectTypeOfMethod(std::string &buffer, int &fdSocket);
         void read_request(int fd_R);
         void start_parsing(int fd_R);
-        RequestHandler* createHandler(Request* request);
+        RequestHandler* createHandler(Request &request);
         bool isPHPCGIRequest(std::string URL);
         fd_set current_Rsockets, ready_Rsockets;
         fd_set current_Wsockets, ready_Wsockets;

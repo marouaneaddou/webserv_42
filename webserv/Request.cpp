@@ -52,6 +52,7 @@ void Request::setHeader(std::string buffer)
 {
     _header = buffer;
     setHeaders();
+    
 }
 
 std::string Request::getHeader() const
@@ -119,4 +120,43 @@ void Request::setBody(std::string &buffer)
 std::string Request::getBody() const
 {
     return _body;
+}
+
+bool Request::isReqWellFormed(Response &response)
+{
+    int status;
+    if (_method == "POST")
+    {
+        itHeaders it1 = _headers.find("Transfer-Encoding");
+        itHeaders it2 = _headers.find("Content-Length");
+        if (it1 != _headers.end())
+        {
+            if (it1->second != "chunked")
+            {
+                status = 501;
+                response.setStatus(status);
+                return (EXIT_FAILURE);
+            }
+        }
+        if ( _method == "POST" && it1 == _headers.end() && it2 == _headers.end() )
+        {
+            status = 400;
+            response.setStatus(status);
+            std::cout << response.getStatus() << std::endl;
+            return (EXIT_FAILURE);
+        }
+    }
+    else if (_URL.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
+    {
+        status = 400;
+        response.setStatus(status);
+        return (EXIT_FAILURE);
+    }
+    else if (_URL.size() > 2048)
+    {
+        status = 414;
+        response.setStatus(status);
+        return (EXIT_FAILURE);
+    }
+    return(EXIT_SUCCESS);
 }

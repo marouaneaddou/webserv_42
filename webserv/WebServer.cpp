@@ -65,14 +65,14 @@ void WebServ::run_servers()
                 {
                     read_request(idx);
                     start_parsing(idx);
-                    if (_clients[idx]->_request->getHeader("Content-Type")  != _clients[idx]->_request->getEndHeaders())
+                    if (_clients[idx]->_request.getHeader("Content-Type")  != _clients[idx]->_request.getEndHeaders())
                     {
-                        _clients[idx]->_request->findBoundry();
+                        _clients[idx]->_request.findBoundry();
                         // std::cout <<"buffer bondery" << _buffer.find(_clients[idx]->_request->getHeader("boundary")->second) << std::endl;
-                        if (_buffer.find(_clients[idx]->_request->getHeader("boundary")->second) != -1)
+                        if (_buffer.find(_clients[idx]->_request.getHeader("boundary")->second) != -1)
                         {
-                            _clients[idx]->_request->setBody(_buffer);
-                            std::cout << _clients[idx]->_request->getBody();
+                            _clients[idx]->_request.setBody(_buffer);
+                            // std::cout << _clients[idx]->_request->getBody();
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -82,8 +82,8 @@ void WebServ::run_servers()
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
-                RequestHandler* handler = createHandler(_clients.at(idx)->_request);
-                handler->handleRequest(_clients.at(idx)->_request, _clients.at(idx)->_response);
+                // RequestHandler* handler = createHandler(_clients.at(idx)->_request);
+                // handler->handleRequest(_clients.at(idx)->_request, _clients.at(idx)._response);
                 char httpResponse[] = "HTTP/1.1 200 OK\r\n"
                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
                      "Server: Apache/2.4.41 (Ubuntu)\r\n"
@@ -120,6 +120,7 @@ void WebServ::read_request(int fd_R)
         _buf[_nbytes] = '\0';
     std::cout << _nbytes << std::endl;
     _buffer.append(_buf, _nbytes);
+    std::cout << _buffer << std::endl;
 
 }
 
@@ -130,11 +131,12 @@ void WebServ::start_parsing(int fd_R)
         int findPos = _buffer.find("\r\n");
         _clients.at(fd_R)->setCheck();
         _firstline = _buffer.substr(0, findPos);
-        _clients.at(fd_R)->_request->parse_request_line(_firstline);
+        _clients.at(fd_R)->_request.parse_request_line(_firstline);
         _buffer = _buffer.substr(findPos + 2);
-        if (_clients.at(fd_R)->_request->getMethod() != "POST")
+        if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
-            _clients.at(fd_R)->_request->setHeader(_buffer);
+            _clients.at(fd_R)->_request.setHeader(_buffer);
+            _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             FD_CLR(fd_R, &current_Rsockets);
             FD_SET(fd_R, &current_Wsockets);
             _buffer.clear();
@@ -142,9 +144,11 @@ void WebServ::start_parsing(int fd_R)
         else
         {
             findPos = _buffer.find("\r\n\r\n");
-            _clients.at(fd_R)->_request->setHeader(_buffer.substr(0, findPos + 2));
+            _clients.at(fd_R)->_request.setHeader(_buffer.substr(0, findPos + 2));
+            _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             _buffer = _buffer.substr(findPos + 4);
         }
+
     }
 
 }
@@ -178,16 +182,16 @@ void WebServ::selectTypeOfMethod(std::string &buffer, int &fd)
     // _clients.at(fd)->request->
 }
 
-RequestHandler* WebServ::createHandler(Request* request) 
+RequestHandler* WebServ::createHandler(Request &request) 
 {
-        if (isPHPCGIRequest(request->getURL())) 
-        {
-            return new PhpCgiHandler();
-        }
-        else 
-        {
-            return new StaticFileHandler();
-        }
+    if (isPHPCGIRequest(request.getURL())) 
+    {
+        return new PhpCgiHandler();
+    }
+    else 
+    {
+        return new StaticFileHandler();
+    }
 }
 
 bool WebServ::isPHPCGIRequest(const std::string url) 

@@ -7,6 +7,7 @@
 # include "Response.hpp"
 
 class Request;
+// class Response;
 class Client
 {
     public:
@@ -14,10 +15,11 @@ class Client
         ~Client();
         void setCheck();
         bool getCheck() const;
+        Response& getResponse();
         // Client(int new_socket, struct sockaddr_in new_addr);
         // std::string		getResponse(void); 
-        Request *_request;
-        Response *_response;
+        Request _request;
+        Response _response;
     private:
         int socket;
         bool _check;

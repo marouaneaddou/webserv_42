@@ -10,9 +10,9 @@ RequestHandler::RequestHandler(){
 
 bool RequestHandler::is_req_well_formed(const Request* request, Response* response)
 {
-    // std::map<std::string, std::string>::iterator it1 = request->getHeaders().find("Transfer-Encoding");
-    // std::map<std::string, std::string>::iterator it2 = request->getHeaders().find("Content-Length");
-    // if (it1 != request->getHeaders().end())
+    // itHeaders it1 = request->getHeaders().find("Transfer-Encoding");
+    // itHeaders it2 = request->getHeaders().find("Content-Length");
+    // if (it1 != request->getEndHeaders())
     // {
     //     if (it1->second != "chunked")
     //     {
@@ -20,7 +20,7 @@ bool RequestHandler::is_req_well_formed(const Request* request, Response* respon
     //         return (EXIT_FAILURE);
     //     }
     // }
-    // if (it1 == request->getHeaders().end() && it2 == request->getHeaders().end() && request->getMethod() == "POST")
+    // if (it1 == request->getEndHeaders() && it2 == request->getEndHeaders() /*&& request->getMethod() == "POST"*/)
     // {
     //     response->setStatus(400);
     //     return (EXIT_FAILURE);

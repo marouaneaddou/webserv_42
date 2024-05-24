@@ -10,13 +10,13 @@ Client::Client(int &new_socket /*class config*/)
 {
     socket = new_socket;
     _check = false;
-    _request = new Request(/*class config*/);
-    _response = new Response(/*class config*/);
+    // _request = new Request(/*class config*/);
+    // _response = new Response(/*class config*/);
 };
 
 Client::~Client(){
-    delete _request;
-    delete _response;
+    // delete _request;
+    // delete _response;
 }
 
 void Client::setCheck()
@@ -29,3 +29,7 @@ bool Client::getCheck() const
     return _check;
 }
 
+Response &Client::getResponse()
+{
+    return _response;
+}

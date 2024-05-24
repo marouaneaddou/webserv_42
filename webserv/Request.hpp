@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+# include "Response.hpp"
 #include <map>
 #include <cstdlib>
 #include "../includes/utils.hpp"
@@ -43,8 +44,8 @@ class Request
         /********** POST ******/
         void parse_request_line(std::string &_rawReq);
         void parse_headers_body(std::string _rawReq);
-
-    private:
+        bool isReqWellFormed(Response &response);
+    // private:
         std::string _header;
         std::map<std::string, std::string> _headers;
         std::string _lineRequest;

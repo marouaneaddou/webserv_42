@@ -16,9 +16,11 @@ public:
             oss << value;
         _headers[key] = oss.str();
     }
-    void setStatus(int status);
+    void setStatus(int &status);
     void setHeader(const std::string& key, const std::string& value);
     void setBody(const std::string& body);
+    int getStatus() const;
+    std::string getBody() const;
     std::string generateResponseString() const;
     // std::string toString() const; // Convert the response to a string for sending.
 private:
