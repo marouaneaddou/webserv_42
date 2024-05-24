@@ -1,14 +1,13 @@
 #pragma once
 
-#include "Response.hpp"
-#include "Request.hpp"
+#include "Client.hpp"
 #include "RequestHandler.hpp"
 
 class StaticFileHandler : public RequestHandler {
 public:
     StaticFileHandler();
     ~StaticFileHandler();
-    void handleRequest(const Request* request, Response* response);
+    void handleRequest(Client* cli);
 private:
     // Private members for handling static file requests.
 };

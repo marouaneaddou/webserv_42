@@ -14,7 +14,7 @@ Response::~Response()
 
     /*************** Status ************/
 
-void Response::setStatus(int &status)
+void Response::setStatus(const int &status)
 {
     _status = status;
 }

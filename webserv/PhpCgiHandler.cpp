@@ -1,4 +1,5 @@
 #include "PhpCgiHandler.hpp"
+#include "Client.hpp"
 
 PhpCgiHandler::PhpCgiHandler()
 {}
@@ -6,16 +7,16 @@ PhpCgiHandler::PhpCgiHandler()
 PhpCgiHandler::~PhpCgiHandler()
 {}
 
-void PhpCgiHandler::handleRequest(const Request* request, Response* response)
+void PhpCgiHandler::handleRequest(Client* cli)
 {
-    if (!is_req_well_formed(request, response))
+    // if (!is_req_well_formed(request, response))
+    //     return;
+    if (!req_uri_location(cli))
         return;
-    if (!req_uri_location(request, response))
+    if (!is_location_have_redirection(cli))
         return;
-    if (!is_location_have_redirection(request, response))
+    if (!is_method_allowed_in_location(cli))
         return;
-    if (!is_method_allowed_in_location(request, response))
-        return;
-    if (!check_requested_method(request, response))
+    if (!check_requested_method(cli))
         return;
 }

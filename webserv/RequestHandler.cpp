@@ -1,50 +1,53 @@
 #include "RequestHandler.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include <cstddef>
 #include <cstdlib>
 #include <string>
+#include <sys/stat.h>
+#include <vector>
 
 RequestHandler::RequestHandler(){
 
 }
 
-bool RequestHandler::is_req_well_formed(const Request* request, Response* response)
-{
-    // itHeaders it1 = request->getHeaders().find("Transfer-Encoding");
-    // itHeaders it2 = request->getHeaders().find("Content-Length");
-    // if (it1 != request->getEndHeaders())
+// bool RequestHandler::is_req_well_formed(Client* cli)
+// {
+    // itHeaders it1 = cli->_request.getHeaders().find("Transfer-Encoding");
+    // itHeaders it2 = cli->_request.getHeaders().find("Content-Length");
+    // if (it1 != cli->_request.getEndHeaders())
     // {
     //     if (it1->second != "chunked")
     //     {
-    //         response->setStatus(501);
+    //         cli->_response.setStatus(501);
     //         return (EXIT_FAILURE);
     //     }
     // }
-    // if (it1 == request->getEndHeaders() && it2 == request->getEndHeaders() /*&& request->getMethod() == "POST"*/)
+    // if (it1 == cli->_request.getEndHeaders() && it2 == cli->_request.getEndHeaders() /*&& cli->_request.getMethod() == "POST"*/)
     // {
-    //     response->setStatus(400);
+    //     cli->_response.setStatus(400);
     //     return (EXIT_FAILURE);
     // }
-    // if (request->getURL().find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
+    // if (cli->_request.getURL().find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
     // {
-    //     response->setStatus(400);
+    //     cli->_response.setStatus(400);
     //     return (EXIT_FAILURE);
     // }
-    // if (request->getURL().length() > 2048)
+    // if (cli->_request.getURL().length() > 2048)
     // {
-    //     response->setStatus(414);
+    //     cli->_response.setStatus(414);
     //     return (EXIT_FAILURE);
     // }
     // if(request body larger than client max size in config file)
-    // response->setStatus(413);
+    // cli->_response.setStatus(413);
     // return (EXIT_FAILURE);
 
-    return(EXIT_SUCCESS);
-}
+//     return(EXIT_SUCCESS);
+// }
 
-bool RequestHandler::req_uri_location(const Request* request, Response* response)
+bool RequestHandler::req_uri_location(Client* cli)
 {
-    std::string url = request->getURL();
+    std::string url = cli->_request.getURL();
     std::string path;
     std::size_t query_pos = url.find("?");
     if (query_pos != std::string::npos)
@@ -52,105 +55,126 @@ bool RequestHandler::req_uri_location(const Request* request, Response* response
     else
         path = url;
 
-    //if path doesnt match the location in the server location response->setStatus(404); return(EXIT_FAILURE);
+    //if path doesnt match the location in the server location cli->_response.setStatus(404); return(EXIT_FAILURE);
     
 
     return (EXIT_SUCCESS);
 }
 
-bool RequestHandler::is_location_have_redirection(const Request* request, Response* response)
+bool RequestHandler::is_location_have_redirection(Client* cli)
 {
     //see if there is rewrite to that request url in location
-    //if location have redirection response->setHeader("Location", "new_URL")
-    // response->setStatus(301); 
-    //response->setHeader("Content-Length", 0);
+    //if location have redirection cli->_response.setHeader("Location", "new_URL")
+    // cli->_response.setStatus(301); 
+    //cli->_response.setHeader("Content-Length", 0);
     //return(EXIT_FAILURE);
 
     return (EXIT_SUCCESS);
 }
 
-bool RequestHandler::is_method_allowed_in_location(const Request* request, Response* response)
+bool RequestHandler::is_method_allowed_in_location(Client* cli)
 {
-    //[SUBJECT]Define a list of accepted HTTP methods for the route
-    //if method doesnt exist in the list of accepted methods response->setStatus(405); return(EXIT_FAILURE);
-    return (EXIT_SUCCESS);
+    std::vector<std::string> accepted_methods; //get it from cli->conf->accepted_methods
+    for (std::vector<std::string>::const_iterator it = accepted_methods.begin(); it != accepted_methods.end(); ++it) 
+    {
+        if (*it == cli->_request.getMethod())  
+            return (EXIT_SUCCESS);
+    }
+    cli->_response.setStatus(405);
+    return(EXIT_FAILURE);
 }
 
-bool RequestHandler::check_requested_method(const Request* request, Response* response)
+bool RequestHandler::check_requested_method(Client* cli)
 {
-    if (request->getMethod() == "GET")
+    if (cli->_request.getMethod() == "GET")
     {
-        if (!get_requested_ressource(request, response)) {return (EXIT_FAILURE);}
-        get_ressource_type(request, response);
-        if (_pathType == "DIR")
+        if (!get_requested_ressource(cli)) {return (EXIT_FAILURE);}
+    
+        if (get_ressource_type(cli) == "DIR")
         {
             if (_path[_path.length() - 1] != '/')
             {
-                // response->setHeader("Location", _path + '/');
-                // response->setHeader("Content-Length", 0);
-                // response->setStatus(301);
+                cli->_response.setHeader("Location", _path + '/');
+                cli->_response.setHeader("Content-Length", 0);
+                cli->_response.setStatus(301);
                 return (EXIT_FAILURE);
             }
-            if (!is_dir_has_index_files(request, response))
+            if (!is_dir_has_index_files(cli))
             {
+                 
                 //check autoindex(config) ON/OFF :
+                
 
                 //if its OFF 
-                    // response->setStatus(403)
+                    // cli->_response.setStatus(403);
+                    //return(EXIT_FAILURE);
 
-                //if ON generate a directory listing and response->setBody(content)
-                    // response->setHeaders("Content-Type", "example: text/html; charset=utf-8");
-                    // response->setHeaders("Content-Type", "size of resp body in bytes")
-                    //response->setStatus(200);
-                    //return(EXIT_SUCCESS);
+                //if ON generate a directory listing and cli->_response.setBody(HTML page with the content in the directory)
+                    cli->_response.setHeader("Content-Type", "text/html");
+                    // cli->_response.setHeader("Content-Length", "size of resp body in bytes")
+                    // cli->_response.setStatus(200);
+                    // return(EXIT_SUCCESS);
             }
         }
-        if (if_location_has_cgi(request, response))
+        if (if_location_has_cgi(cli))
         {
             //run cgi
             //code depend on cgi
-            //response->setStatus(200);
+            // cli->_response.setStatus(200); ?
         }
         else {
-            //return requested file
-            //response->setStatus(200);
+            //return requested file cli->_response.setBody(file.whatever content)
+            cli->_response.setHeader("Content-Length", getPathSize());
+            cli->_response.setStatus(200);
         }
 
     }
-    else if (request->getMethod() == "POST") {
+    else if (cli->_request.getMethod() == "POST") {
     
     }
-    else if (request->getMethod() == "DELETE") {
+    else if (cli->_request.getMethod() == "DELETE") {
     
     }
     return (EXIT_SUCCESS);
 }
 
-bool RequestHandler::get_requested_ressource(const Request* request, Response* response)
+bool RequestHandler::get_requested_ressource(Client* cli)
 {
-    //if requested ressource not found in root in the conf file response->setStatus(404); return(EXIT_FAILURE);
-    std::string url = request->getURL();
+    struct stat fileInfo;
+    std::string root_DIR; //get from conf, example "/var/www/html"
+
+    //if requested ressource not found in root in the conf file cli->_response.setStatus(404); return(EXIT_FAILURE);
+    std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
     if (query_pos != std::string::npos)
         _path = url.substr(0, query_pos);
     else
         _path = url;
+
+    std::string absolut_path = root_DIR + _path;
+    if (stat(absolut_path.c_str(), &fileInfo) != 0)
+    {
+        cli->_response.setStatus(404);
+        return (EXIT_FAILURE);
+    }
     return (EXIT_SUCCESS);
 }
 
-void RequestHandler::get_ressource_type(const Request* request, Response* response)
+const std::string RequestHandler::get_ressource_type(Client* cli)
 {
+    std::string pathType;
     struct stat fileInfo;
-    int result = stat(_path.c_str(), &fileInfo);
+    stat(_path.c_str(), &fileInfo);
     if (S_ISDIR(fileInfo.st_mode))
-       _pathType = "DIR";
+       pathType = "DIR";
     else if (S_ISREG(fileInfo.st_mode))
-        _pathType = "FILE";
+        pathType = "FILE";
+    return (pathType);
 }
 
-bool RequestHandler::is_dir_has_index_files(const Request* request, Response* response)
+bool RequestHandler::is_dir_has_index_files(Client* cli)
 {
-    std::vector<std::string> indexFiles;
+    std::vector<std::string> indexFiles; //get it from cli->conf->indexFiles
     struct stat fileInfo;
     for (int i = 0; i < indexFiles.size(); i++)
     {
@@ -161,14 +185,20 @@ bool RequestHandler::is_dir_has_index_files(const Request* request, Response* re
             return (EXIT_SUCCESS);
         }
     }
-
     return (EXIT_FAILURE);
 }
 
-bool RequestHandler::if_location_has_cgi(const Request* request, Response* response)
+bool RequestHandler::if_location_has_cgi(Client* cli)
 {
-
     return (EXIT_SUCCESS);
+}
+
+const size_t RequestHandler::getPathSize()
+{
+    struct stat fileInfo;
+    stat(_path.c_str(), &fileInfo);
+    size_t pathSize = fileInfo.st_size;
+    return (pathSize);
 }
 
 

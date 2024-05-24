@@ -16,7 +16,7 @@ public:
             oss << value;
         _headers[key] = oss.str();
     }
-    void setStatus(int &status);
+    void setStatus(const int &status);
     void setHeader(const std::string& key, const std::string& value);
     void setBody(const std::string& body);
     int getStatus() const;
