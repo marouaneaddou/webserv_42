@@ -30,7 +30,7 @@ protected:
     const size_t getPathSize();
 
     ////POST///////
-    bool if_location_support_upload(Client* cli);
+    // bool if_location_support_upload(Client* cli);
 
 
     //  other checking methods ...

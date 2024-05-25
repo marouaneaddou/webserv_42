@@ -87,7 +87,7 @@ void WebServ::run_servers()
                         if (_buffer.find("0\r\n\r\n") != -1)
                         {
                             _clients[idx]->_request.setBody(_buffer);
-                            std::cout << "hnay hnay hnay\n";
+                            // std::cout << "hnay hnay hnay\n";
                             // std::cout << "start" << std::endl;
                             // std::cout << _clients[idx]->_request.getBody();
                             // std::cout << "end" << std::endl;
@@ -103,7 +103,7 @@ void WebServ::run_servers()
                         {
                             _clients[idx]->_request.setBody(_buffer);
                             std::cout << _clients[idx]->_request.getBody();
-                            std::cout << "hnay hnay hnay\n";
+                            // std::cout << "hnay hnay hnay\n";
                             // std::cout << "start" << std::endl;
                             // std::cout << _clients[idx]->_request.getBody();
                             // std::cout << "end" << std::endl;
@@ -119,10 +119,10 @@ void WebServ::run_servers()
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
                if (_clients.at(idx)->_response.getStatus() == 200)
-               {
-                RequestHandler* handler = createHandler(_clients.at(idx)->_request);
-                handler->handleRequest(_clients.at(idx));
-               }
+                {
+                    RequestHandler* handler = createHandler(_clients.at(idx)->_request);
+                    handler->handleRequest(_clients.at(idx));
+                }
                 char httpResponse[] = "HTTP/1.1 200 OK\r\n"
                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
                      "Server: Apache/2.4.41 (Ubuntu)\r\n"
