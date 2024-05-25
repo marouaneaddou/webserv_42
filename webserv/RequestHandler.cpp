@@ -1,4 +1,5 @@
 #include "RequestHandler.hpp"
+#include "Client.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include <cstddef>
@@ -48,12 +49,11 @@ RequestHandler::RequestHandler(){
 bool RequestHandler::req_uri_location(Client* cli)
 {
     std::string url = cli->_request.getURL();
-    std::string path;
     std::size_t query_pos = url.find("?");
     if (query_pos != std::string::npos)
-        path = url.substr(0, query_pos);
+        _path = url.substr(0, query_pos);
     else
-        path = url;
+        _path = url;
 
     //if path doesnt match the location in the server location cli->_response.setStatus(404); return(EXIT_FAILURE);
     
@@ -75,9 +75,9 @@ bool RequestHandler::is_location_have_redirection(Client* cli)
 bool RequestHandler::is_method_allowed_in_location(Client* cli)
 {
     std::vector<std::string> accepted_methods; //get it from cli->conf->accepted_methods
-    for (std::vector<std::string>::const_iterator it = accepted_methods.begin(); it != accepted_methods.end(); ++it) 
+    for (std::vector<std::string>::const_iterator it = accepted_methods.begin(); it != accepted_methods.end(); ++it)
     {
-        if (*it == cli->_request.getMethod())  
+        if (*it == cli->_request.getMethod())
             return (EXIT_SUCCESS);
     }
     cli->_response.setStatus(405);
@@ -86,8 +86,7 @@ bool RequestHandler::is_method_allowed_in_location(Client* cli)
 
 bool RequestHandler::check_requested_method(Client* cli)
 {
-    std::string str;
-    std::string path;
+
     if (cli->_request.getMethod() == "GET")
     {
         if (!get_requested_ressource(cli)) {return (EXIT_FAILURE);}
@@ -96,13 +95,8 @@ bool RequestHandler::check_requested_method(Client* cli)
         {
             if (_path[_path.length() - 1] != '/')
             {
-                str = "Location";
-                path = _path;
-                path += '/';
-                int a = 0;
-                cli->_response.setHeader(str, path);
-                str = "Content-Length";
-                cli->_response.setHeader(str, a);
+                cli->_response.setHeader("Location", _path + '/');
+                cli->_response.setHeader("Content-Length", 0);
                 cli->_response.setStatus(301);
                 return (EXIT_FAILURE);
             }
@@ -112,17 +106,16 @@ bool RequestHandler::check_requested_method(Client* cli)
                 //check autoindex(config) ON/OFF :
                 
 
-                //if its OFF 
+                //if its OFF
                     // cli->_response.setStatus(403);
                     //return(EXIT_FAILURE);
 
                 //if ON generate a directory listing and cli->_response.setBody(HTML page with the content in the directory)
-                str = "Content-Type";
-                path =  "text/html";
-                    cli->_response.setHeader(str, path);
+
+                    cli->_response.setHeader("Content-Type", "text/html");
                     // cli->_response.setHeader("Content-Length", "size of resp body in bytes")
-                    // cli->_response.setStatus(200);
-                    // return(EXIT_SUCCESS);
+                    cli->_response.setStatus(200);
+                    return(EXIT_SUCCESS);
             }
         }
         if (if_location_has_cgi(cli))
@@ -133,8 +126,7 @@ bool RequestHandler::check_requested_method(Client* cli)
         }
         else {
             //return requested file cli->_response.setBody(file.whatever content)
-            str = "Content-Length";
-            cli->_response.setHeader(str, getPathSize());
+            cli->_response.setHeader("Content-Length", getPathSize());
             cli->_response.setStatus(200);
         }
 
@@ -210,3 +202,49 @@ const size_t RequestHandler::getPathSize()
     size_t pathSize = fileInfo.st_size;
     return (pathSize);
 }
+
+
+void RequestHandler::setStatusMessage(Client* cli)
+{
+    switch(cli->_response.getStatus()) 
+    {
+        case 501:
+            cli->_response.setStatusMsg("Not Implemented");
+        break;
+        case 400:
+            cli->_response.setStatusMsg("Bad Request");
+        break;
+        case 414:
+            cli->_response.setStatusMsg("Request-URI Too Large");
+        case 413:
+            cli->_response.setStatusMsg("Request Entity Too Large");
+        break;
+        case 404:
+            cli->_response.setStatusMsg("Not Found");
+        break;
+        case 301:
+            cli->_response.setStatusMsg("Moved Permanently");
+        break;
+        case 405:
+            cli->_response.setStatusMsg("Method Not Allowed");
+        break;
+        case 403:
+            cli->_response.setStatusMsg("Forbidden");
+        break;
+        case 409:
+            cli->_response.setStatusMsg("Conflict");
+        break;
+        case 204:
+            cli->_response.setStatusMsg("No Content");
+        break;
+        case 500:
+            cli->_response.setStatusMsg("Internal Server Error");
+        break;
+        case 201:
+            cli->_response.setStatusMsg("Created");
+        default:
+            cli->_response.setStatusMsg("OK");
+    }
+}
+
+

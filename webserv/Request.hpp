@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include "../includes/utils.hpp"
 
+
 typedef std::map<std::string, std::string>::const_iterator itHeaders;
 class Request
 {

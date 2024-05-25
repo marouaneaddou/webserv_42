@@ -50,7 +50,6 @@ void WebServ::run_servers()
                 std::vector<int>::iterator it = std::find(servers_fds.begin(), servers_fds.end(), idx);
                 if (it != servers_fds.end() /*&& servers[i]->getClients().size() < MAX_CONNECTIONS*/)
                 {
-                    std::cout << *it << std::endl;
                     int new_socket = 0;
                     socklen_t _sockaddr_len = sizeof(_sockaddr);
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
@@ -228,7 +227,7 @@ RequestHandler* WebServ::createHandler(Request &request)
     {
         return new PhpCgiHandler();
     }
-    else 
+    else
     {
         return new StaticFileHandler();
     }

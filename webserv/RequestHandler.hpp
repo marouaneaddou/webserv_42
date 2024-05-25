@@ -25,5 +25,6 @@ protected:
     bool is_dir_has_index_files(Client* cli);
     bool if_location_has_cgi(Client* cli);
     const size_t getPathSize();
+    void setStatusMessage(Client* cli);
     //  other checking methods ...
 };

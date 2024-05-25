@@ -1,5 +1,6 @@
 
 #include "Response.hpp"
+#include <string>
 
 Response::Response()
 {
@@ -41,4 +42,9 @@ std::string Response::getBody() const
 std::string Response::generateResponseString() const 
 {
     return (_Response);
+}
+
+void Response::setStatusMsg(const std::string& msg)
+{
+    this->_Msg = msg;
 }

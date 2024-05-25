@@ -19,8 +19,5 @@ void StaticFileHandler::handleRequest(Client* cli)
         return;
     if (!check_requested_method(cli))
         return;
-    
-    
-
-
+    setStatusMessage(cli);
 }
