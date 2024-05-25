@@ -118,8 +118,11 @@ void WebServ::run_servers()
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
+               if (_clients.at(idx)->_response.getStatus() == 200)
+               {
                 RequestHandler* handler = createHandler(_clients.at(idx)->_request);
                 handler->handleRequest(_clients.at(idx));
+               }
                 char httpResponse[] = "HTTP/1.1 200 OK\r\n"
                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
                      "Server: Apache/2.4.41 (Ubuntu)\r\n"

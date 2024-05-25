@@ -123,7 +123,7 @@ std::string Request::getBody() const
     return _body;
 }
 
-bool Request::isReqWellFormed(Response &response)
+void Request::isReqWellFormed(Response &response)
 {
     if (_method == "POST")
     {
@@ -134,32 +134,30 @@ bool Request::isReqWellFormed(Response &response)
             if (it1->second != "chunked")
             {
                 response.setStatus(501);
-                return (EXIT_FAILURE);
+                response.setStatusMsg("Not Implemented");
             }
         }
         if ( _method == "POST" && it1 == _headers.end() && it2 == _headers.end() )
         {
             response.setStatus(400);
+            response.setStatusMsg("Bad Request");
             std::cout << response.getStatus() << std::endl;
-            return (EXIT_FAILURE);
         }
     }
     if (_URL.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
     {
         response.setStatus(400);
-        return (EXIT_FAILURE);
+        response.setStatusMsg("Bad Request");
     }
     if (_URL.size() > 2048)
     {
         response.setStatus(414);
-        return (EXIT_FAILURE);
+        response.setStatusMsg("Request-URI Too Large");
     }
     #define CLIENT_MAX_BODY 1000000 /*get client max body size in config file*/ 
     if(getBody().size() > CLIENT_MAX_BODY)
     {
         response.setStatus(413);
-        return (EXIT_FAILURE);
+        response.setStatusMsg("Request Entity Too Large");
     }
-
-    return(EXIT_SUCCESS);
 }

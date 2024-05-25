@@ -12,40 +12,6 @@ RequestHandler::RequestHandler(){
 
 }
 
-// bool RequestHandler::is_req_well_formed(Client* cli)
-// {
-    // itHeaders it1 = cli->_request.getHeaders().find("Transfer-Encoding");
-    // itHeaders it2 = cli->_request.getHeaders().find("Content-Length");
-    // if (it1 != cli->_request.getEndHeaders())
-    // {
-    //     if (it1->second != "chunked")
-    //     {
-    //         cli->_response.setStatus(501);
-    //         return (EXIT_FAILURE);
-    //     }
-    // }
-    // if (it1 == cli->_request.getEndHeaders() && it2 == cli->_request.getEndHeaders() /*&& cli->_request.getMethod() == "POST"*/)
-    // {
-    //     cli->_response.setStatus(400);
-    //     return (EXIT_FAILURE);
-    // }
-    // if (cli->_request.getURL().find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
-    // {
-    //     cli->_response.setStatus(400);
-    //     return (EXIT_FAILURE);
-    // }
-    // if (cli->_request.getURL().length() > 2048)
-    // {
-    //     cli->_response.setStatus(414);
-    //     return (EXIT_FAILURE);
-    // }
-    // if(request body larger than client max size in config file)
-    // cli->_response.setStatus(413);
-    // return (EXIT_FAILURE);
-
-//     return(EXIT_SUCCESS);
-// }
-
 bool RequestHandler::req_uri_location(Client* cli)
 {
     std::string url = cli->_request.getURL();
@@ -54,8 +20,8 @@ bool RequestHandler::req_uri_location(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-
-    //if path doesnt match the location in the server location cli->_response.setStatus(404); return(EXIT_FAILURE);
+    //save the location that match the url to access its block later
+    //if path doesnt match the locations params in the server location cli->_response.setStatus(404); return(EXIT_FAILURE);
     
 
     return (EXIT_SUCCESS);
@@ -131,7 +97,9 @@ bool RequestHandler::check_requested_method(Client* cli)
         }
 
     }
-    else if (cli->_request.getMethod() == "POST") {
+    else if (cli->_request.getMethod() == "POST")
+    {
+        
     
     }
     else if (cli->_request.getMethod() == "DELETE") {
@@ -145,7 +113,6 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     struct stat fileInfo;
     std::string root_DIR; //get from conf, example "/var/www/html"
 
-    //if requested ressource not found in root in the conf file cli->_response.setStatus(404); return(EXIT_FAILURE);
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
     if (query_pos != std::string::npos)
@@ -166,6 +133,7 @@ const std::string RequestHandler::get_ressource_type(Client* cli)
 {
     std::string pathType;
     struct stat fileInfo;
+
     stat(_path.c_str(), &fileInfo);
     if (S_ISDIR(fileInfo.st_mode))
        pathType = "DIR";
@@ -178,6 +146,7 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
 {
     std::vector<std::string> indexFiles; //get it from cli->conf->indexFiles
     struct stat fileInfo;
+
     for (int i = 0; i < indexFiles.size(); i++)
     {
         std::string filePath = _path + indexFiles[i];
@@ -245,6 +214,11 @@ void RequestHandler::setStatusMessage(Client* cli)
         default:
             cli->_response.setStatusMsg("OK");
     }
+}
+
+bool RequestHandler::if_location_support_upload(Client* cli)
+{
+
 }
 
 

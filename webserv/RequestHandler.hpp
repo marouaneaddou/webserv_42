@@ -20,11 +20,18 @@ protected:
     bool is_location_have_redirection(Client* cli);
     bool is_method_allowed_in_location(Client* cli);
     bool check_requested_method(Client* cli);
+    void setStatusMessage(Client* cli);
+
+    ///GET/////
     bool get_requested_ressource(Client* cli);
     const std::string get_ressource_type(Client* cli);
     bool is_dir_has_index_files(Client* cli);
     bool if_location_has_cgi(Client* cli);
     const size_t getPathSize();
-    void setStatusMessage(Client* cli);
+
+    ////POST///////
+    bool if_location_support_upload(Client* cli);
+
+
     //  other checking methods ...
 };

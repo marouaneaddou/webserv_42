@@ -10,7 +10,7 @@ public:
     Response();
     ~Response();
     template<typename T>
-    void setHeader( std::string key,  T value)
+    void setHeader(const std::string& key,  const T& value)
     {
         std::ostringstream oss;
             oss << value;

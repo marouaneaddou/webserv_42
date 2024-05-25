@@ -45,7 +45,7 @@ class Request
         /********** POST ******/
         void parse_request_line(std::string &_rawReq);
         void parse_headers_body(std::string _rawReq);
-        bool isReqWellFormed(Response &response);
+        void isReqWellFormed(Response &response);
 
         /******************* PRINT DATA *****************/
 
