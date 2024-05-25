@@ -86,6 +86,8 @@ bool RequestHandler::is_method_allowed_in_location(Client* cli)
 
 bool RequestHandler::check_requested_method(Client* cli)
 {
+    std::string str;
+    std::string path;
     if (cli->_request.getMethod() == "GET")
     {
         if (!get_requested_ressource(cli)) {return (EXIT_FAILURE);}
@@ -94,8 +96,13 @@ bool RequestHandler::check_requested_method(Client* cli)
         {
             if (_path[_path.length() - 1] != '/')
             {
-                cli->_response.setHeader("Location", _path + '/');
-                cli->_response.setHeader("Content-Length", 0);
+                str = "Location";
+                path = _path;
+                path += '/';
+                int a = 0;
+                cli->_response.setHeader(str, path);
+                str = "Content-Length";
+                cli->_response.setHeader(str, a);
                 cli->_response.setStatus(301);
                 return (EXIT_FAILURE);
             }
@@ -110,7 +117,9 @@ bool RequestHandler::check_requested_method(Client* cli)
                     //return(EXIT_FAILURE);
 
                 //if ON generate a directory listing and cli->_response.setBody(HTML page with the content in the directory)
-                    cli->_response.setHeader("Content-Type", "text/html");
+                str = "Content-Type";
+                path =  "text/html";
+                    cli->_response.setHeader(str, path);
                     // cli->_response.setHeader("Content-Length", "size of resp body in bytes")
                     // cli->_response.setStatus(200);
                     // return(EXIT_SUCCESS);
@@ -124,7 +133,8 @@ bool RequestHandler::check_requested_method(Client* cli)
         }
         else {
             //return requested file cli->_response.setBody(file.whatever content)
-            cli->_response.setHeader("Content-Length", getPathSize());
+            str = "Content-Length";
+            cli->_response.setHeader(str, getPathSize());
             cli->_response.setStatus(200);
         }
 
@@ -200,5 +210,3 @@ const size_t RequestHandler::getPathSize()
     size_t pathSize = fileInfo.st_size;
     return (pathSize);
 }
-
-

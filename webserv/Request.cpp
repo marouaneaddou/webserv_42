@@ -19,7 +19,7 @@ void Request::parse_request_line(std::string &_rawReq)
     _method = tokens[0];
     _URL = tokens[1];
     std::cout << tokens.size() << std::endl;
-    http_version = tokens[2];
+    _http_version = tokens[2];
 }
 
 
@@ -78,10 +78,9 @@ void Request::setHeaders()
             _headers[line.substr(0, separator_pos)] = line.substr(separator_pos + 2);
         _header.erase(0, pos + 2);
     }
-    for (auto ut : _headers)
-    {
-        std::cout << ut.first << "============="  <<  ut.second <<std::endl;
-    }
+
+    /*************** PRINT ***************/
+        printHeaders();
 }
 
 itHeaders Request::getHeader(const char* key) const
@@ -99,17 +98,19 @@ itHeaders Request::getEndHeaders() const
     return _headers.end();
 }
 
-void Request::findBoundry()
+void Request::findTypeOfPostMethod()
 {
     itHeaders it = _headers.find("Content-Type");
-    std::string boundry = it->second.substr(it->second.find("=") + 1);
-    boundry += "--";
-    _headers["boundary"] = boundry;
-    std::cout << boundry << std::endl;
-    // for (auto ut : _headers)
-    // {
-    //     std::cout << ut.first << "============="  <<  ut.second <<std::endl;
-    // }
+    if (it->second.find("boundry") != -1)
+    {
+        std::string type = it->second.substr(it->second.find("=") + 1);
+        _headers["typeMethodPost"] = type;
+        _headers["type"] = "form-data";
+    }
+    else if (it->second.find("application/x-www-form") != -1)
+        _headers["type"] = "form";
+    else 
+        _headers["type"] = "none";
 }
 
 void Request::setBody(std::string &buffer)
@@ -142,17 +143,17 @@ bool Request::isReqWellFormed(Response &response)
         {
             status = 400;
             response.setStatus(status);
-            std::cout << response.getStatus() << std::endl;
+            // std::cout << response.getStatus() << std::endl;
             return (EXIT_FAILURE);
         }
     }
-    else if (_URL.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
+    if (_URL.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
     {
         status = 400;
         response.setStatus(status);
         return (EXIT_FAILURE);
     }
-    else if (_URL.size() > 2048)
+    if (_URL.size() > 2048)
     {
         status = 414;
         response.setStatus(status);

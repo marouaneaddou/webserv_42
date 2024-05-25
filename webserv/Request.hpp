@@ -37,7 +37,7 @@ class Request
 
         /********** POST ******/
 
-            void findBoundry();
+            void findTypeOfPostMethod();
             void setBody(std::string &buffer);
             std::string getBody() const;
         
@@ -45,14 +45,21 @@ class Request
         void parse_request_line(std::string &_rawReq);
         void parse_headers_body(std::string _rawReq);
         bool isReqWellFormed(Response &response);
-    // private:
+
+        /******************* PRINT DATA *****************/
+
+            void printHeaders() const;
+            void printRequest() const;
+
+        /******************* PRINT DATA *****************/
+    private:
         std::string _header;
         std::map<std::string, std::string> _headers;
         std::string _lineRequest;
         std::string _body;
         std::string _method;
         std::string _URL;
-        std::string http_version;
+        std::string _http_version;
         std::string _rawReq;
 
         

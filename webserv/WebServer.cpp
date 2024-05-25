@@ -65,19 +65,56 @@ void WebServ::run_servers()
                 {
                     read_request(idx);
                     start_parsing(idx);
-                    if (_clients[idx]->_request.getHeader("Content-Type")  != _clients[idx]->_request.getEndHeaders())
+                    _clients[idx]->_request.findTypeOfPostMethod();
+
+                    // if (_clients[idx]->_request.getHeader("Content-Type")  != _clients[idx]->_request.getEndHeaders())
+                    // {
+                    //     // std::cout << "hnya1" << std::endl;
+                    //     // std::cout << _clients[idx]->_request.getHeader("type")->second << std::endl;
+                    //     // std::cout << "hnya2" << std::endl;
+
+                    //     // std::cout <<"buffer bondery" << _buffer.find(_clients[idx]->_request->getHeader("boundary")->second) << std::endl;
+                    //     if (_buffer.find(_clients[idx]->_request.getHeader("boundary")->second) != -1)
+                    //     {
+                    //         _clients[idx]->_request.setBody(_buffer);
+                    //         // std::cout << _clients[idx]->_request.getBody();
+                    //         _buffer.clear();
+                    //         FD_CLR(idx, &current_Rsockets);
+                    //         FD_SET(idx, &current_Wsockets);
+                    //     }
+                    // }
+                    if ( _clients[idx]->_request.getHeader("Transfer-Encoding")  != _clients[idx]->_request.getEndHeaders())
                     {
-                        _clients[idx]->_request.findBoundry();
-                        // std::cout <<"buffer bondery" << _buffer.find(_clients[idx]->_request->getHeader("boundary")->second) << std::endl;
-                        if (_buffer.find(_clients[idx]->_request.getHeader("boundary")->second) != -1)
+                        if (_buffer.find("0\r\n\r\n") != -1)
                         {
                             _clients[idx]->_request.setBody(_buffer);
-                            // std::cout << _clients[idx]->_request->getBody();
+                            std::cout << "hnay hnay hnay\n";
+                            // std::cout << "start" << std::endl;
+                            // std::cout << _clients[idx]->_request.getBody();
+                            // std::cout << "end" << std::endl;
+                            _clients[idx]->_request.printRequest();
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
                         }
                     }
+                    else if (_clients[idx]->_request.getHeader("Content-Length")  != _clients[idx]->_request.getEndHeaders())
+                    {
+                        if (_buffer.size() == stoi(_clients[idx]->_request.getHeader("Content-Length")->second))
+                        {
+                            _clients[idx]->_request.setBody(_buffer);
+                            std::cout << _clients[idx]->_request.getBody();
+                            std::cout << "hnay hnay hnay\n";
+                            // std::cout << "start" << std::endl;
+                            // std::cout << _clients[idx]->_request.getBody();
+                            // std::cout << "end" << std::endl;
+                            _clients[idx]->_request.printRequest();
+                            _buffer.clear();
+                            FD_CLR(idx, &current_Rsockets);
+                            FD_SET(idx, &current_Wsockets);
+                        }
+                    }
+
                 }
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
@@ -104,7 +141,7 @@ void WebServ::run_servers()
 
 void WebServ::read_request(int fd_R)
 {
-    if ((_nbytes = recv(fd_R, _buf, sizeof(_buf), 0)) <= 0)
+    if ((_nbytes = recv(fd_R, _buf, 25000, 0)) <= 0)
     {
         // got error or connection closed by client
         if (_nbytes == 0)
@@ -115,12 +152,15 @@ void WebServ::read_request(int fd_R)
         FD_CLR(fd_R, &current_Rsockets);
         // continue;
     }
-
     if (_nbytes < sizeof(_buf))
         _buf[_nbytes] = '\0';
-    std::cout << _nbytes << std::endl;
+    // std::cout << "size byte" << _nbytes << std::endl;
     _buffer.append(_buf, _nbytes);
-    std::cout << _buffer << std::endl;
+    // std::cout << "buffer1" << std::endl;
+    // std::cout << _buffer << std::endl;
+    // std::cout << "buffer2" << std::endl;
+    // if (_buffer.find("0\r\n\r\n") != -1)
+    //     std::cout << "rak tama am3alam" << std::endl;
 
 }
 
