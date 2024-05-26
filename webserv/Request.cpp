@@ -82,6 +82,7 @@ void Request::setHeaders()
 
     /*************** PRINT ***************/
         printHeaders();
+        
 }
 
 itHeaders Request::getHeader(const char* key) const

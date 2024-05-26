@@ -62,9 +62,10 @@ void WebServ::run_servers()
                 }
                 else
                 {
-                    read_request(idx);
+                    read_request(idx); 
                     start_parsing(idx);
-                    _clients[idx]->_request.findTypeOfPostMethod();
+                    if (_clients[idx]->_request.getMethod() == "POST")
+                        _clients[idx]->_request.findTypeOfPostMethod();
 
                     // if (_clients[idx]->_request.getHeader("Content-Type")  != _clients[idx]->_request.getEndHeaders())
                     // {
@@ -125,19 +126,20 @@ void WebServ::run_servers()
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
+                
                if (_clients.at(idx)->_response.getStatus() == 200)
                 {
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
-                char httpResponse[] = "HTTP/1.1 200 OK\r\n"
-                     "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                     "Server: Apache/2.4.41 (Ubuntu)\r\n"
-                     "Content-Type: text/plain; charset=UTF-8\r\n"
-                     "Content-Length: 13\r\n"
-                     "\r\n"
-                     "Hello, World!";
-                int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
+                // char httpResponse[] = "HTTP/1.1 200 OK\r\n"
+                //      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
+                //      "Server: Apache/2.4.41 (Ubuntu)\r\n"
+                //      "Content-Type: text/plain; charset=UTF-8\r\n"
+                //      "Content-Length: 13\r\n"
+                //      "\r\n"
+                //      "Hello, World!";
+                // int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
                 itClient it = _clients.find(idx);
@@ -187,8 +189,10 @@ void WebServ::start_parsing(int fd_R)
             _clients.at(fd_R)->_request.setHeader(_buffer);
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             FD_CLR(fd_R, &current_Rsockets);
+            
             FD_SET(fd_R, &current_Wsockets);
             _buffer.clear();
+            //  std::cout << "test" << std::endl;
         }
         else
         {

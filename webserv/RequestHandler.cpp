@@ -113,8 +113,10 @@ bool RequestHandler::check_requested_method(Client* cli)
 
 bool RequestHandler::get_requested_ressource(Client* cli)
 {
+    
     struct stat fileInfo;
-    std::string root_DIR = "/Users/maddou/Desktop/1337/test/webserv/"; //get from conf, example "/var/www/html"
+    std::cout << "test" << std::endl;
+    std::string root_DIR = "/home/marouan/Desktop/1337/webserv_42/webserv/test/"; //get from conf, example "/var/www/html"
 
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
@@ -127,6 +129,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     std::string absolut_path = root_DIR + _path;
     if (stat(absolut_path.c_str(), &fileInfo) != 0)
     {
+        std::cout << "kayna" << std::endl;
         cli->_response.setStatus(404);
         return (EXIT_FAILURE);
     }
