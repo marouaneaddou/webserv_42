@@ -41,7 +41,8 @@ class Request
             void findTypeOfPostMethod();
             void setBody(std::string &buffer);
             std::string getBody() const;
-        
+            void parceBodyChunked();
+
         /********** POST ******/
         void parse_request_line(std::string &_rawReq);
         void parse_headers_body(std::string _rawReq);
@@ -55,9 +56,12 @@ class Request
         /******************* PRINT DATA *****************/
     private:
         std::string _header;
+        int readByte;
+        int hexa;
         std::map<std::string, std::string> _headers;
         std::string _lineRequest;
         std::string _body;
+        std::vector<std::string> _pureBody;
         std::string _method;
         std::string _URL;
         std::string _http_version;

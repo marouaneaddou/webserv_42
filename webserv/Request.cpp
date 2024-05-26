@@ -1,6 +1,7 @@
 #include "Request.hpp"
 #include <cstdlib>
-
+#include <string>
+// #include "../includes/utils.hpp"
 
 Request::Request()
 {
@@ -101,7 +102,7 @@ itHeaders Request::getEndHeaders() const
 void Request::findTypeOfPostMethod()
 {
     itHeaders it = _headers.find("Content-Type");
-    if (it->second.find("boundry") != -1)
+    if (it->second.find("boundary") != -1)
     {
         std::string type = it->second.substr(it->second.find("=") + 1);
         _headers["typeMethodPost"] = type;
@@ -161,3 +162,32 @@ void Request::isReqWellFormed(Response &response)
         response.setStatusMsg("Request Entity Too Large");
     }
 }
+
+
+
+/************************ Transfer-Encoding ***********************/
+
+    void Request::parceBodyChunked()
+    {
+        std::string newBody;
+        std::string hexaStr = _body.substr(0, _body.find("\r\n"));
+        int hexa;
+        hexa = stoi(_body.substr(0, _body.find("\r\n")),nullptr,16);
+        std::cout << _body.substr(5, hexa) << std::endl;
+        newBody += _body.substr(5, hexa);
+        _body = _body.substr(5);
+        // for (; hexa == 0;)
+        // {
+        //     hexa = 
+        // }
+            
+        // // }
+        // std::cout << "start" << std::endl;
+        // std::vector<std::string> result= Utils::split(_body, "\r\n\r\n");
+        // for (int i = 0; i < result.size(); i++)
+        //     std::cout << result[i] << " 1x1 "<< std::endl;
+        // std::cout << "end" << std::endl;
+        
+    }
+
+/************************ Transfer-Encoding ***********************/

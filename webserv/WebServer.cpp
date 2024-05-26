@@ -87,11 +87,15 @@ void WebServ::run_servers()
                         if (_buffer.find("0\r\n\r\n") != -1)
                         {
                             _clients[idx]->_request.setBody(_buffer);
+                            std::cout << "size" <<_clients[idx]->_request.getBody().size() << std::endl;
+                            _clients[idx]->_request.parceBodyChunked();
                             // std::cout << "hnay hnay hnay\n";
                             // std::cout << "start" << std::endl;
                             // std::cout << _clients[idx]->_request.getBody();
                             // std::cout << "end" << std::endl;
                             _clients[idx]->_request.printRequest();
+                            if(_buffer.find("0\r\n\r\n") != -1)
+                                std::cout << "Final" << std::endl;
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -102,12 +106,15 @@ void WebServ::run_servers()
                         if (_buffer.size() == stoi(_clients[idx]->_request.getHeader("Content-Length")->second))
                         {
                             _clients[idx]->_request.setBody(_buffer);
-                            std::cout << _clients[idx]->_request.getBody();
+                            std::cout << "size" <<_clients[idx]->_request.getBody().size()  << std::endl;
                             // std::cout << "hnay hnay hnay\n";
                             // std::cout << "start" << std::endl;
                             // std::cout << _clients[idx]->_request.getBody();
                             // std::cout << "end" << std::endl;
                             _clients[idx]->_request.printRequest();
+
+                            if(_buffer.find("0\r\n\r\n") != -1)
+                                std::cout << "Final" << std::endl;
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -190,7 +197,6 @@ void WebServ::start_parsing(int fd_R)
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             _buffer = _buffer.substr(findPos + 4);
         }
-
     }
 
 }

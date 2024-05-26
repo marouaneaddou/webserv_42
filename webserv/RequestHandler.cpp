@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <vector>
 #include <fcntl.h>
+# include <cstring>
 RequestHandler::RequestHandler(){
 
 }
@@ -113,7 +114,7 @@ bool RequestHandler::check_requested_method(Client* cli)
 bool RequestHandler::get_requested_ressource(Client* cli)
 {
     struct stat fileInfo;
-    std::string root_DIR = "/Users/maddou/Desktop/1337/test/webserv"; //get from conf, example "/var/www/html"
+    std::string root_DIR = "/Users/maddou/Desktop/1337/test/webserv/"; //get from conf, example "/var/www/html"
 
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
@@ -121,6 +122,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
+/*************** TEST *********/
 
     std::string absolut_path = root_DIR + _path;
     if (stat(absolut_path.c_str(), &fileInfo) != 0)
@@ -129,22 +131,22 @@ bool RequestHandler::get_requested_ressource(Client* cli)
         return (EXIT_FAILURE);
     }
     int fd = open(absolut_path.c_str(), O_RDONLY | O_CREAT);
- 
-    char str[267];
-    read(fd, str, 266);
+    char str[400];
+    int n = read(fd, str, 400);
+    str[n] = '\0';
     std::string response= "HTTP/1.1 200 OK\r\n"
                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                     "Server: Apache/2.4.41 (Ubuntu)\r\n"
-                     "Content-Type: text/html; charset=UTF-8\r\n"
-                     "Content-Length: 266\r\n"
-                     "\r\n"
-                     ;
+                     "Server: Apache/2.4.41 (Ubuntu)\r\n";
+    response += "Accept";
+    response += ": ";
+    response += cli->_request.getHeader("Accept")->second;
+    response += "\r\n";
     response += str;
-                int nbyte = send(4, response.c_str(), strlen(response.c_str()), 0);
-    printf("fd = %d\n", fd);
+    int nbyte = send(4, response.c_str(), strlen(response.c_str()), 0);
     std::cout << fileInfo.st_size << std::endl;
-    // cli->_response.setBody()
-    std::cout << "kayna" << std::endl;
+
+/*************** TEST *********/
+
     return (EXIT_SUCCESS);
 }
 
