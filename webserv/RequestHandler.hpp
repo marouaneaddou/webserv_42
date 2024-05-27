@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Client.hpp"
-#include <cstddef>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
+#include <cstddef>
+#include <cstdlib>
+#include <string>
+#include <vector>
+#include <fcntl.h>
 
 
 class RequestHandler {

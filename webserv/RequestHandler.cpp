@@ -2,13 +2,8 @@
 #include "Client.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include <cstddef>
 #include <cstdlib>
-#include <string>
-#include <sys/stat.h>
-#include <vector>
-#include <fcntl.h>
-# include <cstring>
+
 RequestHandler::RequestHandler(){
 
 }
@@ -50,6 +45,7 @@ bool RequestHandler::is_method_allowed_in_location(Client* cli)
     cli->_response.setStatus(405);
     // return(EXIT_FAILURE);
     return (EXIT_SUCCESS);
+
 
 }
 
@@ -103,7 +99,6 @@ bool RequestHandler::check_requested_method(Client* cli)
     else if (cli->_request.getMethod() == "POST")
     {
         
-    
     }
     else if (cli->_request.getMethod() == "DELETE") {
     
@@ -116,7 +111,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     
     struct stat fileInfo;
     std::cout << "test" << std::endl;
-    std::string root_DIR = "/home/marouan/Desktop/1337/webserv_42/webserv/test/"; //get from conf, example "/var/www/html"
+    std::string root_DIR = "/Users/mel-gand/Desktop/webserv_git/webserv/test/"; //get from conf, example "/var/www/html"
 
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
