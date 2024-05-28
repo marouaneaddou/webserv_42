@@ -2,13 +2,8 @@
 #include "Client.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include <cstddef>
 #include <cstdlib>
-#include <string>
-#include <sys/stat.h>
-#include <vector>
-#include <fcntl.h>
-# include <cstring>
+
 RequestHandler::RequestHandler(){
 
 }
@@ -50,6 +45,7 @@ bool RequestHandler::is_method_allowed_in_location(Client* cli)
     cli->_response.setStatus(405);
     // return(EXIT_FAILURE);
     return (EXIT_SUCCESS);
+
 
 }
 
@@ -103,7 +99,6 @@ bool RequestHandler::check_requested_method(Client* cli)
     else if (cli->_request.getMethod() == "POST")
     {
         
-    
     }
     else if (cli->_request.getMethod() == "DELETE") {
     

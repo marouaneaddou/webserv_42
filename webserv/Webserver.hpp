@@ -33,7 +33,7 @@ class WebServ
         WebServ();
         ~WebServ();
         
-        void run_servers();
+        void run_servers(std::vector<Servers> Confs);
         void SetListeners();
         void set_non_blocking(int sock);
         void selectTypeOfMethod(std::string &buffer, int &fdSocket);

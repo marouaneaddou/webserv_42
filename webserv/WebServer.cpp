@@ -4,10 +4,10 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <vector>
+#include "../includes/servers.hpp"
 
 WebServ::WebServ()
 {
-    // std::vector<Servers> Confs;
 
     
     // fill infos from config class;
@@ -24,15 +24,15 @@ WebServ::~WebServ()
         delete _servers[i];
 }
 
-void WebServ::run_servers()
+void WebServ::run_servers(std::vector<Servers> Confs)
 {
     int pos;
     int find;
     /*class config*/
-    for (int i = 0; i < _ports.size(); i++)
+    for (int i = 0; i <  Confs.size(); i++)
     {
         
-        _servers.push_back(new TCPserver(_ports[i]));
+        _servers.push_back(new TCPserver(Confs[i]));
     }
     SetListeners();
     while (true)
