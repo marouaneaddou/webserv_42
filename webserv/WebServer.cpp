@@ -95,6 +95,7 @@ void WebServ::run_servers()
                             // std::cout << _clients[idx]->_request.getBody();
                             // std::cout << "end" << std::endl;
                             _clients[idx]->_request.printRequest();
+                            
                             if(_buffer.find("0\r\n\r\n") != -1)
                                 std::cout << "Final" << std::endl;
                             _buffer.clear();
@@ -132,14 +133,14 @@ void WebServ::run_servers()
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
-                // char httpResponse[] = "HTTP/1.1 200 OK\r\n"
-                //      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                //      "Server: Apache/2.4.41 (Ubuntu)\r\n"
-                //      "Content-Type: text/plain; charset=UTF-8\r\n"
-                //      "Content-Length: 13\r\n"
-                //      "\r\n"
-                //      "Hello, World!";
-                // int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
+                char httpResponse[] = "HTTP/1.1 200 OK\r\n"
+                     "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
+                     "Server: Apache/2.4.41 (Ubuntu)\r\n"
+                     "Content-Type: text/plain; charset=UTF-8\r\n"
+                     "Content-Length: 13\r\n"
+                     "\r\n"
+                     "Hello, World!";
+                int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
                 itClient it = _clients.find(idx);

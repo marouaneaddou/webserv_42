@@ -116,7 +116,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     
     struct stat fileInfo;
     std::cout << "test" << std::endl;
-    std::string root_DIR = "/home/marouan/Desktop/1337/webserv_42/webserv/test/"; //get from conf, example "/var/www/html"
+    std::string root_DIR = "/Users/maddou/Desktop/1337/test/webserv/test"; //get from conf, example "/var/www/html"
 
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
@@ -127,6 +127,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
 /*************** TEST *********/
 
     std::string absolut_path = root_DIR + _path;
+    std::cout << absolut_path << std::endl;
     if (stat(absolut_path.c_str(), &fileInfo) != 0)
     {
         std::cout << "kayna" << std::endl;
@@ -134,8 +135,9 @@ bool RequestHandler::get_requested_ressource(Client* cli)
         return (EXIT_FAILURE);
     }
     int fd = open(absolut_path.c_str(), O_RDONLY | O_CREAT);
-    char str[400];
-    int n = read(fd, str, 400);
+    char str[540];
+    int n = read(fd, str, 540);
+    // std::cout << str << std::endl;
     str[n] = '\0';
     std::string response= "HTTP/1.1 200 OK\r\n"
                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
@@ -145,7 +147,9 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     response += cli->_request.getHeader("Accept")->second;
     response += "\r\n";
     response += str;
-    int nbyte = send(4, response.c_str(), strlen(response.c_str()), 0);
+    std::cout << response << std::endl;
+    std::cout << "write"<<write(4,response.c_str(), response.size()) << std::endl;;
+    // int nbyte = send(4, response.c_str(), strlen(response.c_str()), 0);
     std::cout << fileInfo.st_size << std::endl;
 
 /*************** TEST *********/
