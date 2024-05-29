@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:08:28 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/05/19 12:43:36 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/05/27 16:01:48 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 class Servers
 {
-        private:
+       public:
                 std::string host;
                 std::vector<int> ports;
                 size_t client_body_size;

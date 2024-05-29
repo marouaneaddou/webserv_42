@@ -25,6 +25,7 @@ class TCPserver
         void exit_error(const std::string err_msg);
         std::vector<int> getSocket() ;
         std::vector<int> getCliSocket() ;
+        
         // const & Config getConfig();
 
     private:
@@ -35,7 +36,6 @@ class TCPserver
         struct sockaddr_in _sockaddr;
         int start_server(Servers &server);
         void close_server();
-        void start_listen(int i);
         void set_non_blocking(int sock);
 
 

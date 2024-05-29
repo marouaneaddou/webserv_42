@@ -7,18 +7,20 @@ void fill_Conf(std::vector<Servers> &Confs)
 {
     Servers one;
     Servers two;
+    one.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv/test");
     one.ports.clear();
-    one.ports.push_back(2210);
-    one.ports.push_back(1452);
+    one.ports.push_back(2225);
+    one.ports.push_back(2223);
     one.ports.push_back(4040);
-    one.host = "127.0.0.0";
+    one.host = "localhost";
     Confs.push_back(one);
 
     two.ports.clear();
-    two.ports.push_back(1030);
-    two.ports.push_back(1052);
+    two.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv/");
+    two.ports.push_back(7777);
+    two.ports.push_back(3052);
     two.ports.push_back(4242);
-    two.host = "192.07.20.30";
+    two.host = "localhost";
     Confs.push_back(two);
 }
 

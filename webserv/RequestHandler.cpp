@@ -3,6 +3,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include <cstdlib>
+#include <sys/socket.h>
 
 RequestHandler::RequestHandler(){
 
@@ -110,8 +111,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
 {
     
     struct stat fileInfo;
-    std::cout << "test" << std::endl;
-    std::string root_DIR = "/Users/maddou/Desktop/1337/test/webserv/test"; //get from conf, example "/var/www/html"
+    // std::string root_DIR = "/Users/mel-gand/Desktop/webserv_git/webserv/test/"; //get from conf, example "/var/www/html"
 
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
@@ -119,16 +119,15 @@ bool RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-/*************** TEST *********/
-
-    std::string absolut_path = root_DIR + _path;
-    std::cout << absolut_path << std::endl;
+    std::string absolut_path = cli->getServer().roots[0] + _path;
     if (stat(absolut_path.c_str(), &fileInfo) != 0)
     {
-        std::cout << "kayna" << std::endl;
+        std::cout << absolut_path << std::endl;
         cli->_response.setStatus(404);
         return (EXIT_FAILURE);
     }
+/*************** TEST *********/
+
     int fd = open(absolut_path.c_str(), O_RDONLY | O_CREAT);
     char str[540];
     int n = read(fd, str, 540);
@@ -142,9 +141,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     response += cli->_request.getHeader("Accept")->second;
     response += "\r\n";
     response += str;
-    std::cout << response << std::endl;
-    std::cout << "write"<<write(4,response.c_str(), response.size()) << std::endl;;
-    // int nbyte = send(4, response.c_str(), strlen(response.c_str()), 0);
+    int nbyte = send(cli->socket, response.c_str(), strlen(response.c_str()), 0);
     std::cout << fileInfo.st_size << std::endl;
 
 /*************** TEST *********/

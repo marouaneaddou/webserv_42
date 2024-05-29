@@ -33,3 +33,13 @@ Response &Client::getResponse()
 {
     return _response;
 }
+
+void Client::setConf(Servers &server)
+{
+    _server = server;
+}
+
+Servers Client::getServer()
+{
+    return _server;
+}

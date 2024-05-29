@@ -183,32 +183,3 @@ void Request::parceBodyChunked()
     if (_headers.find("type")->second == "")
     std::cout << _body << std::endl;
 }
-
-/************************ Transfer-Encoding ***********************/
-
-// /************************ Transfer-Encoding ***********************/
-
-//     void Request::parceBodyChunked()
-//     {
-//         std::string newBody;
-//         std::string hexaStr = _body.substr(0, _body.find("\r\n"));
-//         int hexa;
-//         hexa = stoi(_body.substr(0, _body.find("\r\n")),nullptr,16);
-//         std::cout << _body.substr(5, hexa) << std::endl;
-//         newBody += _body.substr(5, hexa);
-//         _body = _body.substr(5);
-//         // for (; hexa == 0;)
-//         // {
-//         //     hexa = 
-//         // }
-            
-//         // // }
-//         // std::cout << "start" << std::endl;
-//         // std::vector<std::string> result= Utils::split(_body, "\r\n\r\n");
-//         // for (int i = 0; i < result.size(); i++)
-//         //     std::cout << result[i] << " 1x1 "<< std::endl;
-//         // std::cout << "end" << std::endl;
-        
-//     }
-
-// /************************ Transfer-Encoding ***********************/

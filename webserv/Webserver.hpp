@@ -26,6 +26,7 @@ class WebServ
         std::vector<int> servers_fds;
         std::vector<int> clients_fds;
         std::map<int, Client*> _clients;
+        std::map<int, Servers> _myconf;
         struct sockaddr_in _sockaddr;
         // std::map<int , int> check;
         // bool check;
@@ -34,9 +35,9 @@ class WebServ
         ~WebServ();
         
         void run_servers(std::vector<Servers> Confs);
+        Servers getConf(int fd, std::vector<Servers> Confs);
         void SetListeners();
         void set_non_blocking(int sock);
-        void selectTypeOfMethod(std::string &buffer, int &fdSocket);
         void read_request(int fd_R);
         void start_parsing(int fd_R);
         RequestHandler* createHandler(Request &request);

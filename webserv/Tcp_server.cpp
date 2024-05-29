@@ -1,4 +1,6 @@
 #include "Tcp_server.hpp"
+#include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <sys/socket.h>
 
@@ -26,39 +28,38 @@ int TCPserver::start_server(Servers &server)
     int status;
     struct addrinfo hints, *res;
 
-
     for (int i = 0; i < server.ports.size(); i++)
     {
-        memset(&hints, 0, sizeof hints); // make sure the struct is empty
-        hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
-        hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
-        hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
+        memset(&hints, 0, sizeof hints);
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        // hints.ai_flags = AI_PASSIVE;
         if ((status = getaddrinfo(server.host.c_str(), std::to_string(server.ports[i]).c_str(), &hints, &res)) != 0) {
-            fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+            perror("error");
             exit(1);
         }
         if ((ssocket = socket(res->ai_family, res->ai_socktype, 0)) < 0)
-            exit_error("cannot create socket");
+        {
+            perror("error");
+            exit(1);
+        }
         setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval));
         _Socket.push_back(ssocket);
-    }
-    for (int i = 0; i < _Socket.size(); i++)
-    {   
-        if (bind(_Socket[i], res->ai_addr, res->ai_addrlen) < 0)
+        if (bind(ssocket, res->ai_addr, res->ai_addrlen) < 0)
         {
-            exit_error("Cannot connect socket to address");
-            close(_Socket[i]);
+            perror("error");
+            close(ssocket);
+            exit(1);
         }
-        start_listen(i);
+        if (listen(ssocket, BACKLOGS) < 0)
+        {
+            perror("error");
+            close(ssocket);
+            exit(1);
+        }
+        set_non_blocking(ssocket);
     }
     return (0);
-}
-
-void TCPserver::start_listen(int i)
-{
-    if (listen(_Socket[i], BACKLOGS) < 0)
-        exit_error("Socket listening failed");
-    set_non_blocking(_Socket[i]);
 }
 
 void TCPserver::close_server()
@@ -68,7 +69,6 @@ void TCPserver::close_server()
 }
 
  std::vector<int> TCPserver::getSocket()  {return (_Socket);}
-//  std::vector<class Client> TCPserver::getClients() {return (_Clients);}
 
 void TCPserver::set_non_blocking(int sock) {
     int flags = fcntl(sock, F_GETFL, 0);
