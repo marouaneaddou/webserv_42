@@ -1,9 +1,5 @@
 #include "RequestHandler.hpp"
-#include "Client.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
 #include <cstdlib>
-#include <sys/socket.h>
 
 RequestHandler::RequestHandler(){
 
@@ -17,37 +13,65 @@ bool RequestHandler::req_uri_location(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-    //save the location that match the url to access its block later
-    //if path doesnt match the locations params in the server location cli->_response.setStatus(404); return(EXIT_FAILURE);
-    
 
-    return (EXIT_SUCCESS);
+    //Exact Match
+    for (int i = 0; i < cli->getServer().locations.size(); i++) 
+    {
+        if (cli->getServer().locations[i]->getPath()[0] == '=' && cli->getServer().locations[i]->getPath().substr(1) == _path)
+        {
+            _blockIdx = i;
+            return (EXIT_SUCCESS);
+        }
+    }
+
+    //Prefix Match
+    std::string longestMatch;
+    for (int i = 0; i < cli->getServer().locations.size(); i++)
+    {
+        if (cli->getServer().locations[i]->getPath()[0] != '=' && _path.find(cli->getServer().locations[i]->getPath()) == 0)
+        {
+            if (cli->getServer().locations[i]->getPath().length() > longestMatch.length())
+            {
+                longestMatch = cli->getServer().locations[i]->getPath();
+                _blockIdx = i;
+            }
+        }
+    }
+    if (!(longestMatch.empty()))
+        return(EXIT_SUCCESS);
+
+    // default location Match
+    if (cli->getServer().locations[0]->getPath() == "/")
+    {
+        _blockIdx = 0;
+        return (EXIT_SUCCESS);
+    }
+
+    cli->_response.setStatus(404);
+    return(EXIT_FAILURE);
 }
 
 bool RequestHandler::is_location_have_redirection(Client* cli)
 {
-    //see if there is rewrite to that request url in location
-    //if location have redirection cli->_response.setHeader("Location", "new_URL")
-    // cli->_response.setStatus(301); 
-    //cli->_response.setHeader("Content-Length", 0);
-    //return(EXIT_FAILURE);
-
+    if (!(cli->getServer().locations[_blockIdx]->getReturn().empty()))
+    {
+        cli->_response.setHeader("Location", cli->getServer().locations[_blockIdx]->getReturn());
+        cli->_response.setStatus(301);
+        cli->_response.setHeader("Content-Length", 0);
+        return(EXIT_FAILURE);
+    }
     return (EXIT_SUCCESS);
 }
 
 bool RequestHandler::is_method_allowed_in_location(Client* cli)
 {
-    std::vector<std::string> accepted_methods; //get it from cli->conf->accepted_methods
-    for (std::vector<std::string>::const_iterator it = accepted_methods.begin(); it != accepted_methods.end(); ++it)
+    for (int i = 0; i < cli->getServer().locations[_blockIdx]->getAcceptedMethod().size(); i++)
     {
-        if (*it == cli->_request.getMethod())
+        if (cli->getServer().locations[_blockIdx]->getAcceptedMethod()[i] == cli->_request.getMethod())
             return (EXIT_SUCCESS);
     }
     cli->_response.setStatus(405);
-    // return(EXIT_FAILURE);
-    return (EXIT_SUCCESS);
-
-
+    return(EXIT_FAILURE);
 }
 
 bool RequestHandler::check_requested_method(Client* cli)
@@ -55,7 +79,7 @@ bool RequestHandler::check_requested_method(Client* cli)
 
     if (cli->_request.getMethod() == "GET")
     {
-        if (!get_requested_ressource(cli)) {return (EXIT_FAILURE);}
+        if (get_requested_ressource(cli) == EXIT_FAILURE) {return (EXIT_FAILURE);}
     
         if (get_ressource_type(cli) == "DIR")
         {
@@ -66,22 +90,24 @@ bool RequestHandler::check_requested_method(Client* cli)
                 cli->_response.setStatus(301);
                 return (EXIT_FAILURE);
             }
-            if (!is_dir_has_index_files(cli))
+            if (is_dir_has_index_files(cli) == EXIT_FAILURE)
             {
-                 
-                //check autoindex(config) ON/OFF :
-                
+                //check autoindex/directorylisting : ON/OFF
 
-                //if its OFF
-                    // cli->_response.setStatus(403);
-                    //return(EXIT_FAILURE);
-
-                //if ON generate a directory listing and cli->_response.setBody(HTML page with the content in the directory)
-
+                //OFF :
+                if (cli->getServer().locations[_blockIdx]->directory_listing == false)
+                {
+                    cli->_response.setStatus(403);
+                    return(EXIT_FAILURE);
+                }
+                //ON :
+                else
+                {
                     cli->_response.setHeader("Content-Type", "text/html");
+                    // cli->_response.setBody(HTML page with the content in the directory)
                     // cli->_response.setHeader("Content-Length", "size of resp body in bytes")
-                    cli->_response.setStatus(200);
                     return(EXIT_SUCCESS);
+                }
             }
         }
         if (if_location_has_cgi(cli))
@@ -90,7 +116,8 @@ bool RequestHandler::check_requested_method(Client* cli)
             //code depend on cgi
             // cli->_response.setStatus(200); ?
         }
-        else {
+        else
+        {
             //return requested file cli->_response.setBody(file.whatever content)
             cli->_response.setHeader("Content-Length", getPathSize());
             cli->_response.setStatus(200);
@@ -111,7 +138,6 @@ bool RequestHandler::get_requested_ressource(Client* cli)
 {
     
     struct stat fileInfo;
-    // std::string root_DIR = "/Users/mel-gand/Desktop/webserv_git/webserv/test/"; //get from conf, example "/var/www/html"
 
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
@@ -120,32 +146,28 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     else
         _path = url;
     std::string absolut_path = cli->getServer().roots[0] + _path;
+        std::cout << "ABS "<< absolut_path << std::endl;
     if (stat(absolut_path.c_str(), &fileInfo) != 0)
     {
-        std::cout << absolut_path << std::endl;
         cli->_response.setStatus(404);
         return (EXIT_FAILURE);
     }
-/*************** TEST *********/
-
-    int fd = open(absolut_path.c_str(), O_RDONLY | O_CREAT);
-    char str[540];
-    int n = read(fd, str, 540);
-    // std::cout << str << std::endl;
-    str[n] = '\0';
-    std::string response= "HTTP/1.1 200 OK\r\n"
-                     "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                     "Server: Apache/2.4.41 (Ubuntu)\r\n";
-    response += "Accept";
-    response += ": ";
-    response += cli->_request.getHeader("Accept")->second;
-    response += "\r\n";
-    response += str;
-    int nbyte = send(cli->socket, response.c_str(), strlen(response.c_str()), 0);
-    std::cout << fileInfo.st_size << std::endl;
-
-/*************** TEST *********/
-
+/*************** TEST *************/
+    // int fd = open(absolut_path.c_str(), O_RDONLY | O_CREAT);
+    // char str[540];
+    // int n = read(fd, str, 540);
+    // str[n] = '\0';
+    // response= "HTTP/1.1 200 OK\r\n"
+    //                  "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
+    //                  "Server: Apache/2.4.41 (Ubuntu)\r\n";
+    // response += "Accept";
+    // response += ": ";
+    // response += cli->_request.getHeader("Accept")->second;
+    // response += "\r\n\r\n";
+    // response += str;
+    // int nbyte = send(cli->socket, response.c_str(), strlen(response.c_str()), 0);
+    // std::cout << "response: " << response.c_str() << std::endl;
+/*************** TEST ************/
     return (EXIT_SUCCESS);
 }
 
@@ -164,15 +186,14 @@ const std::string RequestHandler::get_ressource_type(Client* cli)
 
 bool RequestHandler::is_dir_has_index_files(Client* cli)
 {
-    std::vector<std::string> indexFiles; //get it from cli->conf->indexFiles
     struct stat fileInfo;
 
-    for (int i = 0; i < indexFiles.size(); i++)
+    for (int i = 0; i < cli->getServer()._indexFiles.size(); i++)
     {
-        std::string filePath = _path + indexFiles[i];
+        std::string filePath = _path + cli->getServer()._indexFiles[i];
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
-            _path = _path + indexFiles[i];
+            _path = _path + cli->getServer()._indexFiles[i];
             return (EXIT_SUCCESS);
         }
     }

@@ -1,5 +1,6 @@
 #include "Webserver.hpp"
 #include <cstdlib>
+#include <iostream>
 #include <map>
 #include <sys/fcntl.h>
 #include <unistd.h>
@@ -88,26 +89,23 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
-                
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
-                    std::cout << "index" << idx << std::endl;
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
-                char httpResponse[] = "HTTP/1.1 200 OK\r\n"
-                     "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                     "Server: Apache/2.4.41 (Ubuntu)\r\n"
-                     "Content-Type: text/plain; charset=UTF-8\r\n"
-                     "Content-Length: 13\r\n"
-                     "\r\n"
-                     "Hello, World!";
-                int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
+                // char httpResponse[] = "HTTP/1.1 200 OK\r\n"
+                //      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
+                //      "Server: Apache/2.4.41 (Ubuntu)\r\n"
+                //      "Content-Type: text/plain; charset=UTF-8\r\n"
+                //      "Content-Length: 13\r\n"
+                //      "\r\n"
+                //      "Hello, World!";
+                // int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
                 itClient it = _clients.find(idx);
                 _clients.erase(it);
-                // FD_SET(idx, &current_Rsockets);
             }
         }
     }

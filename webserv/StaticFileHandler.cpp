@@ -9,8 +9,6 @@ StaticFileHandler::~StaticFileHandler()
 
 void StaticFileHandler::handleRequest(Client* cli)
 {
-    // if (!is_req_well_formed(request, response))
-    //     return;
     if (req_uri_location(cli) == EXIT_FAILURE)
         return;
     if (is_location_have_redirection(cli) == EXIT_FAILURE)

@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <string>
-#include <vector>
 #include <fcntl.h>
 
 
@@ -16,8 +15,10 @@ public:
     RequestHandler();
     virtual ~RequestHandler() {}
     virtual void handleRequest(Client* cli) = 0;
+    std::string response;
 protected:
     std::string _path;
+    int _blockIdx;
     // bool is_req_well_formed(const Request* request, Response* response);
     bool req_uri_location(Client* cli);
     bool is_location_have_redirection(Client* cli);

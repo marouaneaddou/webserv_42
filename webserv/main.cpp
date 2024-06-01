@@ -1,4 +1,4 @@
-#include "Tcp_server.hpp"
+
 #include "Webserver.hpp"
 #include <vector>
 #include "../includes/servers.hpp"
@@ -16,7 +16,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     Confs.push_back(one);
 
     two.ports.clear();
-    two.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv/");
+    two.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv");
     two.ports.push_back(7777);
     two.ports.push_back(3052);
     two.ports.push_back(4242);
