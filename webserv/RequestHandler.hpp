@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <string>
 #include <fcntl.h>
+#include <dirent.h>
 
 
 class RequestHandler {
@@ -15,7 +16,6 @@ public:
     RequestHandler();
     virtual ~RequestHandler() {}
     virtual void handleRequest(Client* cli) = 0;
-    std::string response;
 protected:
     std::string _path;
     int _blockIdx;
@@ -32,6 +32,9 @@ protected:
     bool is_dir_has_index_files(Client* cli);
     bool if_location_has_cgi(Client* cli);
     const size_t getPathSize();
+    const std::string getFileContent();
+    const std::string getDirListing();
+    const std::string getMimeType();
 
     ////POST///////
     // bool if_location_support_upload(Client* cli);

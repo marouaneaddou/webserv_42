@@ -3,17 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   errors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aech-che <aech-che@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:44 by aech-che          #+#    #+#             */
-/*   Updated: 2024/05/10 15:47:12 by aech-che         ###   ########.fr       */
+/*   Updated: 2024/05/30 17:50:58 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ERRORS_HPP
 # define ERRORS_HPP
 
-#include "includes.hpp"
 #include "utils.hpp"
 
 
