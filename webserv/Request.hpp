@@ -8,9 +8,11 @@
 #include <map>
 #include <cstdlib>
 #include "../includes/utils.hpp"
-
+ 
 
 typedef std::map<std::string, std::string>::const_iterator itHeaders;
+
+
 class Request
 {
     public :
@@ -41,19 +43,28 @@ class Request
             void findTypeOfPostMethod();
             void setBody(std::string &buffer);
             std::string getBody() const;
-            void parceBodyChunked();
+            void parceBody();
 
         /********** POST ******/
+
         void parse_request_line(std::string &_rawReq);
         void parse_headers_body(std::string _rawReq);
         void isReqWellFormed(Response &response);
-
+        void remeveHexaDecimalInBody();
+        void removeBoundaryInFrontLastBody();
         /******************* PRINT DATA *****************/
 
             void printHeaders() const;
             void printRequest() const;
+            void printVectOfString() const;
 
         /******************* PRINT DATA *****************/
+
+        std::vector<std::string> getPureBody() const;
+        void removeBoundary();
+        void splitBody();
+        void removeNewLineInLastEachBody();
+
     private:
         std::string _header;
         int readByte;
@@ -66,6 +77,5 @@ class Request
         std::string _URL;
         std::string _http_version;
         std::string _rawReq;
-
         
 };

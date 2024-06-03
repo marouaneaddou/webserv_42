@@ -18,7 +18,7 @@ class WebServ
 {
     private:
         int _nbytes;
-        char _buf[25000];
+        char _buf[250000];
         std::string _buffer;
         std::string _firstline;
         std::vector <std::vector<int> > _ports;

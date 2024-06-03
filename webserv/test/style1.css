@@ -4,7 +4,19 @@ body
     height: 100%;
     position: relative;
 }
-
+form 
+{
+    width: 200px;
+    height: 300px;
+    border: 1px solid brown;
+    border-radius: 5px;
+}
+input:nth-child(1)
+{
+    width: 150px;
+    height: 20px;
+    text-align: center;
+}
 .upload
 {
     position: absolute;

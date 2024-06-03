@@ -120,29 +120,57 @@ bool RequestHandler::get_requested_ressource(Client* cli)
     else
         _path = url;
     std::string absolut_path = cli->getServer().roots[0] + _path;
+
     if (stat(absolut_path.c_str(), &fileInfo) != 0)
     {
         std::cout << absolut_path << std::endl;
         cli->_response.setStatus(404);
         return (EXIT_FAILURE);
     }
-/*************** TEST *********/
 
-    int fd = open(absolut_path.c_str(), O_RDONLY | O_CREAT);
-    char str[540];
-    int n = read(fd, str, 540);
-    // std::cout << str << std::endl;
-    str[n] = '\0';
+
+/*************** TEST *********/
+    /*********** OPEN && READ ***********/
+   int fd = open(absolut_path.c_str(), O_RDONLY);
+if (fd == -1) {
+    perror("open");
+    cli->_response.setStatus(500); // Internal Server Error
+    return EXIT_FAILURE;
+}
+
+char str[fileInfo.st_size];
+int n = read(fd, str, fileInfo.st_size);
+if (n == -1) {
+    perror("read");
+    close(fd);
+    cli->_response.setStatus(500); // Internal Server Error
+    return EXIT_FAILURE;
+}
+close(fd);
+str[n] = '\0';
+    /*********** OPEN && READ ***********/      
     std::string response= "HTTP/1.1 200 OK\r\n"
                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
                      "Server: Apache/2.4.41 (Ubuntu)\r\n";
     response += "Accept";
     response += ": ";
     response += cli->_request.getHeader("Accept")->second;
-    response += "\r\n";
+    response += "\r\n\r\n";
     response += str;
-    int nbyte = send(cli->socket, response.c_str(), strlen(response.c_str()), 0);
-    std::cout << fileInfo.st_size << std::endl;
+    /***************** WRITE IN NEW SOCKET****************/
+    size_t response_length = response.size();
+    ssize_t bytes_written = 1;
+        bytes_written = write(cli->socket, response.data(), response_length);
+
+    if (bytes_written == -1) 
+    {
+        perror("write");
+        cli->_response.setStatus(500); // Internal Server Error
+        return EXIT_FAILURE;
+    }
+/***************** WRITE IN NEW SOCKET****************/
+    // int nbyte = send(cli->socket, response.c_str(), strlen(response.c_str()), 0);
+    // std::cout << "hello1" << fileInfo.st_size << std::endl;
 
 /*************** TEST *********/
 

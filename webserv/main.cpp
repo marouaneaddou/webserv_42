@@ -7,7 +7,7 @@ void fill_Conf(std::vector<Servers> &Confs)
 {
     Servers one;
     Servers two;
-    one.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv/test");
+    one.roots.push_back("/Users/maddou/Desktop/1337/test/webserv/test");
     one.ports.clear();
     one.ports.push_back(2225);
     one.ports.push_back(2223);
@@ -16,7 +16,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     Confs.push_back(one);
 
     two.ports.clear();
-    two.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv/");
+    two.roots.push_back("/Users/maddou/Desktop/1337/test/webserv");
     two.ports.push_back(7777);
     two.ports.push_back(3052);
     two.ports.push_back(4242);

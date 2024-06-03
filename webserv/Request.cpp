@@ -1,7 +1,7 @@
 #include "Request.hpp"
 #include <cstdlib>
 #include <string>
-// #include "../includes/utils.hpp"
+
 
 Request::Request()
 {
@@ -53,7 +53,6 @@ void Request::setHeader(std::string buffer)
 {
     _header = buffer;
     setHeaders();
-    
 }
 
 std::string Request::getHeader() const
@@ -79,9 +78,8 @@ void Request::setHeaders()
             _headers[line.substr(0, separator_pos)] = line.substr(separator_pos + 2);
         _header.erase(0, pos + 2);
     }
-
     /*************** PRINT ***************/
-        printHeaders();
+        // printHeaders();
         
 }
 
@@ -100,12 +98,18 @@ itHeaders Request::getEndHeaders() const
     return _headers.end();
 }
 
+std::vector<std::string> Request::getPureBody() const
+{
+    return _pureBody;
+}
 void Request::findTypeOfPostMethod()
 {
     itHeaders it = _headers.find("Content-Type");
+
     if (it->second.find("boundary") != -1)
     {
         std::string type = it->second.substr(it->second.find("=") + 1);
+        type.insert(0, "--");
         _headers["typeMethodPost"] = type;
         _headers["type"] = "form-data";
     }
@@ -166,7 +170,61 @@ void Request::isReqWellFormed(Response &response)
 
 /************************ Transfer-Encoding ***********************/
 
-void Request::parceBodyChunked()
+void    Request::removeBoundary()
+{
+    for (int i = 0; i < _pureBody.size(); i++)
+        if (i > 0)
+            _pureBody[i].erase(0, _headers["typeMethodPost"].size() + 1);
+}
+
+void Request::removeNewLineInLastEachBody()
+{
+    printVectOfString();
+    std::cout << "last last last\n";
+    int j;
+    for (int i = 0; i < _pureBody.size(); i++)
+    {
+        j = _pureBody[i].size() - 1;
+        for (; j >= 0 && (_pureBody[i][j] == '\r' || _pureBody[i][j] == '\n'); j--)
+        _pureBody[i].erase(j);
+    }
+    printVectOfString();
+}
+
+
+void    Request::removeBoundaryInFrontLastBody()
+{
+    std::string endBoundary = _headers["typeMethodPost"];
+    endBoundary += "--";
+    _body.erase(_body.find(endBoundary));
+    _body.erase(0, endBoundary.size());
+    if (_headers.find("typeMethodPost") == _headers.end())
+        _headers["typeMethodPost"] = _body.substr(0, _body.find("\r\n"));  
+}
+
+void    Request::parceBody()
+{
+    if (_headers.find("Transfer-Encoding") != _headers.end())
+        remeveHexaDecimalInBody();
+    if (_headers["type"] == "form-data")
+    {
+        removeBoundaryInFrontLastBody();
+        _pureBody =  Utils::split(_body, _headers["typeMethodPost"]);
+        removeBoundary();
+    }
+    else if (_headers["type"] == "form")
+        _pureBody =  Utils::split(_body, "&");
+    else 
+        _pureBody.push_back(_body);
+
+    /************* PRINT Request *************/
+    
+        // printRequest();
+
+    /************* PRINT Request *************/
+}
+
+void    Request::remeveHexaDecimalInBody()
 {
     int pos = 0;
     int hexaToDecimal = 0;
@@ -180,6 +238,4 @@ void Request::parceBodyChunked()
         if (hexaToDecimal == 0)
             break;
     }
-    if (_headers.find("type")->second == "")
-    std::cout << _body << std::endl;
 }

@@ -40,6 +40,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
                         perror("Server failed to accept incoming connection");
                     set_non_blocking(new_socket);
+                    std::cout << new_socket << std::endl;
                     _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
                     Servers server = getConf(*it, Confs);
                     _clients[new_socket]->setConf(server);
@@ -51,18 +52,16 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                 {
                     read_request(idx);
                     start_parsing(idx);
-                    if (_clients[idx]->_request.getMethod() == "POST")
-                        _clients[idx]->_request.findTypeOfPostMethod();
                     if ( _clients[idx]->_request.getHeader("Transfer-Encoding")  != _clients[idx]->_request.getEndHeaders())
                     {
                         if (_buffer.find("0\r\n\r\n") != -1)
                         {
+                            _clients[idx]->_request.findTypeOfPostMethod();
                             _clients[idx]->_request.setBody(_buffer);
-                            std::cout << "size" <<_clients[idx]->_request.getBody().size() << std::endl;
-                            _clients[idx]->_request.parceBodyChunked();
+
+                            _clients[idx]->_request.parceBody();
+                            
                             _clients[idx]->_request.printRequest();
-                            if(_buffer.find("0\r\n\r\n") != -1)
-                                std::cout << "Final" << std::endl;
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -72,12 +71,13 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     {
                         if (_buffer.size() == stoi(_clients[idx]->_request.getHeader("Content-Length")->second))
                         {
+                            _clients[idx]->_request.findTypeOfPostMethod();
                             _clients[idx]->_request.setBody(_buffer);
-                            std::cout << "size" <<_clients[idx]->_request.getBody().size()  << std::endl;
-                            _clients[idx]->_request.printRequest();
 
-                            if(_buffer.find("0\r\n\r\n") != -1)
-                                std::cout << "Final" << std::endl;
+                            _clients[idx]->_request.parceBody();
+
+                            // _clients[idx]->_request.printRequest();
+
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -91,7 +91,6 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                 
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
-                    std::cout << "index" << idx << std::endl;
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
@@ -138,12 +137,14 @@ void WebServ::start_parsing(int fd_R)
     {
         int findPos = _buffer.find("\r\n");
         _clients.at(fd_R)->setCheck();
+
         _firstline = _buffer.substr(0, findPos);
         _clients.at(fd_R)->_request.parse_request_line(_firstline);
         _buffer = _buffer.substr(findPos + 2);
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
             _clients.at(fd_R)->_request.setHeader(_buffer);
+            _clients.at(fd_R)->_request.printHeaders();
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             FD_CLR(fd_R, &current_Rsockets);
             
