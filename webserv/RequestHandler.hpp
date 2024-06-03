@@ -7,8 +7,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <string>
-#include <vector>
 #include <fcntl.h>
+#include <dirent.h>
 
 
 class RequestHandler {
@@ -18,6 +18,7 @@ public:
     virtual void handleRequest(Client* cli) = 0;
 protected:
     std::string _path;
+    int _blockIdx;
     // bool is_req_well_formed(const Request* request, Response* response);
     bool req_uri_location(Client* cli);
     bool is_location_have_redirection(Client* cli);
@@ -31,6 +32,9 @@ protected:
     bool is_dir_has_index_files(Client* cli);
     bool if_location_has_cgi(Client* cli);
     const size_t getPathSize();
+    const std::string getFileContent();
+    const std::string getDirListing();
+    const std::string getMimeType();
 
     ////POST///////
     // bool if_location_support_upload(Client* cli);
