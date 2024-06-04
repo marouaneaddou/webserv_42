@@ -6,7 +6,7 @@
 /*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:18 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/06/01 06:47:49 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/06/04 17:09:45 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,11 @@ class Locations
         public:
             Locations();
             ~Locations();
-        bool directory_listing;
+            bool directory_listing;
             std::string getPath() const;
             std::string getReturn() const;
+            void setReturn(std::string ret);
+            void setPath(std::string path);
             std::vector<std::string> getAcceptedMethod() const;
 
 };
