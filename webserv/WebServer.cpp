@@ -62,6 +62,14 @@ void WebServ::run_servers(std::vector<Servers> Confs)
 
                             _clients[idx]->_request.parceBody();
                             _clients[idx]->_request.printRequest();
+
+                                /*************** Function Run Cgi Login && Register *****************/
+
+                                // Cgi cgi(_clients[idx]->_request);
+                                // _clients[idx]->runCgiLoginRegister(cgi);
+
+                                /*************** Function Run Cgi Login && Register *****************/
+
                             std::cout << "here" << std::endl;
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
@@ -77,8 +85,15 @@ void WebServ::run_servers(std::vector<Servers> Confs)
 
                             _clients[idx]->_request.parceBody();
 
-                            // _clients[idx]->_request.printRequest();
+                            _clients[idx]->_request.printRequest();
 
+                                /*************** Function Run Cgi Login && Register *****************/
+
+                                // Cgi cgi(_clients[idx]->_request);
+                                // _clients[idx]->runCgiLoginRegister(cgi);
+
+                                /*************** Function Run Cgi Login && Register *****************/
+                                
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -143,7 +158,7 @@ void WebServ::start_parsing(int fd_R)
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
             _clients.at(fd_R)->_request.setHeader(_buffer);
-            _clients.at(fd_R)->_request.printHeaders();
+            _clients.at(fd_R)->_request.printRequest();
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             FD_CLR(fd_R, &current_Rsockets);
             

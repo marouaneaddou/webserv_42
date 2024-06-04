@@ -6,7 +6,7 @@
 # include "Request.hpp"
 # include "Response.hpp"
 #include "../includes/servers.hpp"
-
+# include "cgi.hpp"
 class Request;
 // class Response;
 class Client
@@ -16,11 +16,18 @@ class Client
         ~Client();
         void setCheck();
         void setConf(Servers &server);
+
+        /********************************* CGI ****************************************/
+
+            // bool runCgiLoginRegister(Cgi &cgi);
+
+        /********************************* CGI ****************************************/
+        
         bool getCheck() const;
         Response& getResponse();
         Servers getServer();
         // Client(int new_socket, struct sockaddr_in new_addr);
-        // std::string		getResponse(void); 
+        // std::string		getResponse(void);
         Request _request;
         Response _response;
         int socket;

@@ -16,7 +16,9 @@ void StaticFileHandler::handleRequest(Client* cli)
         return;
     if (is_method_allowed_in_location(cli) == EXIT_FAILURE)
         return;
+    std::cout << "HERE --------------??\n";
     if (check_requested_method(cli) == EXIT_FAILURE)
         return;
+    
     setStatusMessage(cli);
 }
