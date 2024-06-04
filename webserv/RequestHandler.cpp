@@ -1,12 +1,5 @@
 #include "RequestHandler.hpp"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <dirent.h>
-#include <string>
-#include <sys/dirent.h>
-#include <sys/unistd.h>
-#include <unistd.h>
+#include <iostream>
 
 RequestHandler::RequestHandler(){
 
@@ -22,24 +15,25 @@ bool RequestHandler::req_uri_location(Client* cli)
         _path = url;
 
     //Exact Match
-    for (int i = 0; i < cli->getServer().locations.size(); i++) 
+    for (int i = 0; i < cli->getServer().locations.size(); i++)
     {
-        if (cli->getServer().locations[i]->getPath()[0] == '=' && cli->getServer().locations[i]->getPath().substr(1) == _path)
+        if (cli->getServer().locations[i].getPath()[0] == '=' && cli->getServer().locations[i].getPath().substr(2) == _path)
         {
+            std::cout << "here\n";
             _blockIdx = i;
             return (EXIT_SUCCESS);
         }
     }
-
-    //Prefix Match
+        
+    //Prefix Match + default if no longer prefix found
     std::string longestMatch;
     for (int i = 0; i < cli->getServer().locations.size(); i++)
     {
-        if (cli->getServer().locations[i]->getPath()[0] != '=' && _path.find(cli->getServer().locations[i]->getPath()) == 0)
+        if (cli->getServer().locations[i].getPath()[0] != '=' && _path.find(cli->getServer().locations[i].getPath()) == 0)
         {
-            if (cli->getServer().locations[i]->getPath().length() > longestMatch.length())
+            if (cli->getServer().locations[i].getPath().length() > longestMatch.length())
             {
-                longestMatch = cli->getServer().locations[i]->getPath();
+                longestMatch = cli->getServer().locations[i].getPath();
                 _blockIdx = i;
             }
         }
@@ -47,22 +41,16 @@ bool RequestHandler::req_uri_location(Client* cli)
     if (!(longestMatch.empty()))
         return(EXIT_SUCCESS);
 
-    // default location Match
-    if (cli->getServer().locations[0]->getPath() == "/")
-    {
-        _blockIdx = 0;
-        return (EXIT_SUCCESS);
-    }
-
     cli->_response.setStatus(404);
     return(EXIT_FAILURE);
 }
 
 bool RequestHandler::is_location_have_redirection(Client* cli)
 {
-    if (!(cli->getServer().locations[_blockIdx]->getReturn().empty()))
+    if (!(cli->getServer().locations[_blockIdx].getReturn().empty()))
     {
-        cli->_response.setHeader("Location", cli->getServer().locations[_blockIdx]->getReturn());
+        std::cout << cli->getServer().locations[_blockIdx].getReturn() << std::endl;
+        cli->_response.setHeader("Location", cli->getServer().locations[_blockIdx].getReturn());
         cli->_response.setStatus(301);
         cli->_response.setHeader("Content-Length", 0);
         return(EXIT_FAILURE);
@@ -72,9 +60,9 @@ bool RequestHandler::is_location_have_redirection(Client* cli)
 
 bool RequestHandler::is_method_allowed_in_location(Client* cli)
 {
-    for (int i = 0; i < cli->getServer().locations[_blockIdx]->getAcceptedMethod().size(); i++)
+    for (int i = 0; i < cli->getServer().locations[_blockIdx].getAcceptedMethod().size(); i++)
     {
-        if (cli->getServer().locations[_blockIdx]->getAcceptedMethod()[i] == cli->_request.getMethod())
+        if (cli->getServer().locations[_blockIdx].getAcceptedMethod()[i] == cli->_request.getMethod())
             return (EXIT_SUCCESS);
     }
     cli->_response.setStatus(405);
@@ -87,7 +75,6 @@ bool RequestHandler::check_requested_method(Client* cli)
     if (cli->_request.getMethod() == "GET")
     {
         if (get_requested_ressource(cli) == EXIT_FAILURE) {return (EXIT_FAILURE);}
-    
         if (get_ressource_type(cli) == "DIR")
         {
             if (_path[_path.length() - 1] != '/')
@@ -102,7 +89,7 @@ bool RequestHandler::check_requested_method(Client* cli)
                 //check autoindex/directorylisting : ON/OFF
 
                 //OFF :
-                if (cli->getServer().locations[_blockIdx]->directory_listing == false)
+                if (cli->getServer().locations[_blockIdx].directory_listing == false)
                 {
                     cli->_response.setStatus(403);
                     return(EXIT_FAILURE);
@@ -325,11 +312,6 @@ const std::string RequestHandler::getDirListing()
     htmlContent += "        <tr><th>Name</th><th>Size</th></tr>\n";
 
     DIR* dir = opendir(_path.c_str());
-    if (dir == NULL)
-    {
-        std::cerr << "Invalid directory path." << std::endl;
-        exit(1);
-    }
 
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL)

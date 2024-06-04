@@ -7,16 +7,25 @@ void fill_Conf(std::vector<Servers> &Confs)
 {
     Servers one;
     Servers two;
-    one.roots.push_back("/Users/maddou/Desktop/1337/test/webserv/test");
+    Locations first;
+    Locations second;
+
+    first.setPath("/");
+    second.setPath("/index.html");
+    first.setReturn("/first");
+    second.setReturn("/second");
+    one.roots.push_back("/Users/mel-gand/Desktop/1337/test/webserv/test");
     one.ports.clear();
     one.ports.push_back(2225);
     one.ports.push_back(2223);
     one.ports.push_back(4040);
     one.host = "localhost";
+    one.locations.push_back(first);
+    one.locations.push_back(second);
     Confs.push_back(one);
 
     two.ports.clear();
-    two.roots.push_back("/Users/maddou/Desktop/1337/test/webserv");
+    two.roots.push_back("/Users/mel-gand/Desktop/1337/test/webserv");
     two.ports.push_back(7777);
     two.ports.push_back(3052);
     two.ports.push_back(4242);
