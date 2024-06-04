@@ -4,7 +4,7 @@
 #include <cstring>
 #include <dirent.h>
 #include <string>
-#include <sys/dirent.h>
+// #include <sys/dirent.h>
 #include <sys/unistd.h>
 #include <unistd.h>
 
