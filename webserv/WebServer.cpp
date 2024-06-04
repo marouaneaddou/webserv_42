@@ -61,8 +61,8 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                             _clients[idx]->_request.setBody(_buffer);
 
                             _clients[idx]->_request.parceBody();
-                            
                             _clients[idx]->_request.printRequest();
+                            std::cout << "here" << std::endl;
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);

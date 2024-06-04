@@ -1,5 +1,12 @@
 #include "RequestHandler.hpp"
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <dirent.h>
+#include <string>
+// #include <sys/dirent.h>
+#include <sys/unistd.h>
+#include <unistd.h>
 
 RequestHandler::RequestHandler(){
 

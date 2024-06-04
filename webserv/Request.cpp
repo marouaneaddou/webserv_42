@@ -105,16 +105,22 @@ std::vector<std::string> Request::getPureBody() const
 void Request::findTypeOfPostMethod()
 {
     itHeaders it = _headers.find("Content-Type");
-
-    if (it->second.find("boundary") != -1)
+    printHeaders();
+    if (it != _headers.end())
     {
-        std::string type = it->second.substr(it->second.find("=") + 1);
-        type.insert(0, "--");
-        _headers["typeMethodPost"] = type;
-        _headers["type"] = "form-data";
+        std::cout << "here 1" << std::endl;
+        if (it->second.find("boundary") != -1)
+        {
+            std::string type = it->second.substr(it->second.find("=") + 1);
+            type.insert(0, "--");
+            _headers["typeMethodPost"] = type;
+            _headers["type"] = "form-data";
+        }
+        else if (it->second.find("application/x-www-form") != -1)
+            _headers["type"] = "form";
+        else 
+            _headers["type"] = "none";
     }
-    else if (it->second.find("application/x-www-form") != -1)
-        _headers["type"] = "form";
     else 
         _headers["type"] = "none";
 }
@@ -206,10 +212,12 @@ void    Request::parceBody()
 {
     if (_headers.find("Transfer-Encoding") != _headers.end())
         remeveHexaDecimalInBody();
+        std::cout << _headers["type"] << std::endl;
     if (_headers["type"] == "form-data")
     {
         removeBoundaryInFrontLastBody();
         _pureBody =  Utils::split(_body, _headers["typeMethodPost"]);
+        std::cout << "hna " << std::endl;
         removeBoundary();
     }
     else if (_headers["type"] == "form")
