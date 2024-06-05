@@ -3,32 +3,39 @@
 /*                                                        :::      ::::::::   */
 /*   locations.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:18 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/05/19 12:18:57 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/06/04 17:09:45 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LOCATIONS_HPP
-# define LOCATIONS_HPP
+#pragma once
 
 #include "includes.hpp"
+#include <string>
+#include <vector>
 
 
 class Locations
 {
         private:
-                std::string path;
+                std::string _path;
+                std::string _return;
                 std::string default_file;
                 std::vector<std::string> methods;
                 std::string directory;
-                bool directory_listing;
                 std::string cgi_bin;
                 std::string cgi_extension;
 
         public:
             Locations();
             ~Locations();
+            bool directory_listing;
+            std::string getPath() const;
+            std::string getReturn() const;
+            void setReturn(std::string ret);
+            void setPath(std::string path);
+            std::vector<std::string> getAcceptedMethod() const;
 
 };

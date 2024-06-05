@@ -1,18 +1,14 @@
 #include "Webserver.hpp"
 #include <cstdlib>
+#include <iostream>
 #include <map>
 #include <sys/fcntl.h>
 #include <unistd.h>
+#include <utility>
 #include <vector>
+#include "../includes/servers.hpp"
 
-WebServ::WebServ()
-{
-    // fill infos from config class;
-    std::vector<int> port;
-    port.push_back(4223);
-    _ports.push_back(port);
-
-}
+WebServ::WebServ(){}
 
 WebServ::~WebServ()
 {
@@ -20,13 +16,12 @@ WebServ::~WebServ()
         delete _servers[i];
 }
 
-void WebServ::run_servers()
+void WebServ::run_servers(std::vector<Servers> Confs)
 {
     int pos;
-    for (int i = 0; i < _ports.size(); i++)
-    {
-        _servers.push_back(new TCPserver(_ports[i]));
-    }
+    int find;
+    for (int i = 0; i <  Confs.size(); i++)
+        _servers.push_back(new TCPserver(Confs[i]));
     SetListeners();
     while (true)
     {
@@ -41,7 +36,6 @@ void WebServ::run_servers()
                 std::vector<int>::iterator it = std::find(servers_fds.begin(), servers_fds.end(), idx);
                 if (it != servers_fds.end() /*&& servers[i]->getClients().size() < MAX_CONNECTIONS*/)
                 {
-                    std::cout << *it << std::endl;
                     int new_socket = 0;
                     socklen_t _sockaddr_len = sizeof(_sockaddr);
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
@@ -49,21 +43,57 @@ void WebServ::run_servers()
                     set_non_blocking(new_socket);
                     std::cout << new_socket << std::endl;
                     _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
+                    Servers server = getConf(*it, Confs);
+                    _clients[new_socket]->setConf(server);
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
-                    // FD_SET(new_socket, &current_Wsockets);
                     printf("New connection accepted.\n");
                 }
                 else
                 {
                     read_request(idx);
                     start_parsing(idx);
+                    if ( _clients[idx]->_request.getHeader("Transfer-Encoding")  != _clients[idx]->_request.getEndHeaders())
+                    {
+                        if (_buffer.find("0\r\n\r\n") != -1)
+                        {
+                            _clients[idx]->_request.findTypeOfPostMethod();
+                            _clients[idx]->_request.setBody(_buffer);
+
+                            _clients[idx]->_request.parceBody();
+                            _clients[idx]->_request.printRequest();
+                            std::cout << "here" << std::endl;
+                            _buffer.clear();
+                            FD_CLR(idx, &current_Rsockets);
+                            FD_SET(idx, &current_Wsockets);
+                        }
+                    }
+                    else if (_clients[idx]->_request.getHeader("Content-Length")  != _clients[idx]->_request.getEndHeaders())
+                    {
+                        if (_buffer.size() == stoi(_clients[idx]->_request.getHeader("Content-Length")->second))
+                        {
+                            _clients[idx]->_request.findTypeOfPostMethod();
+                            _clients[idx]->_request.setBody(_buffer);
+
+                            _clients[idx]->_request.parceBody();
+
+                            // _clients[idx]->_request.printRequest();
+
+                            _buffer.clear();
+                            FD_CLR(idx, &current_Rsockets);
+                            FD_SET(idx, &current_Wsockets);
+                        }
+                    }
+
                 }
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
-                RequestHandler* handler = createHandler(_clients.at(idx)->_request);
-                handler->handleRequest(_clients.at(idx)->_request, _clients.at(idx)->_response);
+                if (_clients.at(idx)->_response.getStatus() == 200)
+                {
+                    RequestHandler* handler = createHandler(_clients.at(idx)->_request);
+                    handler->handleRequest(_clients.at(idx));
+                }
                 // char httpResponse[] = "HTTP/1.1 200 OK\r\n"
                 //      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
                 //      "Server: Apache/2.4.41 (Ubuntu)\r\n"
@@ -74,7 +104,8 @@ void WebServ::run_servers()
                 // int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
-                // FD_SET(idx, &current_Rsockets);
+                itClient it = _clients.find(idx);
+                _clients.erase(it);
             }
         }
     }
@@ -82,7 +113,7 @@ void WebServ::run_servers()
 
 void WebServ::read_request(int fd_R)
 {
-    if ((_nbytes = recv(fd_R, _buf, sizeof _buf, 0)) <= 0)
+    if ((_nbytes = recv(fd_R, _buf, 25000, 0)) <= 0)
     {
         // got error or connection closed by client
         if (_nbytes == 0)
@@ -93,36 +124,41 @@ void WebServ::read_request(int fd_R)
         FD_CLR(fd_R, &current_Rsockets);
         // continue;
     }
-    _buf[_nbytes] = '\0';
+    if (_nbytes < sizeof(_buf))
+        _buf[_nbytes] = '\0';
     _buffer.append(_buf, _nbytes);
-    std::cout << _buffer << std::endl;
-    std::cout << "*****************************\n";
+
 }
 
 void WebServ::start_parsing(int fd_R)
 {
-    if (_buffer.find("\r\n\r\n") != -1)
+    if (_clients.at(fd_R)->getCheck() == false &&_buffer.find("\r\n\r\n") != -1)
     {
-        _firstline = _buffer.substr(0, _buffer.find("\r\n"));
-        _clients.at(fd_R)->_request->parse_request_line(_firstline);
-        _buffer = _buffer.substr(_buffer.find("\r\n"));
-        if (_clients.at(fd_R)->_request->getMethod() != "POST")
+        int findPos = _buffer.find("\r\n");
+        _clients.at(fd_R)->setCheck();
+
+        _firstline = _buffer.substr(0, findPos);
+        _clients.at(fd_R)->_request.parse_request_line(_firstline);
+        _buffer = _buffer.substr(findPos + 2);
+        if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
-            _clients.at(fd_R)->_request->setHeader(_buffer);
-            _buffer.clear();
+            _clients.at(fd_R)->_request.setHeader(_buffer);
+            _clients.at(fd_R)->_request.printHeaders();
+            _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             FD_CLR(fd_R, &current_Rsockets);
+            
             FD_SET(fd_R, &current_Wsockets);
+            _buffer.clear();
         }
         else
         {
-            // line = buffer.substr(0, buffer.find("\r\n\r\n"));
-            // buffer = buffer.substr(buffer.find("\r\n\r\n"));
-            // std::cout << buffer << std::endl;
-            // std::cout << "SGV" << std::endl;
+            findPos = _buffer.find("\r\n\r\n");
+            _clients.at(fd_R)->_request.setHeader(_buffer.substr(0, findPos + 2));
+            _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
+            _buffer = _buffer.substr(findPos + 4);
         }
-        // selectTypeOfMethod(buffer, idx);
     }
-    // std::cout << buffer << std::endl;
+
 }
 
 void WebServ::SetListeners()
@@ -139,29 +175,26 @@ void WebServ::SetListeners()
     }
 }
 
-void WebServ::set_non_blocking(int sock) {
-    if (fcntl(sock, F_SETFL | O_NONBLOCK) == -1) {
+void WebServ::set_non_blocking(int sock) 
+{
+    if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1) 
+    {
         perror("fcntl F_SETFL");
         exit(EXIT_FAILURE);
     }
 }
 
-void WebServ::selectTypeOfMethod(std::string &buffer, int &fd)
-{
-    int pos = buffer.find("\r\n");
-    // _clients.at(fd)->request->
-}
 
-RequestHandler* WebServ::createHandler(Request* request) 
+RequestHandler* WebServ::createHandler(Request &request) 
 {
-        if (isPHPCGIRequest(request->getURL())) 
-        {
-            return new PhpCgiHandler();
-        }
-        else 
-        {
-            return new StaticFileHandler();
-        }
+    if (isPHPCGIRequest(request.getURL()))
+    {
+        return new PhpCgiHandler();
+    }
+    else
+    {
+        return new StaticFileHandler();
+    }
 }
 
 bool WebServ::isPHPCGIRequest(const std::string url) 
@@ -171,4 +204,19 @@ bool WebServ::isPHPCGIRequest(const std::string url)
         return true;
     }
     return false;
+}
+
+Servers WebServ::getConf(int fd, std::vector<Servers> Confs)
+{
+    for (int i = 0; i < _servers.size(); i++)
+    {
+        for (int j = 0; j < _servers[i]->getSocket().size(); j++) 
+        {
+            if (_servers[i]->getSocket()[j] == fd)
+            {
+                return Confs[i];
+            }
+        }
+    }
+    return (Confs[0]);
 }

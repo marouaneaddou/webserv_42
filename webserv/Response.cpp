@@ -1,27 +1,50 @@
+
 #include "Response.hpp"
+#include <string>
 
 Response::Response()
 {
-    setStatus(200);
+    int status = 200;
+    setStatus(status);
 }
-Response::~Response(){}
 
-void Response::setStatus(int status)
+Response::~Response()
+{
+    
+}
+
+    /*************** Status ************/
+
+void Response::setStatus(const int &status)
 {
     _status = status;
 }
+
+int Response::getStatus() const
+{
+    return _status;
+}
+    /*************** Status ************/
+
+    /*************** Body ************/
 
 void Response::setBody(const std::string& body)
 {
     _body = body;
 }
 
-void Response::setHeader(const std::string& key, const std::string& value)
+std::string Response::getBody() const
 {
-    _headers[key] = value;
+    return _body;
 }
 
+    /*************** Body ************/
 std::string Response::generateResponseString() const 
 {
     return (_Response);
+}
+
+void Response::setStatusMsg(const std::string& msg)
+{
+    this->_Msg = msg;
 }
