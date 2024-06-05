@@ -39,8 +39,7 @@ bool RequestHandler::req_uri_location(Client* cli)
         if (cli->getServer().locations[i].getPath()[0] != '=' && _path.find(cli->getServer().locations[i].getPath()) == 0)
         {
             if (cli->getServer().locations[i].getPath().length() > longestMatch.length())
-            {
-                longestMatch = cli->getServer().locations[i].getPath();
+            {    longestMatch = cli->getServer().locations[i].getPath();
                 _blockIdx = i;
             }
         }
@@ -69,6 +68,7 @@ bool RequestHandler::is_method_allowed_in_location(Client* cli)
 {
     for (int i = 0; i < cli->getServer().locations[_blockIdx].getAcceptedMethod().size(); i++)
     {
+        std::cout << "HERE --------------???????????\n";
         if (cli->getServer().locations[_blockIdx].getAcceptedMethod()[i] == cli->_request.getMethod())
             return (EXIT_SUCCESS);
     }
@@ -81,7 +81,9 @@ bool RequestHandler::check_requested_method(Client* cli)
 
     if (cli->_request.getMethod() == "GET")
     {
+        
         if (get_requested_ressource(cli) == EXIT_FAILURE) {return (EXIT_FAILURE);}
+        
         if (get_ressource_type(cli) == "DIR")
         {
             if (_path[_path.length() - 1] != '/')
@@ -175,6 +177,7 @@ bool RequestHandler::get_requested_ressource(Client* cli)
 
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
+    
     if (query_pos != std::string::npos)
         _path = url.substr(0, query_pos);
     else
