@@ -20,14 +20,14 @@ protected:
     std::string _path;
     int _blockIdx;
     // bool is_req_well_formed(const Request* request, Response* response);
-    bool req_uri_location(Client* cli);
-    bool is_location_have_redirection(Client* cli);
-    bool is_method_allowed_in_location(Client* cli);
-    bool check_requested_method(Client* cli);
+    void req_uri_location(Client* cli);
+    void is_location_have_redirection(Client* cli);
+    void is_method_allowed_in_location(Client* cli);
+    void check_requested_method(Client* cli);
     void setStatusMessage(Client* cli);
 
     ///GET/////
-    bool get_requested_ressource(Client* cli);
+    void get_requested_ressource(Client* cli);
     const std::string get_ressource_type(Client* cli);
     bool is_dir_has_index_files(Client* cli);
     bool if_location_has_cgi(Client* cli);

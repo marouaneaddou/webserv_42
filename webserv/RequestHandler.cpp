@@ -12,7 +12,7 @@ RequestHandler::RequestHandler(){
 
 }
 
-bool RequestHandler::req_uri_location(Client* cli)
+void RequestHandler::req_uri_location(Client* cli)
 {
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
@@ -26,9 +26,8 @@ bool RequestHandler::req_uri_location(Client* cli)
     {
         if (cli->getServer().locations[i].getPath()[0] == '=' && cli->getServer().locations[i].getPath().substr(2) == _path)
         {
-            std::cout << "here\n";
             _blockIdx = i;
-            return (EXIT_SUCCESS);
+            return;
         }
     }
         
@@ -46,13 +45,13 @@ bool RequestHandler::req_uri_location(Client* cli)
         }
     }
     if (!(longestMatch.empty()))
-        return(EXIT_SUCCESS);
+        return;
 
     cli->_response.setStatus(404);
-    return(EXIT_FAILURE);
+    throw(404);
 }
 
-bool RequestHandler::is_location_have_redirection(Client* cli)
+void RequestHandler::is_location_have_redirection(Client* cli)
 {
     if (!(cli->getServer().locations[_blockIdx].getReturn().empty()))
     {
@@ -60,28 +59,28 @@ bool RequestHandler::is_location_have_redirection(Client* cli)
         cli->_response.setHeader("Location", cli->getServer().locations[_blockIdx].getReturn());
         cli->_response.setStatus(301);
         cli->_response.setHeader("Content-Length", 0);
-        return(EXIT_FAILURE);
+        throw(301);
     }
-    return (EXIT_SUCCESS);
+    return;
 }
 
-bool RequestHandler::is_method_allowed_in_location(Client* cli)
+void RequestHandler::is_method_allowed_in_location(Client* cli)
 {
     for (int i = 0; i < cli->getServer().locations[_blockIdx].getAcceptedMethod().size(); i++)
     {
         if (cli->getServer().locations[_blockIdx].getAcceptedMethod()[i] == cli->_request.getMethod())
-            return (EXIT_SUCCESS);
+            return;
     }
     cli->_response.setStatus(405);
-    return(EXIT_FAILURE);
+    throw(405);
 }
 
-bool RequestHandler::check_requested_method(Client* cli)
+void RequestHandler::check_requested_method(Client* cli)
 {
 
     if (cli->_request.getMethod() == "GET")
     {
-        if (get_requested_ressource(cli) == EXIT_FAILURE) {return (EXIT_FAILURE);}
+        get_requested_ressource(cli);
         if (get_ressource_type(cli) == "DIR")
         {
             if (_path[_path.length() - 1] != '/')
@@ -89,9 +88,9 @@ bool RequestHandler::check_requested_method(Client* cli)
                 cli->_response.setHeader("Location", _path + '/');
                 cli->_response.setHeader("Content-Length", 0);
                 cli->_response.setStatus(301);
-                return (EXIT_FAILURE);
+                throw(301);
             }
-            if (is_dir_has_index_files(cli) == EXIT_FAILURE)
+            if (is_dir_has_index_files(cli) == false)
             {
                 //check autoindex/directorylisting : ON/OFF
 
@@ -99,7 +98,7 @@ bool RequestHandler::check_requested_method(Client* cli)
                 if (cli->getServer().locations[_blockIdx].directory_listing == false)
                 {
                     cli->_response.setStatus(403);
-                    return(EXIT_FAILURE);
+                    throw(403);
                 }
                 //ON :
                 else
@@ -108,7 +107,7 @@ bool RequestHandler::check_requested_method(Client* cli)
                     cli->_response.setHeader("Content-Type", "text/html");
                     cli->_response.setHeader("Content-Length", htmlFile.length());
                     cli->_response.setBody(htmlFile);
-                    return(EXIT_SUCCESS);
+                    return;
                 }
             }
         }
@@ -123,16 +122,13 @@ bool RequestHandler::check_requested_method(Client* cli)
             if (access(_path.c_str(), R_OK) != 0)
             {
                 cli->_response.setStatus(403);
-                return(EXIT_FAILURE);
+                throw(403);
             }
             std::string StaticFile = getFileContent();
             cli->_response.setHeader("Content-Type", getMimeType());
             cli->_response.setHeader("Content-Length", StaticFile.length());
             cli->_response.setBody(StaticFile);
-
         }
-        return (EXIT_SUCCESS);
-
     }
     else if (cli->_request.getMethod() == "POST")
     {
@@ -141,7 +137,7 @@ bool RequestHandler::check_requested_method(Client* cli)
     else if (cli->_request.getMethod() == "DELETE") {
     
     }
-    return (EXIT_SUCCESS);
+    return;
 }
 
 
@@ -155,10 +151,10 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
             _path = _path + cli->getServer()._indexFiles[i];
-            return (EXIT_SUCCESS);
+            return (true);
         }
     }
-    return (EXIT_FAILURE);
+    return (false);
 }
 
 bool RequestHandler::if_location_has_cgi(Client* cli)
@@ -168,9 +164,8 @@ bool RequestHandler::if_location_has_cgi(Client* cli)
 
 
 ////////////////getters/////////////////
-bool RequestHandler::get_requested_ressource(Client* cli)
+void RequestHandler::get_requested_ressource(Client* cli)
 {
-    
     struct stat fileInfo;
 
     std::string url = cli->_request.getURL();
@@ -179,61 +174,59 @@ bool RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-    std::string absolut_path = cli->getServer().roots[0] + _path;
-        std::cout << "ABS "<< absolut_path << std::endl;
-    if (stat(absolut_path.c_str(), &fileInfo) != 0)
+    std::cout << _path << std::endl;
+
+    _path = cli->getServer().roots[0] + _path;
+    if (stat(_path.c_str(), &fileInfo) != 0)
     {
         cli->_response.setStatus(404);
-        return (EXIT_FAILURE);
+        throw(404);
     }
-
-
 /*************** TEST *********/
     /*********** OPEN && READ ***********/
-   int fd = open(absolut_path.c_str(), O_RDONLY);
-if (fd == -1) {
-    perror("open");
-    cli->_response.setStatus(500); // Internal Server Error
-    return EXIT_FAILURE;
-}
+//    int fd = open(absolut_path.c_str(), O_RDONLY);
+// if (fd == -1) {
+//     perror("open");
+//     cli->_response.setStatus(500); // Internal Server Error
+//     return EXIT_FAILURE;
+// }
 
-char str[fileInfo.st_size];
-int n = read(fd, str, fileInfo.st_size);
-if (n == -1) {
-    perror("read");
-    close(fd);
-    cli->_response.setStatus(500); // Internal Server Error
-    return EXIT_FAILURE;
-}
-close(fd);
-str[n] = '\0';
-    /*********** OPEN && READ ***********/      
-    std::string response= "HTTP/1.1 200 OK\r\n"
-                     "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                     "Server: Apache/2.4.41 (Ubuntu)\r\n";
-    response += "Accept";
-    response += ": ";
-    response += cli->_request.getHeader("Accept")->second;
-    response += "\r\n\r\n";
-    response += str;
-    /***************** WRITE IN NEW SOCKET****************/
-    size_t response_length = response.size();
-    ssize_t bytes_written = 1;
-        bytes_written = write(cli->socket, response.data(), response_length);
+// char str[fileInfo.st_size];
+// int n = read(fd, str, fileInfo.st_size);
+// if (n == -1) {
+//     perror("read");
+//     close(fd);
+//     cli->_response.setStatus(500); // Internal Server Error
+//     return EXIT_FAILURE;
+// }
+// close(fd);
+// str[n] = '\0';
+//     /*********** OPEN && READ ***********/      
+//     std::string response= "HTTP/1.1 200 OK\r\n"
+//                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
+//                      "Server: Apache/2.4.41 (Ubuntu)\r\n";
+//     response += "Accept";
+//     response += ": ";
+//     response += cli->_request.getHeader("Accept")->second;
+//     response += "\r\n\r\n";
+//     response += str;
+//     /***************** WRITE IN NEW SOCKET****************/
+//     size_t response_length = response.size();
+//     ssize_t bytes_written = 1;
+//         bytes_written = write(cli->socket, response.data(), response_length);
 
-    if (bytes_written == -1) 
-    {
-        perror("write");
-        cli->_response.setStatus(500); // Internal Server Error
-        return EXIT_FAILURE;
-    }
+//     if (bytes_written == -1) 
+//     {
+//         perror("write");
+//         cli->_response.setStatus(500); // Internal Server Error
+//         return EXIT_FAILURE;
+//     }
 /***************** WRITE IN NEW SOCKET****************/
     // int nbyte = send(cli->socket, response.c_str(), strlen(response.c_str()), 0);
     // std::cout << "hello1" << fileInfo.st_size << std::endl;
 
 /*************** TEST *********/
 
-    return (EXIT_SUCCESS);
 }
 
 const std::string RequestHandler::get_ressource_type(Client* cli)
@@ -288,7 +281,7 @@ const std::string RequestHandler::getMimeType()
     MimeTypes[".txt"] = "text/plain";
 
     std::string::size_type idx = _path.rfind('.');
-    if (idx != std::string::npos) 
+    if (idx != std::string::npos)
     {
         std::string extension = _path.substr(idx);
         std::map<std::string, std::string>::iterator it = MimeTypes.find(extension);
@@ -362,7 +355,7 @@ const std::string RequestHandler::getDirListing()
 
 void RequestHandler::setStatusMessage(Client* cli)
 {
-    switch(cli->_response.getStatus()) 
+    switch(cli->_response.getStatus())
     {
         case 501:
             cli->_response.setStatusMsg("Not Implemented");

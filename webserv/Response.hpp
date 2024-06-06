@@ -1,10 +1,11 @@
 #pragma once
 
-# include <iostream>
 # include <map>
 
 #include <sstream>
 #include <string>
+
+typedef std::map<std::string, std::string>::iterator it_Header;
 class Response {
 public:
     Response();
@@ -20,9 +21,11 @@ public:
     void setStatusMsg(const std::string &Msg);
     void setBody(const std::string& body);
     int getStatus() const;
+    std::string getStatusMsg() const;
     std::string getBody() const;
-    std::string generateResponseString() const;
-    // std::string toString() const; // Convert the response to a string for sending.
+    it_Header getHeader(const std::string& key);
+    void generateResponseString();
+    void Send(int cli_fd);
 private:
     int _status;
     std::string _Msg;

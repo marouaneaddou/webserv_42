@@ -1,6 +1,4 @@
 #include "Request.hpp"
-#include <cstdlib>
-#include <string>
 
 
 Request::Request()
@@ -212,7 +210,7 @@ void    Request::parceBody()
 {
     if (_headers.find("Transfer-Encoding") != _headers.end())
         remeveHexaDecimalInBody();
-        std::cout << _headers["type"] << std::endl;
+    std::cout << _headers["type"] << std::endl;
     if (_headers["type"] == "form-data")
     {
         removeBoundaryInFrontLastBody();

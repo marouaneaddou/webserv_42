@@ -1,28 +1,40 @@
 
 #include "Response.hpp"
 #include <string>
+#include <sys/socket.h>
 
 Response::Response()
 {
-    int status = 200;
-    setStatus(status);
+    setStatus(200);
 }
 
 Response::~Response()
 {
     
 }
-
+it_Header Response::getHeader(const std::string& key) 
+{
+        return _headers.find(key);
+}
     /*************** Status ************/
 
 void Response::setStatus(const int &status)
 {
     _status = status;
 }
+void Response::setStatusMsg(const std::string& msg)
+{
+    this->_Msg = msg;
+}
 
 int Response::getStatus() const
 {
     return _status;
+}
+
+std::string Response::getStatusMsg() const
+{
+    return _Msg;
 }
     /*************** Status ************/
 
@@ -38,13 +50,27 @@ std::string Response::getBody() const
     return _body;
 }
 
+
     /*************** Body ************/
-std::string Response::generateResponseString() const 
+
+#include <iostream>
+void Response::generateResponseString() 
 {
-    return (_Response);
+    _Response = "HTTP/1.1 " + std::to_string(getStatus()) + ' ' + getStatusMsg() + "\r\n";
+    std::map<std::string, std::string>::iterator it =  _headers.begin();
+    while (it != _headers.end()) 
+    {
+        _Response += it->first + ": " + it->second;
+        if (++it != _headers.end())
+            _Response += "\n";
+    }
+    _Response += "\r\n";
+    _Response += getBody();
 }
 
-void Response::setStatusMsg(const std::string& msg)
+
+void Response::Send(int cli_fd)
 {
-    this->_Msg = msg;
+    generateResponseString();
+    int nbyte = send(cli_fd, _Response.c_str(), strlen(_Response.c_str()), 0);
 }

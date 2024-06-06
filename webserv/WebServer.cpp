@@ -94,14 +94,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
-                // char httpResponse[] = "HTTP/1.1 200 OK\r\n"
-                //      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-                //      "Server: Apache/2.4.41 (Ubuntu)\r\n"
-                //      "Content-Type: text/plain; charset=UTF-8\r\n"
-                //      "Content-Length: 13\r\n"
-                //      "\r\n"
-                //      "Hello, World!";
-                // int nbyte = send(idx, httpResponse, strlen(httpResponse), 0);
+                _clients.at(idx)->_response.Send(idx);
                 FD_CLR(idx, &current_Wsockets);
                 close(idx);
                 itClient it = _clients.find(idx);

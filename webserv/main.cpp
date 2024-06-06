@@ -11,9 +11,10 @@ void fill_Conf(std::vector<Servers> &Confs)
     Locations second;
 
     first.setPath("/");
-    second.setPath("/index.html");
-    first.setReturn("/first");
-    second.setReturn("/second");
+    // second.setPath("/index.html");
+    first.methods.push_back("GET");
+    // first.setReturn("/first");
+    // second.setReturn("/second");
     one.roots.push_back("/Users/mel-gand/Desktop/1337/test/webserv/test");
     one.ports.clear();
     one.ports.push_back(2225);
@@ -24,13 +25,13 @@ void fill_Conf(std::vector<Servers> &Confs)
     one.locations.push_back(second);
     Confs.push_back(one);
 
-    two.ports.clear();
-    two.roots.push_back("/Users/mel-gand/Desktop/1337/test/webserv");
-    two.ports.push_back(7777);
-    two.ports.push_back(3052);
-    two.ports.push_back(4242);
-    two.host = "localhost";
-    Confs.push_back(two);
+    // two.ports.clear();
+    // two.roots.push_back("/Users/mel-gand/Desktop/1337/test/webserv");
+    // two.ports.push_back(7777);
+    // two.ports.push_back(3052);
+    // two.ports.push_back(4242);
+    // two.host = "localhost";
+    // Confs.push_back(two);
 }
 
 int main(int argc, char **argv)
