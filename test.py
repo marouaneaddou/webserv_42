@@ -1,5 +1,6 @@
 import sqlite3
 from getpass import getpass
+import sys
 
 def add_user(conn, user):
     sql = '''INSERT INTO USERS(username, password, email, phone)
@@ -45,14 +46,17 @@ def authenticate_user(conn, username, password):
 if __name__ == '__main__':
     create_sqlite_database("users.db")
     
-    print("[1] LOGIN")
-    print("[2] REGISTER")
-    response = input(">> ")
-
+    # print("[1] LOGIN")
+    # print("[2] REGISTER")
+    # response = input(">> ")
+    response = sys.argv[1]
     if(response == "1"):
         print("Please enter your information")
-        username = input("[Username]> ")
-        password = getpass("[Password]🔒 ")
+        # username = input("[Username]> ")
+        # password = getpass("[Password]🔒 ")
+        username = sys.argv[2]
+        password = sys.argv[3]
+        print(f"{response}, {username}, {password}")
     
     else:
         print("Please enter your information")
@@ -78,7 +82,7 @@ if __name__ == '__main__':
             if authenticate_user(conn, username, password):
                 print("[V]Logged in")
             else:
-                print("[X]Logged in")
+                print("[X]Error")
         elif response == "2":
             user_id = add_user(conn, project)
             print(f'Created a user with the id {user_id}')

@@ -1,35 +1,46 @@
 #include <iostream>
+#include <vector>
+#include <map>
+#include <unistd.h>
+#include <sys/wait.h>
 
-
-
-int main()
+int main(int ac, char **av, char **env)
 {
-	std::cout << "Hello\n";
+    std::string form_type;
+    std::vector<std::string> pure_data;
+    pure_data.push_back("eyubech");
+
+    form_type = "login";
+
+    pure_data.push_back("eyubech");
+    pure_data.push_back("test");
+
+    std::string user = "eyubech";
+    std::string pass = "test";
+
+    const char *username = user.c_str();
+    const char *password = pass.c_str();
+
+    char *const command[] = {"/usr/local/bin/python3", "test.py", "1", (char *const)username, 
+        (char *const)password, NULL};
+    pid_t pid = fork();
+
+    if (pid == 0) 
+    {
+        execve("/usr/local/bin/python3", command, env);
+        perror("execve failed");
+        return 1;
+    } 
+    else 
+    {
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+            std::cout << "Child process exited with status " << WEXITSTATUS(status) << std::endl;
+        } else {
+            std::cout << "Child process did not terminate normally" << std::endl;
+        }
+    }
+
+    return 0;
 }
-
-
-
-// def add_user(conn, project):
-//     sql = ''' INSERT INTO USERS(username,password,email,phone)
-//               VALUES(?,?,?,?) '''
-//     cur = conn.cursor()
-//     cur.execute(sql, project)
-//     conn.commit()
-//     return cur.lastrowid
-
-// def create_sqlite_database(filename):
-//     conn = None
-//     try:
-//         conn = sqlite3.connect(filename)
-//         curs = conn.cursor()
-//         users = """ CREATE TABLE IF NOT EXISTS USERS (
-//             username VARCHAR(255) NOT NULL,
-//             password CHAR(25) NOT NULL,
-//             email CHAR(50) NOT NULL,
-//             phone CHAR(15)
-//         ); """
-//         curs.execute(users)
-//         # project = (username, password, email, phone)
-//         # user_id = add_user(conn, project)
-//         # print(f'Created a user with the id {user_id}')
-
