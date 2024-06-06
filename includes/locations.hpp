@@ -6,7 +6,7 @@
 /*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:18 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/06/04 17:09:45 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/06/06 08:13:13 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,12 @@ class Locations
                 std::string _path;
                 std::string _return;
                 std::string default_file;
-                std::vector<std::string> methods;
                 std::string directory;
                 std::string cgi_bin;
                 std::string cgi_extension;
 
         public:
+                std::vector<std::string> methods;
             Locations();
             ~Locations();
             bool directory_listing;

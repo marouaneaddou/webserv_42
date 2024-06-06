@@ -89,6 +89,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
+
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);

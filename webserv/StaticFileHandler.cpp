@@ -18,6 +18,6 @@ void StaticFileHandler::handleRequest(Client* cli)
     } 
     catch (...)
     {
-        setStatusMessage(cli);
     }
+    setStatusMessage(cli);
 }

@@ -53,19 +53,20 @@ std::string Response::getBody() const
 
     /*************** Body ************/
 
-#include <iostream>
 void Response::generateResponseString() 
 {
+
     _Response = "HTTP/1.1 " + std::to_string(getStatus()) + ' ' + getStatusMsg() + "\r\n";
     std::map<std::string, std::string>::iterator it =  _headers.begin();
-    while (it != _headers.end()) 
+    while (it != _headers.end())
     {
         _Response += it->first + ": " + it->second;
         if (++it != _headers.end())
             _Response += "\n";
     }
-    _Response += "\r\n";
+    _Response += "\r\n\r\n";
     _Response += getBody();
+    std::cout << "response : " << _Response << std::endl;
 }
 
 

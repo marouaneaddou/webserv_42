@@ -20,7 +20,6 @@ void RequestHandler::req_uri_location(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-
     //Exact Match
     for (int i = 0; i < cli->getServer().locations.size(); i++)
     {
@@ -174,9 +173,8 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-    std::cout << _path << std::endl;
-
     _path = cli->getServer().roots[0] + _path;
+    std::cout << _path <<std::endl;
     if (stat(_path.c_str(), &fileInfo) != 0)
     {
         cli->_response.setStatus(404);
@@ -314,9 +312,19 @@ const std::string RequestHandler::getDirListing()
     DIR* dir = opendir(_path.c_str());
 
     struct dirent* entry;
+    std::string filePath;
+    std::vector<std::string> curr;
+
+        curr.push_back(".");
+        curr.push_back("..");
+
     while ((entry = readdir(dir)) != NULL)
     {
-        std::string filePath = _path + "/" + entry->d_name;
+        if (entry->d_name == curr[0] || entry->d_name == curr[1])  
+            continue;
+
+        filePath = _path + "/" + entry->d_name;
+            std::cout << entry->d_name << std::endl;;
         struct stat fileStat;
 
         stat(filePath.c_str(), &fileStat);
@@ -355,6 +363,7 @@ const std::string RequestHandler::getDirListing()
 
 void RequestHandler::setStatusMessage(Client* cli)
 {
+    std::cout << cli->_response.getStatus() << std::endl;
     switch(cli->_response.getStatus())
     {
         case 501:
@@ -391,8 +400,10 @@ void RequestHandler::setStatusMessage(Client* cli)
         break;
         case 201:
             cli->_response.setStatusMsg("Created");
-        default:
+        break;
+        case 200:
             cli->_response.setStatusMsg("OK");
+        break;
     }
 }
 
