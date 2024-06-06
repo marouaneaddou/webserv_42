@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 14:39:01 by aech-che          #+#    #+#             */
-/*   Updated: 2024/05/20 20:49:08 by maddou           ###   ########.fr       */
+/*   Updated: 2024/06/07 00:14:51 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,19 +26,42 @@ Utils::Utils()
 Utils::~Utils(){
 }
 
+std::string Utils::strtrim(std::string s)
+{
 
+	int begin = -1;
+	int end = -1;
+    std::string trimmed = "";
+    
 
+    if(s.length()  == 0)
+        return(trimmed);    
+    if (s.find(" ") == std::string::npos 
+        && s.find("\t") == std::string::npos)
+        return(s);
+	for (size_t i = 0; i < s.length(); i += 1)
+	{
+		if ((s[i] != ' ' && s[i] != '\t') && begin != -1)
+			end = i;
+		else if (s[i] != ' ' && s[i] != '\t')
+			begin = i;
+		
+	}
+    trimmed = s.substr(begin, end - 1);
+	return(trimmed);
+}
 
 
 // void Utils::count_servers(std::ifstream &infile)
 // {
 //     std::string buff;
-//     while ( infile )
+//     while (infile)
 //     {
 //         std::getline(infile, buff);
 //         if (buff == "server:")
 //             __NUMBER_OF_SERVERS__ += 1;
 //     }
+//     infile.close();
 // }
 
 

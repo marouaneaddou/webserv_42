@@ -25,7 +25,7 @@ class Utils
                 ~Utils();
                 static std::vector<std::string> split(std::string s, std::string c);
                 static void count_servers(std::ifstream &infile);
-
+                static std::string strtrim(std::string s);
 
 
 };

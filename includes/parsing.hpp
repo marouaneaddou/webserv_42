@@ -26,7 +26,7 @@ class Parsing
     public:
         Parsing();
         ~Parsing();
-        static int parse_file(std::ifstream &infile, std::vector<std::string> &data);
+        static int parse_file(char *filename, std::vector<std::string> &data);
 
 
 
