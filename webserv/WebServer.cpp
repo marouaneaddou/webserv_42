@@ -61,7 +61,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                             _clients[idx]->_request.setBody(_buffer);
 
                             _clients[idx]->_request.parceBody();
-                            _clients[idx]->_request.printRequest();
+                            // _clients[idx]->_request.printRequest();
 
                                 /*************** Function Run Cgi Login && Register *****************/
 
@@ -85,12 +85,16 @@ void WebServ::run_servers(std::vector<Servers> Confs)
 
                             _clients[idx]->_request.parceBody();
 
-                            _clients[idx]->_request.printRequest();
+                            // _clients[idx]->_request.printRequest();
 
                                 /*************** Function Run Cgi Login && Register *****************/
 
                                 // Cgi cgi(_clients[idx]->_request);
                                 // _clients[idx]->runCgiLoginRegister(cgi);
+                                std::cout << "**************\n";
+                                _clients[idx]->_request.printVectOfString();
+                                std::cout << "**************\n";
+
 
                                 /*************** Function Run Cgi Login && Register *****************/
                                 

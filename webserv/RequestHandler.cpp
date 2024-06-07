@@ -278,7 +278,7 @@ const std::string RequestHandler::getMimeType()
     MimeTypes[".png"] = "image/png";
     MimeTypes[".gif"] = "image/gif";
     MimeTypes[".txt"] = "text/plain";
-
+    MimeTypes[".css"] = "text/css";
     std::string::size_type idx = _path.rfind('.');
     if (idx != std::string::npos)
     {

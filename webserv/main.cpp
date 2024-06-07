@@ -18,7 +18,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     // first.setMethod("POST");
     first.methods.push_back("GET");
     first.methods.push_back("POST");
-    one.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv/test");
+    one.roots.push_back("/Users/aech-che/Desktop/webserv_dyal_cgi/webserv/test");
     one.ports.clear();
     one.ports.push_back(2225);
     one.ports.push_back(2223);
@@ -30,7 +30,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     // one.locations.second
 
     two.ports.clear();
-    two.roots.push_back("/Users/maddou/Desktop/1337/test/webserv/test");
+    two.roots.push_back("/Users/aech-che/Desktop/webserv_dyal_cgi/webserv/test");
     two.ports.push_back(7777);
     two.ports.push_back(3052);
     two.ports.push_back(4242);
