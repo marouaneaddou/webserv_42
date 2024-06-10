@@ -14,10 +14,13 @@ void PhpCgiHandler::handleRequest(Client* cli)
         req_uri_location(cli);
         is_location_have_redirection(cli);
         is_method_allowed_in_location(cli);
+        std::cout << "hnaya" << std::endl;
         check_requested_method(cli);
     } 
     catch (...)
     {
-        setStatusMessage(cli);
+        // setStatusMessage(cli);
     }
+    setStatusMessage(cli);
+
 }

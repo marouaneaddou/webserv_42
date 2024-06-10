@@ -26,6 +26,7 @@ class Locations
                 std::string directory;
                 std::string cgi_bin;
                 std::string cgi_extension;
+                bool    cgiSupport;
 
         public:
                 std::vector<std::string> methods;
@@ -36,6 +37,8 @@ class Locations
             std::string getReturn() const;
             void setReturn(std::string ret);
             void setPath(std::string path);
+            void setCgiSupport(bool u);
+            bool getCgiSupport() const ;
             std::vector<std::string> getAcceptedMethod() const;
 
 };

@@ -10,7 +10,6 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-
 class RequestHandler {
 public:
     RequestHandler();
@@ -38,7 +37,7 @@ protected:
 
     ////POST///////
     // bool if_location_support_upload(Client* cli);
-
+    // bool ifLocationSupportCgi(Location &location) const;
 
     //  other checking methods ...
 };

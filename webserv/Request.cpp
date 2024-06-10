@@ -103,7 +103,7 @@ std::vector<std::string> Request::getPureBody() const
 void Request::findTypeOfPostMethod()
 {
     itHeaders it = _headers.find("Content-Type");
-    printHeaders();
+    // printHeaders();
     if (it != _headers.end())
     {
         std::cout << "here 1" << std::endl;
@@ -183,7 +183,7 @@ void    Request::removeBoundary()
 
 void Request::removeNewLineInLastEachBody()
 {
-    printVectOfString();
+    // printVectOfString();
     std::cout << "last last last\n";
     int j;
     for (int i = 0; i < _pureBody.size(); i++)
@@ -192,7 +192,7 @@ void Request::removeNewLineInLastEachBody()
         for (; j >= 0 && (_pureBody[i][j] == '\r' || _pureBody[i][j] == '\n'); j--)
         _pureBody[i].erase(j);
     }
-    printVectOfString();
+    // printVectOfString();
 }
 
 
@@ -206,6 +206,23 @@ void    Request::removeBoundaryInFrontLastBody()
         _headers["typeMethodPost"] = _body.substr(0, _body.find("\r\n"));  
 }
 
+void    Request::checkUpload()
+{
+    std::string informationFile;
+    std::string headerBody;
+    for (int i  = 0; i < _pureBody.size(); i++)
+    {
+        informationFile = _pureBody[i].substr(0, _pureBody[i].find("\r\n\r\n"));
+        if(informationFile.find("filename")  != -1)
+        {
+            int find = informationFile.find("\r\n");
+            informationFile[find] = ';';
+            informationFile[find + 1] = ' ';
+        }
+        std::cout << informationFile << std::endl;
+    }
+}
+
 void    Request::parceBody()
 {
     if (_headers.find("Transfer-Encoding") != _headers.end())
@@ -215,7 +232,8 @@ void    Request::parceBody()
     {
         removeBoundaryInFrontLastBody();
         _pureBody =  Utils::split(_body, _headers["typeMethodPost"]);
-        std::cout << "hna " << std::endl;
+        checkUpload();
+        // std::cout << "hna " << std::endl;
         removeBoundary();
     }
     else if (_headers["type"] == "form")
@@ -245,3 +263,18 @@ void    Request::remeveHexaDecimalInBody()
             break;
     }
 }
+
+
+
+/*************************************************/
+
+int Request::getSizeOfBodyPure() const
+{
+    return _pureBody.size();
+}
+
+std::string Request::getElementBodyPure(int i) const
+{
+    return _pureBody[i];
+}
+/*************************************************/

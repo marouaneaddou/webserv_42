@@ -42,6 +42,7 @@ class Request
             void setBody(std::string &buffer);
             std::string getBody() const;
             void parceBody();
+            void checkUpload();
 
         /********** POST ******/
 
@@ -62,6 +63,9 @@ class Request
         void removeBoundary();
         void splitBody();
         void removeNewLineInLastEachBody();
+
+        int getSizeOfBodyPure() const;
+        std::string getElementBodyPure(int i) const;
 
     private:
         std::string _header;

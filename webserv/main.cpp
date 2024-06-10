@@ -11,19 +11,29 @@ void fill_Conf(std::vector<Servers> &Confs)
     Locations second;
 
     first.setPath("/");
-    // second.setPath("/indexAut.html");
+    second.setPath("/python.py");
+
     // first.setReturn("/first");
     // second.setReturn("/second");
     // first.setMethod("GET");
     // first.setMethod("POST");
+
     first.methods.push_back("GET");
     first.methods.push_back("POST");
-    one.roots.push_back("/Users/aech-che/Desktop/webserv_dyal_cgi/webserv/test");
+    first.setCgiSupport(1);
+
+    second.methods.push_back("GET");
+    second.methods.push_back("POST");
+
+    one.roots.push_back("/Users/maddou/Desktop/server/webserv_42/webserv/test");
     one.ports.clear();
+
     one.ports.push_back(2225);
     one.ports.push_back(2223);
     one.ports.push_back(4040);
+    
     one.host = "localhost";
+
     one.locations.push_back(first);
     one.locations.push_back(second);
     Confs.push_back(one);

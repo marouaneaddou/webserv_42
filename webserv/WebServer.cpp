@@ -84,16 +84,16 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                             _clients[idx]->_request.setBody(_buffer);
 
                             _clients[idx]->_request.parceBody();
-
-                            // _clients[idx]->_request.printRequest();
+                            // std::cout << "POST\n";
+                            _clients[idx]->_request.printRequest();
 
                                 /*************** Function Run Cgi Login && Register *****************/
 
                                 // Cgi cgi(_clients[idx]->_request);
                                 // _clients[idx]->runCgiLoginRegister(cgi);
-                                std::cout << "**************\n";
-                                _clients[idx]->_request.printVectOfString();
-                                std::cout << "**************\n";
+                                // std::cout << "**************\n";
+                                // _clients[idx]->_request.printVectOfString();
+                                // std::cout << "**************\n";
 
 
                                 /*************** Function Run Cgi Login && Register *****************/
@@ -108,7 +108,6 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             }
             else if (FD_ISSET(idx, &ready_Wsockets))
             {
-
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);
@@ -140,7 +139,7 @@ void WebServ::read_request(int fd_R)
     if (_nbytes < sizeof(_buf))
         _buf[_nbytes] = '\0';
     _buffer.append(_buf, _nbytes);
-
+    std::cout << "nbyte " << _nbytes << std::endl;
 }
 
 void WebServ::start_parsing(int fd_R)
@@ -156,10 +155,9 @@ void WebServ::start_parsing(int fd_R)
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
             _clients.at(fd_R)->_request.setHeader(_buffer);
-            _clients.at(fd_R)->_request.printRequest();
+            // _clients.at(fd_R)->_request.printRequest();
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             FD_CLR(fd_R, &current_Rsockets);
-            
             FD_SET(fd_R, &current_Wsockets);
             _buffer.clear();
         }
@@ -202,6 +200,7 @@ RequestHandler* WebServ::createHandler(Request &request)
 {
     if (isPHPCGIRequest(request.getURL()))
     {
+        std::cout << "hello world\n";
         return new PhpCgiHandler();
     }
     else

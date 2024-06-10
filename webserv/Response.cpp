@@ -22,6 +22,7 @@ void Response::setStatus(const int &status)
 {
     _status = status;
 }
+
 void Response::setStatusMsg(const std::string& msg)
 {
     this->_Msg = msg;
@@ -66,7 +67,7 @@ void Response::generateResponseString()
     }
     _Response += "\r\n\r\n";
     _Response += getBody();
-    std::cout << "response : " << _Response << std::endl;
+    // std::cout << "response : " << _Response << std::endl;
 }
 
 

@@ -1,0 +1,42 @@
+
+
+
+
+body {
+    font-family: sans-serif;
+    margin: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  label {
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+  
+  .file-chosen {
+    /* Optional styling for when a file is selected */
+    color: blue;
+  }
+  
+  input[type="submit"] {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  input[type="submit"]:hover {
+    background-color: #3e8e41;
+  }
+  
