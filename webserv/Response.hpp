@@ -26,7 +26,16 @@ public:
     it_Header getHeader(const std::string& key);
     void generateResponseString();
     void Send(int cli_fd);
+
+    /**************** Response *********** */
+    std::string getResponse() const 
+    {
+        return _Response;
+    }
+    /**************** Response *********** */
+
 private:
+    
     int _status;
     std::string _Msg;
     std::string _Response;

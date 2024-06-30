@@ -2,6 +2,7 @@
 #include "Response.hpp"
 #include <string>
 #include <sys/socket.h>
+#include <cstring>
 
 Response::Response()
 {
@@ -67,12 +68,18 @@ void Response::generateResponseString()
     }
     _Response += "\r\n\r\n";
     _Response += getBody();
-    // std::cout << "response : " << _Response << std::endl;
 }
 
 
 void Response::Send(int cli_fd)
 {
-    generateResponseString();
-    int nbyte = send(cli_fd, _Response.c_str(), strlen(_Response.c_str()), 0);
+    // generateResponseString();
+    std::cout << "size ->" << _Response.size() << std::endl;
+    // std::cout << _Response.c_str() << std::endl;
+    int nbyte = send(cli_fd, _Response.data(), 1000000, 0);
+    if (nbyte == -1)
+        std::cout << "ERROR SEND\n";
+    std::cout << "nbyte ->" << nbyte << std::endl;
+    _Response.erase(0, nbyte);
+    // std::cout << "hnaya hnaya hnaya hnaya hnaya \n";
 }

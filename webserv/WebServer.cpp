@@ -48,6 +48,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
                     printf("New connection accepted.\n");
+                    std::cout << "file" << idx << std::endl;
                 }
                 else
                 {
@@ -113,11 +114,20 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     RequestHandler* handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
-                _clients.at(idx)->_response.Send(idx);
-                FD_CLR(idx, &current_Wsockets);
-                close(idx);
-                itClient it = _clients.find(idx);
-                _clients.erase(it);
+                // in this condition start send data to socket file client 
+                if (_clients.at(idx)->isOpen() == false && _clients.at(idx)->getSizeFile() > 0)
+                {
+                    _clients.at(idx)->_response.Send(idx);
+                    _clients.at(idx)->setSizeFile(_clients.at(idx)->_response.getResponse().size());
+                }
+                else if (_clients.at(idx)->getSizeFile() == 0)
+                {
+                    std::cout << "EXIT EXIT\n";
+                    FD_CLR(idx, &current_Wsockets);
+                    close(idx);
+                    itClient it = _clients.find(idx);
+                    _clients.erase(it);
+                }
             }
         }
     }

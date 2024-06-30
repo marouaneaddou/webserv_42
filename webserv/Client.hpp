@@ -31,7 +31,28 @@ class Client
         Request _request;
         Response _response;
         int socket;
+
+        /********************** FILE DATA ******************* */
+
+            void setSizeFile(int size);
+            int getSizeFile() const;
+                        /************************* OPEN , READ DATA***************** */
+                        void openFile(std::string name); 
+                        /************************* OPEN , READ DATA***************** */
+                        std::string getData() const;
+                        void setData();
+                        
+                        bool isOpen() const;
+
+                        void closeFile();
+                        
+        /********************** FILE DATA ******************* */
+
+
     private:
+        std::ifstream fileData;
+        int sizeFile;
+        std::string dataFile;
         bool _check;
         Servers _server;
         struct sockaddr_in _sockaddr;

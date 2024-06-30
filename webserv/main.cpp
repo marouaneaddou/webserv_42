@@ -11,7 +11,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     Locations second;
 
     first.setPath("/");
-    second.setPath("/python.py");
+    // second.setPath("/python.py");
 
     // first.setReturn("/first");
     // second.setReturn("/second");
@@ -25,7 +25,8 @@ void fill_Conf(std::vector<Servers> &Confs)
     second.methods.push_back("GET");
     second.methods.push_back("POST");
 
-    one.roots.push_back("/Users/maddou/Desktop/server/webserv_42/webserv/test");
+    // one.roots.push_back("/Users/maddou/Desktop/server/webserv_42/webserv/test");
+    one.roots.push_back("/home/marouan/Desktop/1337/server/v1/webserv/test");
     one.ports.clear();
 
     one.ports.push_back(2225);
