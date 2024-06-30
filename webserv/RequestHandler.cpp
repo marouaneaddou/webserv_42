@@ -85,8 +85,7 @@ void RequestHandler::check_requested_method(Client* cli)
 
     if (cli->_request.getMethod() == "GET")
     {
-        if (cli->isOpen() == false && cli->getSizeFile() == -1)
-            get_requested_ressource(cli);
+        get_requested_ressource(cli);
         if (get_ressource_type(cli) == "DIR")
         {
             if (_path[_path.length() - 1] != '/')
