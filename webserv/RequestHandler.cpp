@@ -9,9 +9,7 @@
 #include <unistd.h>
 
 RequestHandler::RequestHandler()
-{
-
-}
+{}
 
 void RequestHandler::req_uri_location(Client* cli)
 {
@@ -22,7 +20,6 @@ void RequestHandler::req_uri_location(Client* cli)
     else
         _path = url;
     //Exact Match
-    std::cout << "hona hona hona aban3ami\n";
     for (int i = 0; i < cli->getServer().locations.size(); i++)
     {
         if (cli->getServer().locations[i].getPath()[0] == '=' && cli->getServer().locations[i].getPath().substr(2) == _path)
@@ -45,10 +42,10 @@ void RequestHandler::req_uri_location(Client* cli)
             }
         }
     }
-    std::cout << "path -->" << "'"<<longestMatch << "'"<<std::endl;
+    //std::cout << "path -->" << "'"<<longestMatch << "'"<<std::endl;
     if (!(longestMatch.empty()))
     {
-        std::cout << "LONGEST MATCH\n";
+        //std::cout << "LONGEST MATCH\n";
         return;
     }
     // cli->_response.setStatus(404); // default location is always there, we dont need this
@@ -85,34 +82,38 @@ void RequestHandler::check_requested_method(Client* cli)
 
     if (cli->_request.getMethod() == "GET")
     {
-        get_requested_ressource(cli);
-        if (get_ressource_type(cli) == "DIR")
+        if(cli->getOnetime() == false)
         {
-            if (_path[_path.length() - 1] != '/')
+            cli->setOnetime();
+            get_requested_ressource(cli);
+            if (get_ressource_type(cli) == "DIR")
             {
-                cli->_response.setHeader("Location", _path + '/');
-                cli->_response.setHeader("Content-Length", 0);
-                cli->_response.setStatus(301);
-                throw(301);
-            }
-            if (is_dir_has_index_files(cli) == false)
-            {
-                //check autoindex/directorylisting : ON/OFF
-
-                //OFF :
-                if (cli->getServer().locations[_blockIdx].directory_listing == false)
+                if (_path[_path.length() - 1] != '/')
                 {
-                    cli->_response.setStatus(403);
-                    throw(403);
+                    cli->_response.setHeader("Location", _path + '/');
+                    cli->_response.setHeader("Content-Length", 0);
+                    cli->_response.setStatus(301);
+                    throw(301);
                 }
-                //ON :
-                else
+                if (is_dir_has_index_files(cli) == false)
                 {
-                    std::string htmlFile = getDirListing();
-                    cli->_response.setHeader("Content-Type", "text/html");
-                    cli->_response.setHeader("Content-Length", htmlFile.length());
-                    cli->_response.setBody(htmlFile);
-                    return;
+                    //check autoindex/directorylisting : ON/OFF
+
+                    //OFF :
+                    if (cli->getServer().locations[_blockIdx].directory_listing == false)
+                    {
+                        cli->_response.setStatus(403);
+                        throw(403);
+                    }
+                    //ON :
+                    else
+                    {
+                        std::string htmlFile = getDirListing();
+                        cli->_response.setHeader("Content-Type", "text/html");
+                        cli->_response.setHeader("Content-Length", htmlFile.length());
+                        cli->_response.setBody(htmlFile);
+                        return;
+                    }
                 }
             }
         }
@@ -121,7 +122,7 @@ void RequestHandler::check_requested_method(Client* cli)
             //run cgi
             //code depend on cgi
             // cli->_response.setStatus(200); ?
-            fileData;
+            //fileData;
         int sizeFile;
         std::string dataFile;
         }
@@ -150,20 +151,19 @@ void RequestHandler::check_requested_method(Client* cli)
                 }
                 cli->openFile(_path.c_str());
             }
-            else if (cli->isOpen() == true && cli->getSizeFile() != 0)
+            if (cli->isOpen() == true && cli->getSizeFile() != 0)
                 cli->setData();
             if (cli->isOpen() == true && cli->getSizeFile() == 0)
             {
-
                 cli->closeFile();
                 cli->setSizeFile(cli->getData().size());
-                std::cout << "start " <<std::endl << std::endl;
+                //std::cout << "start " <<std::endl << std::endl;
                 // std::cout << cli->getData() << std::endl;
-                std::cout << "end " <<std::endl << std::endl;
+                //std::cout << "end " <<std::endl << std::endl;
                 // std::ofstream end("data.jpg");
                 std::string StaticFile;// = getFileContent();
                 // StaticFile += cli->getData();
-                std::cout << "SGV" << std::endl;
+                //std::cout << "SGV" << std::endl;
                 cli->_response.setHeader("Content-Type", getMimeType());
                 cli->_response.setHeader("Content-Length", cli->getData().size()/*StaticFile.length()*/);
                 cli->_response.setBody(cli->getData()/*StaticFile*/);
@@ -255,7 +255,7 @@ void RequestHandler::get_requested_ressource(Client* cli)
     {
         cli->_response.setStatus(404);
         cli->setSizeFile(0);
-        std::cout << "here status" << cli->_response.getStatus() << std::endl;;
+        //std::cout << "here status" << cli->_response.getStatus() << std::endl;
         throw(404);
     }
 /*************** TEST *********/

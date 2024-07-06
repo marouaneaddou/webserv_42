@@ -15,6 +15,7 @@ class Client
         Client(int &new_socket);
         ~Client();
         void setCheck();
+        void setOnetime();
         void setConf(Servers &server);
 
         /********************************* CGI ****************************************/
@@ -24,6 +25,7 @@ class Client
         /********************************* CGI ****************************************/
         
         bool getCheck() const;
+        bool getOnetime() const;
         Response& getResponse();
         Servers getServer();
         // Client(int new_socket, struct sockaddr_in new_addr);
@@ -50,6 +52,7 @@ class Client
 
 
     private:
+        bool onetime;
         std::ifstream fileData;
         int sizeFile;
         std::string dataFile;

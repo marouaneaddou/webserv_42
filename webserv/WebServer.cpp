@@ -41,14 +41,14 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
                         perror("Server failed to accept incoming connection");
                     set_non_blocking(new_socket);
-                    std::cout << new_socket << std::endl;
+                    std::cout << "clientFD: "<< new_socket << std::endl;
                     _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
                     Servers server = getConf(*it, Confs);
                     _clients[new_socket]->setConf(server);
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
                     printf("New connection accepted.\n");
-                    std::cout << "file" << idx << std::endl;
+                    std::cout << "ok\n";
                 }
                 else
                 {
@@ -71,7 +71,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
 
                                 /*************** Function Run Cgi Login && Register *****************/
 
-                            std::cout << "here" << std::endl;
+                            //std::cout << "here" << std::endl;
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -122,7 +122,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                 }
                 else if (_clients.at(idx)->getSizeFile() == 0)
                 {
-                    std::cout << "EXIT EXIT\n";
+                    //std::cout << "EXIT EXIT\n";
                     FD_CLR(idx, &current_Wsockets);
                     close(idx);
                     itClient it = _clients.find(idx);

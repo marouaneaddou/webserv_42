@@ -8,6 +8,7 @@
 
 Client::Client(int &new_socket /*class config*/)
 {
+    onetime = false;
     socket = new_socket;
     _check = false;
     sizeFile = -1;
@@ -20,11 +21,18 @@ Client::~Client(){
     // delete _response;
 }
 
+void Client::setOnetime()
+{onetime = true;}
+
 void Client::setCheck()
 {
     _check = true;
 }
 
+
+bool Client::getOnetime() const{
+    return onetime;
+}
 bool Client::getCheck() const
 {
     return _check;

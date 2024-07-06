@@ -68,6 +68,15 @@
         "map": "cpp",
         "filesystem": "cpp",
         "list": "cpp",
-        "__memory": "cpp"
-    }
+        "__memory": "cpp",
+        "*.tcc": "cpp",
+        "clocale": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "numbers": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "enabled"
 }
