@@ -111,22 +111,25 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             {
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
-                    RequestHandler* handler = createHandler(_clients.at(idx)->_request);
+                    if (_clients.at(idx)->getOnetime() == false)
+                        handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
                 // in this condition start send data to socket file client 
-                if (_clients.at(idx)->isOpen() == false && _clients.at(idx)->getSizeFile() > 0)
+                if (_clients.at(idx)->getTypeData() == WRITEDATA)
                 {
                     _clients.at(idx)->_response.Send(idx);
-                    _clients.at(idx)->setSizeFile(_clients.at(idx)->_response.getResponse().size());
+                    if ( _clients.at(idx)->_response.getResponse().size() == 0)
+                        _clients.at(idx)->setTypeData(CLOSESOCKET);
+                    // _clients.at(idx)->setSizeFile(_clients.at(idx)->_response.getResponse().size());
                 }
-                else if (_clients.at(idx)->getSizeFile() == 0)
+                else if (_clients.at(idx)->getTypeData() == CLOSESOCKET)
                 {
-                    //std::cout << "EXIT EXIT\n";
                     FD_CLR(idx, &current_Wsockets);
                     close(idx);
                     itClient it = _clients.find(idx);
                     _clients.erase(it);
+                    
                 }
             }
         }

@@ -11,7 +11,8 @@ Client::Client(int &new_socket /*class config*/)
     onetime = false;
     socket = new_socket;
     _check = false;
-    sizeFile = -1;
+    sizeFile = 0;
+    readWriteSize = 0;
     // _request = new Request(/*class config*/);
     // _response = new Response(/*class config*/);
 };
@@ -96,22 +97,16 @@ void Client::openFile(std::string name)
 
 void Client::setData()
 {
-    if (fileData.is_open())
-    {
-        char buffer[1000000 + 1];
-        fileData.read(buffer, 1000000);
-        // std::cout << buffer << std::endl;
-        if (fileData.gcount() != 1000000)
-            buffer[fileData.gcount()] = '\0';
-        std::cout << "hnya\n"; 
-        std::cout << fileData.gcount() << std::endl;
-        sizeFile -= fileData.gcount();
-        std::cout << sizeFile << std::endl;
-        dataFile.append(buffer, fileData.gcount());// += buffer;
-        std::cout << "hnya\n"; 
-    }
-    else 
-        std::cout << "ERROR IN OPEN FILE" << std::endl;
+    char buffer[1000000 + 1];
+    fileData.read(buffer, 1000000);
+    if (fileData.gcount() != 1000000)
+        buffer[fileData.gcount()] = '\0';
+    readWriteSize += fileData.gcount();
+    // std::cout << 
+    std::cout << "read " <<fileData.gcount() << std::endl;
+
+    // _response.setAppendBody(buffer);
+    dataFile.append(buffer, fileData.gcount());
 }
 
 std::string Client::getData() const
@@ -129,3 +124,27 @@ void Client::closeFile()
     fileData.close();
 }
 /*************************** DATA FILE **************************** */
+
+
+
+
+void Client::setTypeData(int type)
+{
+    typeData = type;
+}
+
+int Client::getTypeData() const 
+{
+    return typeData;
+}
+
+
+void Client::setreadWriteSize(long long int type)
+{
+    readWriteSize = type;
+}
+
+long long int Client::getreadWriteSize() const 
+{
+    return readWriteSize;
+}

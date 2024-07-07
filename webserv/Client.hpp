@@ -7,8 +7,17 @@
 # include "Response.hpp"
 #include "../includes/servers.hpp"
 # include "cgi.hpp"
+
+/******** */
+
+# define READDATA 0
+# define WRITEDATA 1
+# define CLOSESOCKET 2
+
+/******** */
+
 class Request;
-// class Response;
+
 class Client
 {
     public:
@@ -50,16 +59,28 @@ class Client
                         
         /********************** FILE DATA ******************* */
 
+        void setTypeData(int type);
+        int getTypeData() const;
 
+        void setreadWriteSize(long long int size);
+        long long int getreadWriteSize() const;
     private:
         bool onetime;
+        long long int readWriteSize;
         std::ifstream fileData;
+
         int sizeFile;
+
         std::string dataFile;
+
         bool _check;
+
         Servers _server;
         struct sockaddr_in _sockaddr;
         std::string raw_request;
         std::string method;
+
+
+        int typeData;
 
 };

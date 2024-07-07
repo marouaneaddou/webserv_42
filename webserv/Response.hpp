@@ -20,11 +20,12 @@ public:
     void setStatus(const int &status);
     void setStatusMsg(const std::string &Msg);
     void setBody(const std::string& body);
+    void setAppendBody(const char *buffer);
     int getStatus() const;
     std::string getStatusMsg() const;
     std::string getBody() const;
     it_Header getHeader(const std::string& key);
-    void generateResponseString();
+    void generateHeaderResponse();
     void Send(int cli_fd);
 
     /**************** Response *********** */
