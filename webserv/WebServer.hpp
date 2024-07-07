@@ -30,6 +30,7 @@ class WebServ
         struct sockaddr_in _sockaddr;
         // std::map<int , int> check;
         // bool check;
+        RequestHandler* handler;
     public:
         WebServ();
         ~WebServ();

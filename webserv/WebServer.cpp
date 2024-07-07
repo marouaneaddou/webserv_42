@@ -111,7 +111,8 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             {
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
-                    RequestHandler* handler = createHandler(_clients.at(idx)->_request);
+                    if (_clients.at(idx)->getOnetime() == false)
+                        handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
                 }
                 // in this condition start send data to socket file client 
