@@ -84,8 +84,10 @@ void RequestHandler::check_requested_method(Client* cli)
     {
         if(cli->getOnetime() == false)
         {
+            std::cout << "here" << std::endl;
             cli->setOnetime();
             get_requested_ressource(cli);
+            
             if (get_ressource_type(cli) == "DIR")
             {
                 if (_path[_path.length() - 1] != '/')
@@ -112,37 +114,13 @@ void RequestHandler::check_requested_method(Client* cli)
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlFile.length());
                         cli->_response.setBody(htmlFile);
+                        cli->setTypeData(WRITEDATA);
+                        cli->_response.generateHeaderResponse();
                         return;
                     }
                 }
             }
-        }
-        if (if_location_has_cgi(cli))
-        {
-            //run cgi
-            //code depend on cgi
-            // cli->_response.setStatus(200); ?
-            //fileData;
-        int sizeFile;
-        std::string dataFile;
-        }
-        else
-        {
-                // add tree variables to class Client 
-                // (first , second) is fileData(in GET method create object with class ofstream to read data from file to my string(dataFile-> is second varible))
-                // and third variable is sizeFile store size  to file and size of strean when send data from string to socket file 
-            
-            
-            // first condition is check if file we need get is open or not and variable sizefile = -1 or 
-            // note(sizefile initiaze with value -1 when create object class Client)
-            // content -> CHECK ACCESS FILE AND OPEN FILE WE NEED TO SERVE
-
-            //second condition check if file is open and varible sizeFile != 0 . 
-            //if this condition is true read data from it's file to my string (dataFile)
-
-            // third condition if varible sizeFile == 0 this meansthat we have read all data 
-            // after that write data from string to socket (look WebServer.cpp )
-            if (cli->isOpen() == false && cli->getSizeFile() == -1) 
+            else 
             {
                 if (access(_path.c_str(), R_OK) != 0)
                 {
@@ -150,25 +128,33 @@ void RequestHandler::check_requested_method(Client* cli)
                     throw(403);
                 }
                 cli->openFile(_path.c_str());
+                cli->setTypeData(READDATA);
             }
-            if (cli->isOpen() == true && cli->getSizeFile() != 0)
-                cli->setData();
-            if (cli->isOpen() == true && cli->getSizeFile() == 0)
+        }
+        if (if_location_has_cgi(cli))
+        {
+            //run cgi
+            //code depend on cgi
+            // cli->_response.setStatus(200); ?
+        }
+        else
+        {
+            if (cli->getTypeData() == READDATA)
             {
-                cli->closeFile();
-                cli->setSizeFile(cli->getData().size());
-                //std::cout << "start " <<std::endl << std::endl;
-                // std::cout << cli->getData() << std::endl;
-                //std::cout << "end " <<std::endl << std::endl;
-                // std::ofstream end("data.jpg");
-                std::string StaticFile;// = getFileContent();
-                // StaticFile += cli->getData();
-                //std::cout << "SGV" << std::endl;
-                cli->_response.setHeader("Content-Type", getMimeType());
-                cli->_response.setHeader("Content-Length", cli->getData().size()/*StaticFile.length()*/);
-                cli->_response.setBody(cli->getData()/*StaticFile*/);
-                cli->_response.generateResponseString();
-
+                cli->setData();
+                std::cout << "sizefile " <<cli->getSizeFile() << std::endl;
+                    std::cout << "xxxxxxxxxxxxxxxxxx " <<_path << std::endl;
+                if (cli->getreadWriteSize() == cli->getSizeFile())
+                {
+                    cli->setTypeData(WRITEDATA);
+                    cli->setreadWriteSize(0);
+                    cli->_response.setHeader("Content-Type", getMimeType());
+                    // cli->_response.setHeader("Content-Length", cli->_response.getBody().size()/*StaticFile.length()*/);
+                    cli->_response.setHeader("Content-Length", cli->getData().size()/*StaticFile.length()*/);
+                    cli->closeFile();
+                    cli->_response.setBody(cli->getData()/*StaticFile*/);
+                    cli->_response.generateHeaderResponse();
+                }
             }
         }
     }
@@ -358,6 +344,7 @@ const std::string RequestHandler::getMimeType()
     MimeTypes[".gif"] = "image/gif";
     MimeTypes[".txt"] = "text/plain";
     MimeTypes[".css"] = "text/css";
+    std::cout << "PATH" << _path << std::endl;
     std::string::size_type idx = _path.rfind('.');
     if (idx != std::string::npos)
     {
@@ -405,7 +392,7 @@ const std::string RequestHandler::getDirListing()
             continue;
 
         filePath = _path + "/" + entry->d_name;
-            std::cout << entry->d_name << std::endl;;
+            // std::cout << entry->d_name << std::endl;;
         struct stat fileStat;
 
         stat(filePath.c_str(), &fileStat);
