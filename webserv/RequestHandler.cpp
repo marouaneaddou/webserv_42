@@ -174,7 +174,8 @@ void RequestHandler::check_requested_method(Client* cli)
     }
     else if (cli->_request.getMethod() == "POST")
     {
-        get_requested_ressource(cli);
+
+            get_requested_ressource(cli);
         // std::cout << "here status ok" << cli->_response.getStatus()  << " " << cli->getServer().locations[_blockIdx].getPath()<< std::endl;;
         if (get_ressource_type(cli) == "DIR")
         {
@@ -204,6 +205,31 @@ void RequestHandler::check_requested_method(Client* cli)
         }
     }
     else if (cli->_request.getMethod() == "DELETE") {
+        if(cli->getOnetime() == false)
+        {
+            cli->setOnetime();
+            get_requested_ressource(cli);
+            if (get_ressource_type(cli) == "DIR")
+            {
+                if (_path[_path.length() - 1] != '/')
+                {
+                    cli->_response.setStatus(409);
+                    throw(409);
+                }
+                if (if_location_has_cgi(cli))
+                {
+                    if (is_dir_has_index_files(cli) == false)
+                    {
+                        
+                    }
+                }
+                else
+                    //delete all
+                
+            }
+
+        }
+
     
     }
     return;
@@ -258,51 +284,6 @@ void RequestHandler::get_requested_ressource(Client* cli)
         //std::cout << "here status" << cli->_response.getStatus() << std::endl;
         throw(404);
     }
-/*************** TEST *********/
-    /*********** OPEN && READ ***********/
-//    int fd = open(absolut_path.c_str(), O_RDONLY);
-// if (fd == -1) {
-//     perror("open");
-//     cli->_response.setStatus(500); // Internal Server Error
-//     return EXIT_FAILURE;
-// }
-
-// char str[fileInfo.st_size];
-// int n = read(fd, str, fileInfo.st_size);
-// if (n == -1) {
-//     perror("read");
-//     close(fd);
-//     cli->_response.setStatus(500); // Internal Server Error
-//     return EXIT_FAILURE;
-// }
-// close(fd);
-// str[n] = '\0';
-//     /*********** OPEN && READ ***********/      
-//     std::string response= "HTTP/1.1 200 OK\r\n"
-//                      "Date: Mon, 20 May 2024 12:34:56 GMT\r\n"
-//                      "Server: Apache/2.4.41 (Ubuntu)\r\n";
-//     response += "Accept";
-//     response += ": ";
-//     response += cli->_request.getHeader("Accept")->second;
-//     response += "\r\n\r\n";
-//     response += str;
-//     /***************** WRITE IN NEW SOCKET****************/
-//     size_t response_length = response.size();
-//     ssize_t bytes_written = 1;
-//         bytes_written = write(cli->socket, response.data(), response_length);
-
-//     if (bytes_written == -1) 
-//     {
-//         perror("write");
-//         cli->_response.setStatus(500); // Internal Server Error
-//         return EXIT_FAILURE;
-//     }
-/***************** WRITE IN NEW SOCKET****************/
-    // int nbyte = send(cli->socket, response.c_str(), strlen(response.c_str()), 0);
-    // std::cout << "hello1" << fileInfo.st_size << std::endl;
-
-/*************** TEST *********/
-
 }
 
 const std::string RequestHandler::get_ressource_type(Client* cli)
