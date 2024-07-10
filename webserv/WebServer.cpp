@@ -48,7 +48,6 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     // clients_fds.push_back(new_socket);
                     FD_SET(new_socket, &current_Rsockets);
                     printf("New connection accepted.\n");
-                    std::cout << "ok\n";
                 }
                 else
                 {
@@ -129,7 +128,6 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     close(idx);
                     itClient it = _clients.find(idx);
                     _clients.erase(it);
-                    
                 }
             }
         }
@@ -142,7 +140,10 @@ void WebServ::read_request(int fd_R)
     {
         // got error or connection closed by client
         if (_nbytes == 0)
+        {
+            std::cout << std::strerror(errno) << std::endl;
             printf("selectserver: socket %d hung up\n", fd_R);
+        }
         else
             perror("read");
         close(fd_R);
@@ -152,7 +153,7 @@ void WebServ::read_request(int fd_R)
     if (_nbytes < sizeof(_buf))
         _buf[_nbytes] = '\0';
     _buffer.append(_buf, _nbytes);
-    std::cout << "nbyte " << _nbytes << std::endl;
+    //std::cout << "nbyte " << _nbytes << std::endl;
 }
 
 void WebServ::start_parsing(int fd_R)
@@ -213,7 +214,6 @@ RequestHandler* WebServ::createHandler(Request &request)
 {
     if (isPHPCGIRequest(request.getURL()))
     {
-        std::cout << "hello world\n";
         return new PhpCgiHandler();
     }
     else

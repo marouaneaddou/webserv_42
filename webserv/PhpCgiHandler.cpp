@@ -21,8 +21,9 @@ void PhpCgiHandler::handleRequest(Client* cli)
     } 
     catch (...)
     {
-        // setStatusMessage(cli);
     }
-    setStatusMessage(cli);
+        setStatusMessage(cli);
+        //cli->_response.generateHeaderResponse();
+        //cli->setTypeData(WRITEDATA);
 
 }

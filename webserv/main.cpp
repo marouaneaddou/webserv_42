@@ -25,8 +25,8 @@ void fill_Conf(std::vector<Servers> &Confs)
     second.methods.push_back("GET");
     second.methods.push_back("POST");
 
-    one.roots.push_back("/home/marouan/Desktop/pdf/webserv_42/webserv/test");
-    // one.roots.push_back("/home/mel-gand/webserv42/webserv/test");
+//one.roots.push_back("/home/marouan/Desktop/pdf/webserv_42/webserv/test");
+    one.roots.push_back("/home/mel-gand/webserv42/webserv/test");
     one.ports.clear();
 
     one.ports.push_back(2225);

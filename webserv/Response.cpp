@@ -3,7 +3,8 @@
 #include <string>
 #include <sys/socket.h>
 #include <cstring>
-
+#include <cerrno>
+#include <signal.h>
 Response::Response()
 {
     setStatus(200);
@@ -51,8 +52,8 @@ void Response::setAppendBody(const char *buffer)
 {
     _body.append(buffer);
     // std::cout << buffer << std::endl;
-    std::cout << "size" << _body.size() << std::endl;
-    std::cout << _body << std::endl;
+    //std::cout << "size" << _body.size() << std::endl;
+    //std::cout << _body << std::endl;
 }
 
 std::string Response::getBody() const
@@ -73,18 +74,15 @@ void Response::generateHeaderResponse()
         if (++it != _headers.end())
             _Response += "\n";
     }
-    _Response += "\r\n\r\n";
-    _Response += _body;
+        _Response += "\r\n\r\n";
+        _Response += _body;
     // _Response += dataFile;
 }
 
 
 void Response::Send(int cli_fd)
 {
-    std::cout << _Response.data() << std::endl;
+    signal(SIGPIPE, SIG_IGN);
     int nbyte = send(cli_fd, _Response.data(), 1000000, 0);
-    if (nbyte == -1)
-        std::cout << "ERROR SEND\n";
     _Response.erase(0, nbyte);
-    std::cout << "size " << _Response.size() << std::endl;
 }

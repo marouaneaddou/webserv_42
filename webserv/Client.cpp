@@ -103,7 +103,7 @@ void Client::setData()
         buffer[fileData.gcount()] = '\0';
     readWriteSize += fileData.gcount();
     // std::cout << 
-    std::cout << "read " <<fileData.gcount() << std::endl;
+    //std::cout << "read " <<fileData.gcount() << std::endl;
 
     // _response.setAppendBody(buffer);
     dataFile.append(buffer, fileData.gcount());

@@ -17,7 +17,7 @@ void Request::parse_request_line(std::string &_rawReq)
     std::vector<std::string> tokens = Utils::split(oneline, dele);
     _method = tokens[0];
     _URL = tokens[1];
-    std::cout << tokens.size() << std::endl;
+    //std::cout << tokens.size() << std::endl;
     _http_version = tokens[2];
 }
 
@@ -106,7 +106,7 @@ void Request::findTypeOfPostMethod()
     // printHeaders();
     if (it != _headers.end())
     {
-        std::cout << "here 1" << std::endl;
+        //std::cout << "here 1" << std::endl;
         if (it->second.find("boundary") != -1)
         {
             std::string type = it->second.substr(it->second.find("=") + 1);
@@ -184,7 +184,7 @@ void    Request::removeBoundary()
 void Request::removeNewLineInLastEachBody()
 {
     // printVectOfString();
-    std::cout << "last last last\n";
+    //std::cout << "last last last\n";
     int j;
     for (int i = 0; i < _pureBody.size(); i++)
     {
@@ -219,7 +219,7 @@ void    Request::checkUpload()
             informationFile[find] = ';';
             informationFile[find + 1] = ' ';
         }
-        std::cout << informationFile << std::endl;
+        //std::cout << informationFile << std::endl;
     }
 }
 

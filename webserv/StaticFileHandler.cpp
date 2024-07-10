@@ -9,7 +9,7 @@ StaticFileHandler::~StaticFileHandler()
 
 void StaticFileHandler::handleRequest(Client* cli)
 {
-    try 
+    try
     {
         if (cli->getOnetime() == false)
         {
@@ -18,9 +18,14 @@ void StaticFileHandler::handleRequest(Client* cli)
             is_method_allowed_in_location(cli);
         }
         check_requested_method(cli);
-    } 
+    }
     catch (...)
     {
     }
     setStatusMessage(cli);
+    if (cli->_response.getStatus() != 200)
+    {
+        cli->_response.generateHeaderResponse();
+        cli->setTypeData(WRITEDATA);
+    }
 }

@@ -28,7 +28,6 @@ void RequestHandler::req_uri_location(Client* cli)
             return;
         }
     }
-        
     //Prefix Match + default if no longer prefix found
     std::string longestMatch;
     for (int i = 0; i < cli->getServer().locations.size(); i++)
@@ -36,7 +35,7 @@ void RequestHandler::req_uri_location(Client* cli)
         if (cli->getServer().locations[i].getPath()[0] != '=' && _path.find(cli->getServer().locations[i].getPath()) == 0)
         {
             if (cli->getServer().locations[i].getPath().length() > longestMatch.length())
-            {    
+            {
                 longestMatch = cli->getServer().locations[i].getPath();
                 _blockIdx = i;
             }
@@ -84,10 +83,8 @@ void RequestHandler::check_requested_method(Client* cli)
     {
         if(cli->getOnetime() == false)
         {
-            std::cout << "here" << std::endl;
             cli->setOnetime();
             get_requested_ressource(cli);
-            
             if (get_ressource_type(cli) == "DIR")
             {
                 if (_path[_path.length() - 1] != '/')
@@ -122,12 +119,12 @@ void RequestHandler::check_requested_method(Client* cli)
             }
             else 
             {
-                if (access(_path.c_str(), R_OK) != 0)
+                if (access(abs_path.c_str(), R_OK) != 0)
                 {
                     cli->_response.setStatus(403);
                     throw(403);
                 }
-                cli->openFile(_path.c_str());
+                cli->openFile(abs_path.c_str());
                 cli->setTypeData(READDATA);
             }
         }
@@ -142,8 +139,8 @@ void RequestHandler::check_requested_method(Client* cli)
             if (cli->getTypeData() == READDATA)
             {
                 cli->setData();
-                std::cout << "sizefile " <<cli->getSizeFile() << std::endl;
-                    std::cout << "xxxxxxxxxxxxxxxxxx " <<_path << std::endl;
+                //std::cout << "sizefile " <<cli->getSizeFile() << std::endl;
+                //std::cout << "xxxxxxxxxxxxxxxxxx " <<_path << std::endl;
                 if (cli->getreadWriteSize() == cli->getSizeFile())
                 {
                     cli->setTypeData(WRITEDATA);
@@ -160,7 +157,6 @@ void RequestHandler::check_requested_method(Client* cli)
     }
     else if (cli->_request.getMethod() == "POST")
     {
-
             get_requested_ressource(cli);
         // std::cout << "here status ok" << cli->_response.getStatus()  << " " << cli->getServer().locations[_blockIdx].getPath()<< std::endl;;
         if (get_ressource_type(cli) == "DIR")
@@ -210,6 +206,7 @@ void RequestHandler::check_requested_method(Client* cli)
                     }
                 }
                 else
+                    ;
                     //delete all
                 
             }
@@ -233,10 +230,10 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
 
     for (int i = 0; i < cli->getServer()._indexFiles.size(); i++)
     {
-        std::string filePath = _path + cli->getServer()._indexFiles[i];
+        std::string filePath = abs_path + cli->getServer()._indexFiles[i];
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
-            _path = _path + cli->getServer()._indexFiles[i];
+            abs_path = abs_path + cli->getServer()._indexFiles[i];
             return (true);
         }
     }
@@ -261,13 +258,12 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-    _path = cli->getServer().roots[0] + _path;
-    std::cout << _path <<std::endl;
-    if (stat(_path.c_str(), &fileInfo) != 0)
+    abs_path = cli->getServer().roots[0] + _path;
+    if (stat(abs_path.c_str(), &fileInfo) != 0)
     {
+
         cli->_response.setStatus(404);
-        cli->setSizeFile(0);
-        //std::cout << "here status" << cli->_response.getStatus() << std::endl;
+        //cli->setSizeFile(0);
         throw(404);
     }
 }
@@ -277,7 +273,7 @@ const std::string RequestHandler::get_ressource_type(Client* cli)
     std::string pathType;
     struct stat fileInfo;
 
-    stat(_path.c_str(), &fileInfo);
+    stat(abs_path.c_str(), &fileInfo);
     if (S_ISDIR(fileInfo.st_mode))
        pathType = "DIR";
     else if (S_ISREG(fileInfo.st_mode))
@@ -325,7 +321,8 @@ const std::string RequestHandler::getMimeType()
     MimeTypes[".gif"] = "image/gif";
     MimeTypes[".txt"] = "text/plain";
     MimeTypes[".css"] = "text/css";
-    std::cout << "PATH" << _path << std::endl;
+    MimeTypes[".mp4"] = "video/mp4";
+    //std::cout << "PATH" << _path << std::endl;
     std::string::size_type idx = _path.rfind('.');
     if (idx != std::string::npos)
     {
@@ -354,11 +351,11 @@ const std::string RequestHandler::getDirListing()
     htmlContent += "    </style>\n";
     htmlContent += "</head>\n";
     htmlContent += "<body>\n";
-    htmlContent += "    <h1>Directory Listing for " + _path + "</h1>\n";
+    htmlContent += "    <h1>Directory Listing for " + abs_path + "</h1>\n";
     htmlContent += "    <table>\n";
     htmlContent += "        <tr><th>Name</th><th>Size</th></tr>\n";
 
-    DIR* dir = opendir(_path.c_str());
+    DIR* dir = opendir(abs_path.c_str());
 
     struct dirent* entry;
     std::string filePath;
@@ -372,7 +369,7 @@ const std::string RequestHandler::getDirListing()
         if (entry->d_name == curr[0] || entry->d_name == curr[1])  
             continue;
 
-        filePath = _path + "/" + entry->d_name;
+        filePath = abs_path + "/" + entry->d_name;
             // std::cout << entry->d_name << std::endl;;
         struct stat fileStat;
 
@@ -413,7 +410,6 @@ const std::string RequestHandler::getDirListing()
 
 void RequestHandler::setStatusMessage(Client* cli)
 {
-    std::cout << cli->_response.getStatus() << std::endl;
     switch(cli->_response.getStatus())
     {
         case 501:

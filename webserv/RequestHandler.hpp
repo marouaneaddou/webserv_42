@@ -17,6 +17,7 @@ public:
     virtual void handleRequest(Client* cli) = 0;
 protected:
     std::string _path;
+    std::string abs_path;
     int _blockIdx;
     // bool is_req_well_formed(const Request* request, Response* response);
     void req_uri_location(Client* cli);
