@@ -21,12 +21,15 @@ void fill_Conf(std::vector<Servers> &Confs)
     first.methods.push_back("GET");
     first.methods.push_back("POST");
     first.setCgiSupport(1);
-
+    // first
     second.methods.push_back("GET");
     second.methods.push_back("POST");
 
 //one.roots.push_back("/home/marouan/Desktop/pdf/webserv_42/webserv/test");
-    one.roots.push_back("/home/mel-gand/webserv42/webserv/test");
+    // one.roots.push_back("/home/mel-gand/webserv42/webserv/test");
+    // one.roots.push_back("/Users/maddou/Desktop/project42/webserv_42/webserv/test/web_dir");
+    one.roots.push_back("/Users/maddou/Desktop/project42/webserv_42/webserv/test");
+    one._indexFiles.push_back("python.py");
     one.ports.clear();
 
     one.ports.push_back(2225);

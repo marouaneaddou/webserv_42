@@ -14,6 +14,7 @@ RequestHandler::RequestHandler()
 void RequestHandler::req_uri_location(Client* cli)
 {
     std::string url = cli->_request.getURL();
+    std::cout << "url " << url << std::endl;
     std::size_t query_pos = url.find("?");
     if (query_pos != std::string::npos)
         _path = url.substr(0, query_pos);
@@ -22,6 +23,7 @@ void RequestHandler::req_uri_location(Client* cli)
     //Exact Match
     for (int i = 0; i < cli->getServer().locations.size(); i++)
     {
+        std::cout << cli->getServer().locations[i].getPath() << std::endl;
         if (cli->getServer().locations[i].getPath()[0] == '=' && cli->getServer().locations[i].getPath().substr(2) == _path)
         {
             _blockIdx = i;
@@ -41,7 +43,7 @@ void RequestHandler::req_uri_location(Client* cli)
             }
         }
     }
-    //std::cout << "path -->" << "'"<<longestMatch << "'"<<std::endl;
+    std::cout << "path -->" << "'"<<longestMatch << "'"<<std::endl;
     if (!(longestMatch.empty()))
     {
         //std::cout << "LONGEST MATCH\n";
@@ -85,6 +87,7 @@ void RequestHandler::check_requested_method(Client* cli)
         {
             cli->setOnetime();
             get_requested_ressource(cli);
+            // std::cout << " request ==> " << get_requested_ressource(cli) << std::endl;
             if (get_ressource_type(cli) == "DIR")
             {
                 if (_path[_path.length() - 1] != '/')
@@ -157,34 +160,88 @@ void RequestHandler::check_requested_method(Client* cli)
     }
     else if (cli->_request.getMethod() == "POST")
     {
+        // check location have or support uploud 
+        // cli->_request.getHeader();
+        if (cli->getOnetime() == false) {
+            cli->setOnetime();
             get_requested_ressource(cli);
-        // std::cout << "here status ok" << cli->_response.getStatus()  << " " << cli->getServer().locations[_blockIdx].getPath()<< std::endl;;
-        if (get_ressource_type(cli) == "DIR")
-        {
-        }
-        else 
-        {
-            // ifLocationSupportCgi(cli->getServer().locations[_blockIdx]);
-            if (cli->getServer().locations[_blockIdx].getCgiSupport() != true)
-            {
-                cli->_response.setStatus(403);
-                throw(403);
+
+            if (get_ressource_type(cli) == "DIR") {
+                if (_path[_path.length() - 1] != '/') {
+                    cli->_response.setHeader("Location", _path + '/');
+                    cli->_response.setHeader("Content-Length", 0);
+                    cli->_response.setStatus(301);
+                    throw(301);
+                }
+
+                std::cout << "have index file " << is_dir_has_index_files(cli)  << std::endl;
+                if (is_dir_has_index_files(cli) == true) {
+                    // std::cout << ;
+                    // add abs URL and index file 
+                    
+            std::cout << "{{{{{{{{{{{{{{{}}}}}}}}}}}}}}}"<< std::endl;
+                    // abs_path += cli->getServer()._indexFiles[0];
+                    std::cout << "abs path" << abs_path << std::endl;
+                    if (access(abs_path.c_str(), R_OK) != 0) {
+                        cli->_response.setStatus(403);
+                        throw(403);
+                    }
+                    if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
+                    //excuteFile();
+                    }
+                    else {
+                        cli->_response.setStatus(403);
+                        throw(403);
+                    }
+                }
+                else {
+                    cli->_response.setStatus(403);
+                    throw(403);
+                } 
             }
-            
-            // std::ofstream outputFile("./test.jpg", std::ios::out);
-            // std::cout << "{{{{{{{{{}}}}}}}}}\n";
-            // if (outputFile.is_open())
-            //     std::cout << "not open file\n";
-            // cli->_request.getBody().find("\r\n");
-            // std::string buffer = cli->_request.getBody().substr(cli->_request.getBody().find("\r\n\r\n") + 4);
-            // outputFile.write(buffer.c_str(), buffer.length());
-            // outputFile.close();
-            // for (int i = 0; i < cli->_request.getSizeOfBodyPure(); i++)
-            //     outputFile << cli->_request.getElementBodyPure(i);
-            // outputFile.close();
-            // std::cout << "hnaya kayan uploud" << std::endl;
-            // std::cout << cli->_request.getPureBody[]
+            // else {
+            //     if (access(abs_path.c_str(), R_OK) != 0) {
+            //         cli->_response.setStatus(403);
+            //         throw(403);
+            //     }
+            //     std::cout << "permission is ok" << std::endl;
+            // }
         }
+        cli->setTypeData(CLOSESOCKET);
+
+
+
+
+        
+
+        //     get_requested_ressource(cli);
+        // // std::cout << "here status ok" << cli->_response.getStatus()  << " " << cli->getServer().locations[_blockIdx].getPath()<< std::endl;;
+        // if (get_ressource_type(cli) == "DIR")
+        // {
+        // }
+        // else 
+        // {
+        //     // ifLocationSupportCgi(cli->getServer().locations[_blockIdx]);
+        //     if (cli->getServer().locations[_blockIdx].getCgiSupport() != true)
+        //     {
+        //         cli->_response.setStatus(403);
+        //         throw(403);
+        //     }
+            
+        //     // std::ofstream outputFile("./test.jpg", std::ios::out);
+        //     // std::cout << "{{{{{{{{{}}}}}}}}}\n";
+        //     // if (outputFile.is_open())
+        //     //     std::cout << "not open file\n";
+        //     // cli->_request.getBody().find("\r\n");
+        //     // std::string buffer = cli->_request.getBody().substr(cli->_request.getBody().find("\r\n\r\n") + 4);
+        //     // outputFile.write(buffer.c_str(), buffer.length());
+        //     // outputFile.close();
+        //     // for (int i = 0; i < cli->_request.getSizeOfBodyPure(); i++)
+        //     //     outputFile << cli->_request.getElementBodyPure(i);
+        //     // outputFile.close();
+        //     // std::cout << "hnaya kayan uploud" << std::endl;
+        //     // std::cout << cli->_request.getPureBody[]
+        // }
     }
     else if (cli->_request.getMethod() == "DELETE") {
         if(cli->getOnetime() == false)
@@ -234,10 +291,12 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
             abs_path = abs_path + cli->getServer()._indexFiles[i];
-            return (true);
+            std::cout << abs_path << " " << cli->getServer()._indexFiles[i] << std::endl;
+            return true;
         }
     }
-    return (false);
+    std::cout << "pppppppppppppppppppppp" << std::endl;
+    return false;
 }
 
 bool RequestHandler::if_location_has_cgi(Client* cli)
@@ -259,9 +318,9 @@ void RequestHandler::get_requested_ressource(Client* cli)
     else
         _path = url;
     abs_path = cli->getServer().roots[0] + _path;
-    if (stat(abs_path.c_str(), &fileInfo) != 0)
-    {
-
+    std::cout << "absulate path ++> " << abs_path << std::endl;
+    if (stat(abs_path.c_str(), &fileInfo) != 0) {
+        std::cout << "ERROR" << std::endl;
         cli->_response.setStatus(404);
         //cli->setSizeFile(0);
         throw(404);

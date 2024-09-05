@@ -92,7 +92,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                                 // Cgi cgi(_clients[idx]->_request);
                                 // _clients[idx]->runCgiLoginRegister(cgi);
                                 // std::cout << "**************\n";
-                                // _clients[idx]->_request.printVectOfString();
+                                _clients[idx]->_request.printVectOfString();
                                 // std::cout << "**************\n";
 
 
@@ -113,6 +113,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     if (_clients.at(idx)->getOnetime() == false)
                         handler = createHandler(_clients.at(idx)->_request);
                     handler->handleRequest(_clients.at(idx));
+                    std::cout << "here" << std::endl;
                 }
                 // in this condition start send data to socket file client 
                 if (_clients.at(idx)->getTypeData() == WRITEDATA)

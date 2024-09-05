@@ -8,10 +8,10 @@
 
 void Request::printHeaders() const
 {
-    for (auto ut : _headers)
-    {
-        std::cout << ut.first << "============="  <<  ut.second <<std::endl;
-    }
+    // for (auto ut : _headers)
+    // {
+    //     std::cout << ut.first << "============="  <<  ut.second <<std::endl;
+    // }
 }
 
 void Request::printRequest() const
