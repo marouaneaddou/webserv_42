@@ -21,6 +21,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     first.methods.push_back("GET");
     first.directory_listing = true;
     first.methods.push_back("POST");
+
     first.setCgiSupport(1);
     // first
     second.methods.push_back("GET");

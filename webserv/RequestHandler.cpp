@@ -146,7 +146,7 @@ void RequestHandler::check_requested_method(Client* cli)
             }
             // else if (typeRessource == "FILE")
             // {
-                std::cout << "test directpry request" << std::endl;
+                // std::cout << "test directpry request" << std::endl;
                 if (access(abs_path.c_str(), R_OK) != 0)
                 {
                     cli->_response.setStatus(403);
