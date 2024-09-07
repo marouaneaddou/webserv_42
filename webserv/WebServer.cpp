@@ -119,12 +119,15 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                 // in this condition start send data to socket file client 
                 if (_clients.at(idx)->getTypeData() == WRITEDATA)
                 {
+                    std::cout << "check if send message in uploud not support server cgi\n";
                     _clients.at(idx)->_response.Send(idx);
-                    if ( _clients.at(idx)->_response.getResponse().size() == 0)
+                    if ( _clients.at(idx)->_response.getResponse().size() == 0) {
                         _clients.at(idx)->setTypeData(CLOSESOCKET);
+                        std::cout << "close socket client\n";
+                    }
                     // _clients.at(idx)->setSizeFile(_clients.at(idx)->_response.getResponse().size());
                 }
-                else if (_clients.at(idx)->getTypeData() == CLOSESOCKET)
+                if (_clients.at(idx)->getTypeData() == CLOSESOCKET)
                 {
                     FD_CLR(idx, &current_Wsockets);
                     close(idx);

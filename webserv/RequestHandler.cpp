@@ -132,32 +132,14 @@ void RequestHandler::check_requested_method(Client* cli)
                         return;
                     }
                 }
-                // else {
-                //     std::cout << "test directpry request" << std::endl;
-                //     if (access(abs_path.c_str(), R_OK) != 0)
-                //     {
-                //         cli->_response.setStatus(403);
-                //         throw(403);
-                //     }
-                //     cli->openFile(abs_path.c_str());
-                //     cli->setTypeData(READDATA);
-                // }
-                // if directory not has index file !!!!!!!!!!!
             }
-            // else if (typeRessource == "FILE")
-            // {
-                // std::cout << "test directpry request" << std::endl;
-                if (access(abs_path.c_str(), R_OK) != 0)
-                {
-                    cli->_response.setStatus(403);
-                    throw(403);
-                }
-                cli->openFile(abs_path.c_str());
-                cli->setTypeData(READDATA);
-            // }
-            // else {
-            //     std::cout << "ERROR :GET NOT FILE OR DIR\n";
-            // }
+            if (access(abs_path.c_str(), R_OK) != 0)
+            {
+                cli->_response.setStatus(403);
+                throw(403);
+            }
+            cli->openFile(abs_path.c_str());
+            cli->setTypeData(READDATA);
         }
         if (if_location_has_cgi(cli))
         {
@@ -170,8 +152,6 @@ void RequestHandler::check_requested_method(Client* cli)
             if (cli->getTypeData() == READDATA)
             {
                 cli->setData();
-                //std::cout << "sizefile " <<cli->getSizeFile() << std::endl;
-                //std::cout << "xxxxxxxxxxxxxxxxxx " <<_path << std::endl;
                 if (cli->getreadWriteSize() == cli->getSizeFile())
                 {
                     cli->setTypeData(WRITEDATA);
@@ -188,86 +168,136 @@ void RequestHandler::check_requested_method(Client* cli)
     }
     else if (cli->_request.getMethod() == "POST")
     {
-        // check location have or support uploud 
-        // cli->_request.getHeader();
-        // if (cli->getOnetime() == false) {
-            // cli->setOnetime();
+        
             get_requested_ressource(cli);
             
             if (get_ressource_type(cli) == "DIR") {
                 if (_path[_path.length() - 1] != '/') {
+                    if (access(abs_path.c_str(), R_OK) != 0) {
+                        std::cout << "NOT access\n";
+                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
+                        cli->_response.setHeader("Content-Type", "text/html");
+                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                        cli->_response.setBody(htmlfile);
+                        cli->_response.generateHeaderResponse();
+                        cli->_response.setStatus(403);
+                        cli->setTypeData(WRITEDATA);
+                        throw(403);
+                    }
                     std::cout << "request directory\n";
                     cli->_response.setHeader("Location", _path + '/');
-                    cli->_response.setHeader("Content-Length", 0);
-                    cli->_response.setStatus(301);
+                    std::cout << "body size ==>" << cli->_response.getBody().length() << std::endl;
+                    cli->_response.setStatus(307);
                     throw(301);
                 }
 
                 if (is_dir_has_index_files(cli) == true) {
+                    std::cout << std::endl << std::endl;
+                    std::cout << "access =>>"<< access(abs_path.c_str(), R_OK) << std::endl;
+                    std::cout << std::endl << std::endl;
+
                     if (access(abs_path.c_str(), R_OK) != 0) {
+                        std::cout << "NOT access\n";
+                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
+                        cli->_response.setHeader("Content-Type", "text/html");
+                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                        cli->_response.setBody(htmlfile);
+                        cli->_response.generateHeaderResponse();
                         cli->_response.setStatus(403);
+                        cli->setTypeData(WRITEDATA);
                         throw(403);
                     }
+                    // check location have or support uploud 
                     if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
-                std::cout << "have index file " << is_dir_has_index_files(cli)  << std::endl;
-                        pid_t pid = fork();  // Create a new process
+                        /*****************************************/
 
-                        if (pid < 0) {
-                            // Fork failed
-                            perror("Fork failed");
-                            return ;
-                        }
-                        if (pid == 0) {
-                            // Child process
-                            // Path to the Python interpreter
-                            char python_path[] = "/usr/bin/python3";
 
-                            // Arguments to pass to the Python interpreter
-                            char *x = abs_path.data();
-                            char *args[] = {python_path, x, NULL};  // NULL-terminated argument list
+                                    /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
 
-                            // Replace the current process image with a new process image
-                            execv(python_path, args);
 
-                            // If execv returns, it must have failed
-                            perror("execv failed");
-                            return ;
-                        } else {
-                            // Parent process: wait for the child process to complete
-                            int status;
-                            waitpid(pid, &status, 0);
-                            if (WIFEXITED(status)) {
-                                printf("Child exited with status %d\n", WEXITSTATUS(status));
-                            }
-                        }
+                        /*****************************************/
 
-                        cli->_response.setStatus(200);
+                        // check return cgi !!!!!!!!!!
+                        /*****this just test ====>***/ cli->_response.setStatus(200);
 
-                        cli->setTypeData(CLOSESOCKET);
+                        /****************************************/
+                                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">The file upload was successful.</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
+
+                                    cli->_response.setHeader("Content-Type", "text/html");
+                                    cli->_response.setHeader("Content-Length", htmlfile.length());
+                                    cli->_response.setBody(htmlfile);
+                                    cli->_response.generateHeaderResponse();
+                        cli->setTypeData(WRITEDATA);
+                        /****************************************/
                         throw(200);
-                    //excuteFile();
                     }
                     else {
+                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
                         cli->_response.setStatus(403);
+                        cli->_response.setBody(htmlfile);
+                        cli->_response.setHeader("Content-Type", "text/html");
+                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                        cli->_response.generateHeaderResponse();
+                        cli->setTypeData(WRITEDATA);
+                        std::cout << "return responce if server not support cgi\n";
                         throw(403);
                     }
                 }
                 else {
                     cli->_response.setStatus(403);
+                    cli->_response.generateHeaderResponse();
+                    cli->setTypeData(WRITEDATA);
                     throw(403);
                 } 
             }
-            // else {
-            //     if (access(abs_path.c_str(), R_OK) != 0) {
-            //         cli->_response.setStatus(403);
-            //         throw(403);
-            //     }
-            //     std::cout << "permission is ok" << std::endl;
-            // }
-        // }
-        std::cout << "test 1\n";
-        cli->setTypeData(CLOSESOCKET);
-        std::cout << "test 2\n";
 
 
 
