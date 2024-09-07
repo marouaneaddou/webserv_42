@@ -110,10 +110,11 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             {
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
-                    if (_clients.at(idx)->getOnetime() == false)
+                    if (_clients.at(idx)->getOnetime() == false) {
+                        std::cout << "create handler" << std::endl;
                         handler = createHandler(_clients.at(idx)->_request);
+                    }
                     handler->handleRequest(_clients.at(idx));
-                    std::cout << "here" << std::endl;
                 }
                 // in this condition start send data to socket file client 
                 if (_clients.at(idx)->getTypeData() == WRITEDATA)

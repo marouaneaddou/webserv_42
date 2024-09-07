@@ -8,6 +8,15 @@
 #include <sys/unistd.h>
 #include <unistd.h>
 
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 RequestHandler::RequestHandler()
 {}
 
@@ -87,11 +96,13 @@ void RequestHandler::check_requested_method(Client* cli)
         {
             cli->setOnetime();
             get_requested_ressource(cli);
+            std::string typeRessource = get_ressource_type(cli);
             // std::cout << " request ==> " << get_requested_ressource(cli) << std::endl;
-            if (get_ressource_type(cli) == "DIR")
+            if (typeRessource == "DIR")
             {
                 if (_path[_path.length() - 1] != '/')
                 {
+                    std::cout << "directory in GET\n";
                     cli->_response.setHeader("Location", _path + '/');
                     cli->_response.setHeader("Content-Length", 0);
                     cli->_response.setStatus(301);
@@ -99,12 +110,14 @@ void RequestHandler::check_requested_method(Client* cli)
                 }
                 if (is_dir_has_index_files(cli) == false)
                 {
+                std::cout <<"path =>> " << _path[_path.length() - 1] << std::endl;
                     //check autoindex/directorylisting : ON/OFF
 
                     //OFF :
                     if (cli->getServer().locations[_blockIdx].directory_listing == false)
                     {
                         cli->_response.setStatus(403);
+                        cli->_response.setHeader("Content-Length", 0);
                         throw(403);
                     }
                     //ON :
@@ -119,9 +132,21 @@ void RequestHandler::check_requested_method(Client* cli)
                         return;
                     }
                 }
+                // else {
+                //     std::cout << "test directpry request" << std::endl;
+                //     if (access(abs_path.c_str(), R_OK) != 0)
+                //     {
+                //         cli->_response.setStatus(403);
+                //         throw(403);
+                //     }
+                //     cli->openFile(abs_path.c_str());
+                //     cli->setTypeData(READDATA);
+                // }
+                // if directory not has index file !!!!!!!!!!!
             }
-            else 
-            {
+            // else if (typeRessource == "FILE")
+            // {
+                std::cout << "test directpry request" << std::endl;
                 if (access(abs_path.c_str(), R_OK) != 0)
                 {
                     cli->_response.setStatus(403);
@@ -129,7 +154,10 @@ void RequestHandler::check_requested_method(Client* cli)
                 }
                 cli->openFile(abs_path.c_str());
                 cli->setTypeData(READDATA);
-            }
+            // }
+            // else {
+            //     std::cout << "ERROR :GET NOT FILE OR DIR\n";
+            // }
         }
         if (if_location_has_cgi(cli))
         {
@@ -162,31 +190,61 @@ void RequestHandler::check_requested_method(Client* cli)
     {
         // check location have or support uploud 
         // cli->_request.getHeader();
-        if (cli->getOnetime() == false) {
-            cli->setOnetime();
+        // if (cli->getOnetime() == false) {
+            // cli->setOnetime();
             get_requested_ressource(cli);
-
+            
             if (get_ressource_type(cli) == "DIR") {
                 if (_path[_path.length() - 1] != '/') {
+                    std::cout << "request directory\n";
                     cli->_response.setHeader("Location", _path + '/');
                     cli->_response.setHeader("Content-Length", 0);
                     cli->_response.setStatus(301);
                     throw(301);
                 }
 
-                std::cout << "have index file " << is_dir_has_index_files(cli)  << std::endl;
                 if (is_dir_has_index_files(cli) == true) {
-                    // std::cout << ;
-                    // add abs URL and index file 
-                    
-            std::cout << "{{{{{{{{{{{{{{{}}}}}}}}}}}}}}}"<< std::endl;
-                    // abs_path += cli->getServer()._indexFiles[0];
-                    std::cout << "abs path" << abs_path << std::endl;
                     if (access(abs_path.c_str(), R_OK) != 0) {
                         cli->_response.setStatus(403);
                         throw(403);
                     }
                     if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
+                std::cout << "have index file " << is_dir_has_index_files(cli)  << std::endl;
+                        pid_t pid = fork();  // Create a new process
+
+                        if (pid < 0) {
+                            // Fork failed
+                            perror("Fork failed");
+                            return ;
+                        }
+                        if (pid == 0) {
+                            // Child process
+                            // Path to the Python interpreter
+                            char python_path[] = "/usr/bin/python3";
+
+                            // Arguments to pass to the Python interpreter
+                            char *x = abs_path.data();
+                            char *args[] = {python_path, x, NULL};  // NULL-terminated argument list
+
+                            // Replace the current process image with a new process image
+                            execv(python_path, args);
+
+                            // If execv returns, it must have failed
+                            perror("execv failed");
+                            return ;
+                        } else {
+                            // Parent process: wait for the child process to complete
+                            int status;
+                            waitpid(pid, &status, 0);
+                            if (WIFEXITED(status)) {
+                                printf("Child exited with status %d\n", WEXITSTATUS(status));
+                            }
+                        }
+
+                        cli->_response.setStatus(200);
+
+                        cli->setTypeData(CLOSESOCKET);
+                        throw(200);
                     //excuteFile();
                     }
                     else {
@@ -206,8 +264,10 @@ void RequestHandler::check_requested_method(Client* cli)
             //     }
             //     std::cout << "permission is ok" << std::endl;
             // }
-        }
+        // }
+        std::cout << "test 1\n";
         cli->setTypeData(CLOSESOCKET);
+        std::cout << "test 2\n";
 
 
 
@@ -288,6 +348,7 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
     for (int i = 0; i < cli->getServer()._indexFiles.size(); i++)
     {
         std::string filePath = abs_path + cli->getServer()._indexFiles[i];
+        std::cout << "filePath " << filePath << std::endl;
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
             abs_path = abs_path + cli->getServer()._indexFiles[i];
@@ -318,9 +379,9 @@ void RequestHandler::get_requested_ressource(Client* cli)
     else
         _path = url;
     abs_path = cli->getServer().roots[0] + _path;
-    std::cout << "absulate path ++> " << abs_path << std::endl;
+    std::cout << "absulate path" << abs_path << std::endl;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
-        std::cout << "ERROR" << std::endl;
+        std::cout << "ERROR IS FORBIDEN ACCESS" << std::endl;
         cli->_response.setStatus(404);
         //cli->setSizeFile(0);
         throw(404);
