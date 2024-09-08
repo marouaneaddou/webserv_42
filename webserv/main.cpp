@@ -22,7 +22,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     first.directory_listing = true;
     first.methods.push_back("POST");
 
-    // first.setCgiSupport(1);
+    first.setCgiSupport(1);
     // first
     second.methods.push_back("GET");
     second.methods.push_back("POST");
@@ -37,8 +37,8 @@ void fill_Conf(std::vector<Servers> &Confs)
     one.ports.clear();
 
     one.ports.push_back(2225);
-    one.ports.push_back(2223);
-    one.ports.push_back(4040);
+    // one.ports.push_back(2223);
+    // one.ports.push_back(4040);
     
     one.host = "localhost";
 
@@ -49,9 +49,9 @@ void fill_Conf(std::vector<Servers> &Confs)
 
     two.ports.clear();
     two.roots.push_back("/Users/aech-che/Desktop/webserv_dyal_cgi/webserv/test");
-    two.ports.push_back(7777);
-    two.ports.push_back(3052);
-    two.ports.push_back(4242);
+    // two.ports.push_back(7777);
+    // two.ports.push_back(3052);
+    // two.ports.push_back(4242);
     two.host = "localhost";
     Confs.push_back(two);
 }

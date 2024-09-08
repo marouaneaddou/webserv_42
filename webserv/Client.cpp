@@ -148,3 +148,11 @@ long long int Client::getreadWriteSize() const
 {
     return readWriteSize;
 }
+
+bool Client::checkExtensionFile(std::string path) const {
+    std::cout << "check extension file ===>" << path << std::endl;
+    std::string extension = path.substr(path.find('.') + 1);
+    if (extension != "html" && extension != "js" && extension != "css") return true;
+    std::cout << extension << std::endl;
+    return false;
+} 

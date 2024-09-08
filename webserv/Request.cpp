@@ -103,10 +103,9 @@ std::vector<std::string> Request::getPureBody() const
 void Request::findTypeOfPostMethod()
 {
     itHeaders it = _headers.find("Content-Type");
-    // printHeaders();
+    printHeaders();
     if (it != _headers.end())
     {
-        //std::cout << "here 1" << std::endl;
         if (it->second.find("boundary") != -1)
         {
             std::string type = it->second.substr(it->second.find("=") + 1);
@@ -176,35 +175,39 @@ void Request::isReqWellFormed(Response &response)
 
 void    Request::removeBoundary()
 {
-    for (int i = 0; i < _pureBody.size(); i++)
-        if (i > 0)
-            _pureBody[i].erase(0, _headers["typeMethodPost"].size() + 1);
+//     for (int i = 0; i < _pureBody.size(); i++)
+//         if (i > 0)
+//             _pureBody[i].erase(0, _headers["typeMethodPost"].size() + 1);
 }
 
 void Request::removeNewLineInLastEachBody()
 {
     // printVectOfString();
     //std::cout << "last last last\n";
-    int j;
-    for (int i = 0; i < _pureBody.size(); i++)
-    {
-        j = _pureBody[i].size() - 1;
-        for (; j >= 0 && (_pureBody[i][j] == '\r' || _pureBody[i][j] == '\n'); j--)
-        _pureBody[i].erase(j);
-    }
+    // int j;
+    // for (int i = 0; i < _pureBody.size(); i++)
+    // {
+    //     j = _pureBody[i].size() - 1;
+    //     for (; j >= 0 && (_pureBody[i][j] == '\r' || _pureBody[i][j] == '\n'); j--)
+    //     _pureBody[i].erase(j);
+    // }
     // printVectOfString();
 }
 
 
 void    Request::removeBoundaryInFrontLastBody()
 {
-    std::string endBoundary = _headers["typeMethodPost"];
-    endBoundary += "--";
-    _body.erase(_body.find(endBoundary));
-    _body.erase(0, endBoundary.size());
-    if (_headers.find("typeMethodPost") == _headers.end())
-        _headers["typeMethodPost"] = _body.substr(0, _body.find("\r\n"));  
+    // std::string endBoundary = _headers["typeMethodPost"];
+    // endBoundary += "--";
+    // _body.erase(_body.find(endBoundary));
+    // _body.erase(0, endBoundary.size());
+    // if (_headers.find("typeMethodPost") == _headers.end())
+    //     _headers["typeMethodPost"] = _body.substr(0, _body.find("\r\n"));  
 }
+
+
+
+/******* REMOVE ******/
 
 void    Request::checkUpload()
 {
@@ -222,6 +225,9 @@ void    Request::checkUpload()
         //std::cout << informationFile << std::endl;
     }
 }
+
+/******* REMOVE !!!!!!!!!******/
+
 
 void    Request::parceBody()
 {
@@ -247,6 +253,8 @@ void    Request::parceBody()
 
     /************* PRINT Request *************/
 }
+
+/************** REMOVE !!!!!!!!*************/
 
 void    Request::remeveHexaDecimalInBody()
 {

@@ -64,6 +64,7 @@ class Client
 
         void setreadWriteSize(long long int size);
         long long int getreadWriteSize() const;
+        bool checkExtensionFile(std::string path) const;
     private:
         bool onetime;
         long long int readWriteSize;

@@ -53,24 +53,22 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                 {
                     read_request(idx);
                     start_parsing(idx);
-                    if ( _clients[idx]->_request.getHeader("Transfer-Encoding")  != _clients[idx]->_request.getEndHeaders())
+                    if ( _clients[idx]->_request.getHeader("Transfer-Encoding") != _clients[idx]->_request.getEndHeaders())
                     {
                         if (_buffer.find("0\r\n\r\n") != -1)
                         {
                             _clients[idx]->_request.findTypeOfPostMethod();
                             _clients[idx]->_request.setBody(_buffer);
 
-                            _clients[idx]->_request.parceBody();
-                            // _clients[idx]->_request.printRequest();
+                            // _clients[idx]->_request.parceBody();
 
-                                /*************** Function Run Cgi Login && Register *****************/
+                            /************/
+                            std::cout << "here GET\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+                            _clients[idx]->_request.printRequest();
+                            std::cout << "here GET\n\n\n\n\n";
 
-                                // Cgi cgi(_clients[idx]->_request);
-                                // _clients[idx]->runCgiLoginRegister(cgi);
+                            /************/
 
-                                /*************** Function Run Cgi Login && Register *****************/
-
-                            //std::cout << "here" << std::endl;
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -78,30 +76,21 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     }
                     else if (_clients[idx]->_request.getHeader("Content-Length")  != _clients[idx]->_request.getEndHeaders())
                     {
+                        std::cout << "size read====>" << _buffer.size() << " "<< stoi(_clients[idx]->_request.getHeader("Content-Length")->second) << std::endl;
                         if (_buffer.size() == stoi(_clients[idx]->_request.getHeader("Content-Length")->second))
                         {
+                            std::cout << "POST PRINT BODY\n";
                             _clients[idx]->_request.findTypeOfPostMethod();
+                            std::cout << "body is ==>\n "<<_buffer << std::endl;
                             _clients[idx]->_request.setBody(_buffer);
-
-                            _clients[idx]->_request.parceBody();
-                            // std::cout << "POST\n";
                             _clients[idx]->_request.printRequest();
-
-                                /*************** Function Run Cgi Login && Register *****************/
-
-                                // Cgi cgi(_clients[idx]->_request);
-                                // _clients[idx]->runCgiLoginRegister(cgi);
-                                // std::cout << "**************\n";
-                                _clients[idx]->_request.printVectOfString();
-                                // std::cout << "**************\n";
-
-
-                                /*************** Function Run Cgi Login && Register *****************/
-                                
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
                         }
+                    }
+                    else {
+                        std::cout << "\n\nkayna chi haja machi normale \n\n";
                     }
 
                 }
@@ -114,7 +103,10 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                         std::cout << "create handler" << std::endl;
                         handler = createHandler(_clients.at(idx)->_request);
                     }
+                    std::cout << "check error post1\n";
                     handler->handleRequest(_clients.at(idx));
+                    std::cout << "check error post2\n";
+
                 }
                 // in this condition start send data to socket file client 
                 if (_clients.at(idx)->getTypeData() == WRITEDATA)

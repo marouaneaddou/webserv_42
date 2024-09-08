@@ -141,11 +141,40 @@ void RequestHandler::check_requested_method(Client* cli)
             cli->openFile(abs_path.c_str());
             cli->setTypeData(READDATA);
         }
-        if (if_location_has_cgi(cli))
-        {
-            //run cgi
-            //code depend on cgi
-            // cli->_response.setStatus(200); ?
+        if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(_path)) {
+             /*****************************************/
+
+
+                                    /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
+
+
+                        /*****************************************/
+
+                        // check return cgi !!!!!!!!!!
+                        /*****this just test ====>***/ cli->_response.setStatus(200);
+
+                        /****************************************/
+                                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">CGI GET method.</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
+
+                                    cli->_response.setHeader("Content-Type", "text/html");
+                                    cli->_response.setHeader("Content-Length", htmlfile.length());
+                                    cli->_response.setBody(htmlfile);
+                                    cli->_response.generateHeaderResponse();
+                        cli->setTypeData(WRITEDATA);
+                        /****************************************/
+                        throw(200);
         }
         else
         {
@@ -170,7 +199,7 @@ void RequestHandler::check_requested_method(Client* cli)
     {
         
             get_requested_ressource(cli);
-            
+            cli->setOnetime();
             if (get_ressource_type(cli) == "DIR") {
                 if (_path[_path.length() - 1] != '/') {
                     if (access(abs_path.c_str(), R_OK) != 0) {
@@ -195,18 +224,13 @@ void RequestHandler::check_requested_method(Client* cli)
                         cli->_response.setStatus(403);
                         cli->setTypeData(WRITEDATA);
                         throw(403);
+                    // cli->_response.setHeader("Location", _path + '/');
+                    // cli->_response.setStatus(307);
+                    // throw(301);
                     }
-                    std::cout << "request directory\n";
-                    cli->_response.setHeader("Location", _path + '/');
-                    std::cout << "body size ==>" << cli->_response.getBody().length() << std::endl;
-                    cli->_response.setStatus(307);
-                    throw(301);
                 }
-
+            
                 if (is_dir_has_index_files(cli) == true) {
-                    std::cout << std::endl << std::endl;
-                    std::cout << "access =>>"<< access(abs_path.c_str(), R_OK) << std::endl;
-                    std::cout << std::endl << std::endl;
 
                     if (access(abs_path.c_str(), R_OK) != 0) {
                         std::cout << "NOT access\n";
@@ -233,18 +257,18 @@ void RequestHandler::check_requested_method(Client* cli)
                     }
                     // check location have or support uploud 
                     if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
-                        /*****************************************/
+                                        /*****************************************/
 
 
-                                    /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
+                                                    /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
 
 
-                        /*****************************************/
+                                        /*****************************************/
 
-                        // check return cgi !!!!!!!!!!
-                        /*****this just test ====>***/ cli->_response.setStatus(200);
+                                        // check return cgi !!!!!!!!!!
+                                        /*****this just test ====>***/ cli->_response.setStatus(200);
 
-                        /****************************************/
+                                        /****************************************/
                                         std::string htmlfile = "<!DOCTYPE html>\n"
                                                             "<html lang=\"en\">\n"
                                                             "<head>\n"
@@ -259,11 +283,11 @@ void RequestHandler::check_requested_method(Client* cli)
                                                             "</body>\n"
                                                             "</html>\n";
 
-                                    cli->_response.setHeader("Content-Type", "text/html");
-                                    cli->_response.setHeader("Content-Length", htmlfile.length());
-                                    cli->_response.setBody(htmlfile);
-                                    cli->_response.generateHeaderResponse();
-                        cli->setTypeData(WRITEDATA);
+                                        cli->_response.setHeader("Content-Type", "text/html");
+                                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                                        cli->_response.setBody(htmlfile);
+                                        cli->_response.generateHeaderResponse();
+                                        cli->setTypeData(WRITEDATA);
                         /****************************************/
                         throw(200);
                     }
@@ -298,7 +322,90 @@ void RequestHandler::check_requested_method(Client* cli)
                     throw(403);
                 } 
             }
+            else {
+                 if (access(abs_path.c_str(), R_OK) != 0) {
+                        std::cout << "NOT access\n";
+                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
+                        cli->_response.setHeader("Content-Type", "text/html");
+                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                        cli->_response.setBody(htmlfile);
+                        cli->_response.generateHeaderResponse();
+                        cli->_response.setStatus(403);
+                        cli->setTypeData(WRITEDATA);
+                        throw(403);
+                    }
+                    // check location have or support uploud 
+                    if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
+                                        /*****************************************/
 
+
+                                                    /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
+
+
+                                        /*****************************************/
+
+                                        // check return cgi !!!!!!!!!!
+                                        /*****this just test ====>***/ cli->_response.setStatus(200);
+
+                                        /****************************************/
+                                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">The file upload was successful.</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
+
+                                        cli->_response.setHeader("Content-Type", "text/html");
+                                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                                        cli->_response.setBody(htmlfile);
+                                        cli->_response.generateHeaderResponse();
+                                        cli->setTypeData(WRITEDATA);
+                        /****************************************/
+                        throw(200);
+                    }
+                    else {
+                        std::string htmlfile = "<!DOCTYPE html>\n"
+                                                            "<html lang=\"en\">\n"
+                                                            "<head>\n"
+                                                            "    <meta charset=\"UTF-8\">\n"
+                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                                                            "    <title>Document</title>\n"
+                                                            "</head>\n"
+                                                            "<body>\n"
+                                                            "    <div>\n"
+                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
+                                                            "    </div>\n"
+                                                            "</body>\n"
+                                                            "</html>\n";
+                        cli->_response.setStatus(403);
+                        cli->_response.setBody(htmlfile);
+                        cli->_response.setHeader("Content-Type", "text/html");
+                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                        cli->_response.generateHeaderResponse();
+                        cli->setTypeData(WRITEDATA);
+                        std::cout << "return responce if server not support cgi\n";
+                        throw(403);
+                    }
+            }
 
 
 
@@ -392,6 +499,7 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
 
 bool RequestHandler::if_location_has_cgi(Client* cli)
 {
+
     return (EXIT_SUCCESS);
 }
 
