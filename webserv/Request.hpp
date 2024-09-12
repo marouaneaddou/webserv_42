@@ -50,7 +50,7 @@ class Request
         void parse_headers_body(std::string _rawReq);
         void isReqWellFormed(Response &response);
         void remeveHexaDecimalInBody();
-        void removeBoundaryInFrontLastBody();
+        // void removeBoundaryInFrontLastBody();
         /******************* PRINT DATA *****************/
 
             void printHeaders() const;
@@ -60,9 +60,9 @@ class Request
         /******************* PRINT DATA *****************/
 
         std::vector<std::string> getPureBody() const;
-        void removeBoundary();
+        // void removeBoundary();
         void splitBody();
-        void removeNewLineInLastEachBody();
+        // void removeNewLineInLastEachBody();
 
         int getSizeOfBodyPure() const;
         std::string getElementBodyPure(int i) const;

@@ -17,7 +17,6 @@ void Request::parse_request_line(std::string &_rawReq)
     std::vector<std::string> tokens = Utils::split(oneline, dele);
     _method = tokens[0];
     _URL = tokens[1];
-    //std::cout << tokens.size() << std::endl;
     _http_version = tokens[2];
 }
 
@@ -26,7 +25,7 @@ void Request::parse_headers_body(std::string _rawReq)
 {
     std::istringstream iss(_rawReq);
     std::string line;
-    while (std::getline(iss, line)) /////?
+    while (std::getline(iss, line)) 
     {
         if (line == "\r")
             break;
@@ -76,8 +75,6 @@ void Request::setHeaders()
             _headers[line.substr(0, separator_pos)] = line.substr(separator_pos + 2);
         _header.erase(0, pos + 2);
     }
-    /*************** PRINT ***************/
-        // printHeaders();
         
 }
 
@@ -103,7 +100,6 @@ std::vector<std::string> Request::getPureBody() const
 void Request::findTypeOfPostMethod()
 {
     itHeaders it = _headers.find("Content-Type");
-    printHeaders();
     if (it != _headers.end())
     {
         if (it->second.find("boundary") != -1)
@@ -173,88 +169,6 @@ void Request::isReqWellFormed(Response &response)
 
 /************************ Transfer-Encoding ***********************/
 
-void    Request::removeBoundary()
-{
-//     for (int i = 0; i < _pureBody.size(); i++)
-//         if (i > 0)
-//             _pureBody[i].erase(0, _headers["typeMethodPost"].size() + 1);
-}
-
-void Request::removeNewLineInLastEachBody()
-{
-    // printVectOfString();
-    //std::cout << "last last last\n";
-    // int j;
-    // for (int i = 0; i < _pureBody.size(); i++)
-    // {
-    //     j = _pureBody[i].size() - 1;
-    //     for (; j >= 0 && (_pureBody[i][j] == '\r' || _pureBody[i][j] == '\n'); j--)
-    //     _pureBody[i].erase(j);
-    // }
-    // printVectOfString();
-}
-
-
-void    Request::removeBoundaryInFrontLastBody()
-{
-    // std::string endBoundary = _headers["typeMethodPost"];
-    // endBoundary += "--";
-    // _body.erase(_body.find(endBoundary));
-    // _body.erase(0, endBoundary.size());
-    // if (_headers.find("typeMethodPost") == _headers.end())
-    //     _headers["typeMethodPost"] = _body.substr(0, _body.find("\r\n"));  
-}
-
-
-
-/******* REMOVE ******/
-
-void    Request::checkUpload()
-{
-    std::string informationFile;
-    std::string headerBody;
-    for (int i  = 0; i < _pureBody.size(); i++)
-    {
-        informationFile = _pureBody[i].substr(0, _pureBody[i].find("\r\n\r\n"));
-        if(informationFile.find("filename")  != -1)
-        {
-            int find = informationFile.find("\r\n");
-            informationFile[find] = ';';
-            informationFile[find + 1] = ' ';
-        }
-        //std::cout << informationFile << std::endl;
-    }
-}
-
-/******* REMOVE !!!!!!!!!******/
-
-
-void    Request::parceBody()
-{
-    if (_headers.find("Transfer-Encoding") != _headers.end())
-        remeveHexaDecimalInBody();
-    std::cout << _headers["type"] << std::endl;
-    if (_headers["type"] == "form-data")
-    {
-        removeBoundaryInFrontLastBody();
-        _pureBody =  Utils::split(_body, _headers["typeMethodPost"]);
-        checkUpload();
-        // std::cout << "hna " << std::endl;
-        removeBoundary();
-    }
-    else if (_headers["type"] == "form")
-        _pureBody =  Utils::split(_body, "&");
-    else 
-        _pureBody.push_back(_body);
-
-    /************* PRINT Request *************/
-    
-        // printRequest();
-
-    /************* PRINT Request *************/
-}
-
-/************** REMOVE !!!!!!!!*************/
 
 void    Request::remeveHexaDecimalInBody()
 {

@@ -28,8 +28,6 @@ class WebServ
         std::map<int, Client*> _clients;
         std::map<int, Servers> _myconf;
         struct sockaddr_in _sockaddr;
-        // std::map<int , int> check;
-        // bool check;
         RequestHandler* handler;
     public:
         WebServ();

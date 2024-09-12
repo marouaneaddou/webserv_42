@@ -70,7 +70,6 @@ void Response::generateHeaderResponse()
         _Response += it->first + ": " + it->second;
         if (++it != _headers.end()) {
             _Response += "\r\n";
-            std::cout << it->first << " 11 " << it->second << std::endl;
         }
     }
     _Response += "\r\n\r\n";
