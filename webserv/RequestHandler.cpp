@@ -34,7 +34,7 @@ std::string generateHTML_file(std::string print, bool type) {
     else htmlfile += "        <p style=\"color: green; font-size: 35px;\">"+ print + "</p>\n";
     htmlfile += "    </div>\n";
     htmlfile += "</body>\n";
-    htmlfile += "</html>\n";;
+    htmlfile += "</html>\n";
     return htmlfile;
 }
 
