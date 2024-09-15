@@ -64,7 +64,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
 
                             /************/
                             std::cout << "here GET\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-                            _clients[idx]->_request.printRequest();
+                            // _clients[idx]->_request.printRequest();
                             std::cout << "here GET\n\n\n\n\n";
 
                             /************/
@@ -81,9 +81,9 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                         {
                             std::cout << "POST PRINT BODY\n";
                             _clients[idx]->_request.findTypeOfPostMethod();
-                            std::cout << "body is ==>\n "<<_buffer << std::endl;
+                            // std::cout << "body is ==>\n "<<_buffer << std::endl;
                             _clients[idx]->_request.setBody(_buffer);
-                            _clients[idx]->_request.printRequest();
+                            // _clients[idx]->_request.printRequest();
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);

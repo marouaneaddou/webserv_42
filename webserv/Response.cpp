@@ -76,7 +76,7 @@ void Response::generateHeaderResponse()
     }
         _Response += "\r\n\r\n";
         _Response += _body;
-    std::cout << "\n*************************************\n"<<_Response<< "\n*************************************\n" << std::endl;
+    // std::cout << "\n*************************************\n"<<_Response<< "\n*************************************\n" << std::endl;
     // _Response += dataFile;
 }
 

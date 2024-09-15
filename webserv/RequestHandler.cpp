@@ -96,7 +96,7 @@ void RequestHandler::check_requested_method(Client* cli)
         {
             cli->setOnetime();
             get_requested_ressource(cli);
-            std::string typeRessource = get_ressource_type(cli);
+            std::string typeRessource = get_ressource_type(abs_path);
             // std::cout << " request ==> " << get_requested_ressource(cli) << std::endl;
             if (typeRessource == "DIR")
             {
@@ -200,7 +200,7 @@ void RequestHandler::check_requested_method(Client* cli)
         
             get_requested_ressource(cli);
             cli->setOnetime();
-            if (get_ressource_type(cli) == "DIR") {
+            if (get_ressource_type(abs_path) == "DIR") {
                 if (_path[_path.length() - 1] != '/') {
                     if (access(abs_path.c_str(), R_OK) != 0) {
                         std::cout << "NOT access\n";
@@ -440,37 +440,80 @@ void RequestHandler::check_requested_method(Client* cli)
         //     // std::cout << cli->_request.getPureBody[]
         // }
     }
-    else if (cli->_request.getMethod() == "DELETE") {
-        if(cli->getOnetime() == false)
-        {
-            cli->setOnetime();
+    else if (cli->_request.getMethod() == "DELETE") 
+    {
             get_requested_ressource(cli);
-            if (get_ressource_type(cli) == "DIR")
-            {
-                if (_path[_path.length() - 1] != '/')
-                {
-                    cli->_response.setStatus(409);
-                    throw(409);
-                }
-                if (if_location_has_cgi(cli))
-                {
-                    if (is_dir_has_index_files(cli) == false)
-                    {
-                        
-                    }
-                }
-                else
-                    ;
-                    //delete all
-                
-            }
-
-        }
-
-    
+            handleDeleteRequest(cli, abs_path);
     }
     return;
 }
+
+////////////////////////
+void RequestHandler::deleteDirectoryRecursively(Client* cli, const char* dirPath)
+{
+     DIR *dir = opendir(dirPath);
+    if (dir == NULL)
+    {
+        cli->_response.setStatus(403);
+        throw(403);
+    }
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+        std::string fullPath = std::string(dirPath) + "/" + entry->d_name;
+        if (entry->d_type == DT_DIR)
+            deleteDirectoryRecursively(cli, fullPath.c_str());
+        else
+            handleDeleteRequest(cli, fullPath);
+    }
+    closedir(dir);
+    rmdir(dirPath);
+}
+void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
+{
+    if (get_ressource_type(abs_path) == "DIR")
+    {
+        if (_path[_path.length() - 1] != '/')
+        {
+            cli->_response.setStatus(409);
+            throw(409);
+        }
+        if(ifLocationSupportCgi(cli))
+        {
+            if (is_dir_has_index_files(cli) == true)
+            {
+                // run cgi
+            }
+            else
+            {
+                cli->_response.setStatus(403);
+                throw(403);
+            }
+        }
+        else
+        {
+            deleteDirectoryRecursively(cli, abs_path.c_str());
+            // delete all folder content
+        }
+
+    }
+    else
+    {
+        if(ifLocationSupportCgi(cli))
+        {
+            //run cgi
+        }
+        else
+        {
+            std::remove(abs_path.c_str());
+            cli->_response.setStatus(204);
+            throw(204);
+        }   
+    }
+}
+
 
 // bool RequestHandler::ifLocationSupportCgi(Location &location) const
 // {
@@ -526,7 +569,7 @@ void RequestHandler::get_requested_ressource(Client* cli)
     }
 }
 
-const std::string RequestHandler::get_ressource_type(Client* cli)
+const std::string RequestHandler::get_ressource_type(std::string abs_path)
 {
     std::string pathType;
     struct stat fileInfo;

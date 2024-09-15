@@ -28,7 +28,7 @@ protected:
 
     ///GET/////
     void get_requested_ressource(Client* cli);
-    const std::string get_ressource_type(Client* cli);
+    const std::string get_ressource_type(std::string abs_path);
     bool is_dir_has_index_files(Client* cli);
     bool if_location_has_cgi(Client* cli);
     const size_t getPathSize();
@@ -41,4 +41,8 @@ protected:
     // bool ifLocationSupportCgi(Location &location) const;
 
     //  other checking methods ...
+
+    ////////DELETE///////////
+    void handleDeleteRequest(Client* cli, std::string abs_path);
+    void deleteDirectoryRecursively(Client* cli, const char* dirPath);
 };

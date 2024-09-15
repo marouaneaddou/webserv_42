@@ -22,7 +22,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     first.directory_listing = true;
     first.methods.push_back("POST");
 
-    first.setCgiSupport(1);
+    // first.setCgiSupport(1);
     // first
     second.methods.push_back("GET");
     second.methods.push_back("POST");
@@ -30,7 +30,7 @@ void fill_Conf(std::vector<Servers> &Confs)
 // one.roots.push_back("/home/marouan/Desktop/project_42/webserv_42/webserv");
     // one.roots.push_back("/home/mel-gand/webserv42/webserv_42/webserv/test");
     // one.roots.push_back("/Users/maddou/Desktop/project42/webserv_42/webserv/test/web_dir");
-    one.roots.push_back("/Users/maddou/Desktop/project42/webserv_42/webserv");
+    one.roots.push_back("/Users/mel-gand/Desktop/webserv_git/webserv");
     one._indexFiles.push_back("python.py");
     // one.locations.directory_listing = true;
     // one.locat
