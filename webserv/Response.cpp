@@ -8,6 +8,7 @@
 Response::Response()
 {
     setStatus(200);
+    setStatusMsg("OK");
 }
 
 Response::~Response()
@@ -84,6 +85,9 @@ void Response::generateHeaderResponse()
 void Response::Send(int cli_fd)
 {
     signal(SIGPIPE, SIG_IGN);
-    int nbyte = send(cli_fd, _Response.data(), 1000000, 0);
+    int read;
+    if (_Response.size() > 1000000) read = 1000000;
+    else read = _Response.size();
+    int nbyte = send(cli_fd, _Response.data(), read, 0);
     _Response.erase(0, nbyte);
 }

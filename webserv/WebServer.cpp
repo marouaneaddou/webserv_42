@@ -89,9 +89,9 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                             FD_SET(idx, &current_Wsockets);
                         }
                     }
-                    else {
-                        std::cout << "\n\nkayna chi haja machi normale \n\n";
-                    }
+                    // else {
+                    //     std::cout << "\n\nkayna chi haja machi normale \n\n";
+                    // }
 
                 }
             }
@@ -103,15 +103,11 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                         std::cout << "create handler" << std::endl;
                         handler = createHandler(_clients.at(idx)->_request);
                     }
-                    std::cout << "check error post1\n";
                     handler->handleRequest(_clients.at(idx));
-                    std::cout << "check error post2\n";
-
                 }
                 // in this condition start send data to socket file client 
                 if (_clients.at(idx)->getTypeData() == WRITEDATA)
                 {
-                    std::cout << "check if send message in uploud not support server cgi\n";
                     _clients.at(idx)->_response.Send(idx);
                     if ( _clients.at(idx)->_response.getResponse().size() == 0) {
                         _clients.at(idx)->setTypeData(CLOSESOCKET);

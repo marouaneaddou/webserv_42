@@ -1,14 +1,22 @@
 #pragma once
 
 #include "Client.hpp"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <fcntl.h>
+#include <cstdio>
+#include <cstring>
 #include <dirent.h>
+#include <sys/dirent.h>
+#include <sys/unistd.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <string.h>
+#include <stdio.h>
 
 class RequestHandler {
 public:
@@ -38,9 +46,7 @@ protected:
 
     ////POST///////
     // bool if_location_support_upload(Client* cli);
-    // bool ifLocationSupportCgi(Location &location) const;
 
-    //  other checking methods ...
 
     ////////DELETE///////////
     void handleDeleteRequest(Client* cli, std::string abs_path);
