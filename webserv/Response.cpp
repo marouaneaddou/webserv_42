@@ -51,9 +51,6 @@ void Response::setBody(const std::string& body)
 void Response::setAppendBody(const char *buffer)
 {
     _body.append(buffer);
-    // std::cout << buffer << std::endl;
-    //std::cout << "size" << _body.size() << std::endl;
-    //std::cout << _body << std::endl;
 }
 
 std::string Response::getBody() const
@@ -71,19 +68,22 @@ void Response::generateHeaderResponse()
     while (it != _headers.end())
     {
         _Response += it->first + ": " + it->second;
-        if (++it != _headers.end())
-            _Response += "\n";
+        if (++it != _headers.end()) {
+            _Response += "\r\n";
+            std::cout << it->first << " 11 " << it->second << std::endl;
+        }
     }
-        _Response += "\r\n\r\n";
-        _Response += _body;
-    std::cout << "\n*************************************\n"<<_Response<< "\n*************************************\n" << std::endl;
-    // _Response += dataFile;
+    _Response += "\r\n\r\n";
+    _Response += _body;
 }
 
 
 void Response::Send(int cli_fd)
 {
     signal(SIGPIPE, SIG_IGN);
-    int nbyte = send(cli_fd, _Response.data(), 1000000, 0);
+    int read;
+    if (_Response.size() > 1000000) read = 1000000;
+    else read = _Response.size();
+    int nbyte = send(cli_fd, _Response.data(), read, 0);
     _Response.erase(0, nbyte);
 }

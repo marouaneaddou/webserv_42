@@ -18,6 +18,7 @@ void StaticFileHandler::handleRequest(Client* cli)
             is_method_allowed_in_location(cli);
         }
         std::cout << "test 1337\n";
+        setStatusMessage(cli);
         check_requested_method(cli);
         std::cout << "test 1338\n";
 

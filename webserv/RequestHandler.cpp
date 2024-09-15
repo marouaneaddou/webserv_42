@@ -58,15 +58,12 @@ void RequestHandler::req_uri_location(Client* cli)
         //std::cout << "LONGEST MATCH\n";
         return;
     }
-    // cli->_response.setStatus(404); // default location is always there, we dont need this
-    // throw(404);
 }
 
 void RequestHandler::is_location_have_redirection(Client* cli)
 {
     if (!(cli->getServer().locations[_blockIdx].getReturn().empty()))
     {
-        // std::cout << cli->getServer().locations[_blockIdx].getReturn() << std::endl;
         cli->_response.setHeader("Location", cli->getServer().locations[_blockIdx].getReturn());
         cli->_response.setStatus(301);
         cli->_response.setHeader("Content-Length", 0);
@@ -79,7 +76,6 @@ void RequestHandler::is_method_allowed_in_location(Client* cli)
 {
     for (int i = 0; i < cli->getServer().locations[_blockIdx].getAcceptedMethod().size(); i++)
     {
-        // std::cout << "HERE --------------???????????\n";
         if (cli->getServer().locations[_blockIdx].getAcceptedMethod()[i] == cli->_request.getMethod())
             return;
     }
@@ -97,7 +93,6 @@ void RequestHandler::check_requested_method(Client* cli)
             cli->setOnetime();
             get_requested_ressource(cli);
             std::string typeRessource = get_ressource_type(cli);
-            // std::cout << " request ==> " << get_requested_ressource(cli) << std::endl;
             if (typeRessource == "DIR")
             {
                 if (_path[_path.length() - 1] != '/')
@@ -110,7 +105,7 @@ void RequestHandler::check_requested_method(Client* cli)
                 }
                 if (is_dir_has_index_files(cli) == false)
                 {
-                std::cout <<"path =>> " << _path[_path.length() - 1] << std::endl;
+                // std::cout <<"path =>> " << _path[_path.length() - 1] << std::endl;
                     //check autoindex/directorylisting : ON/OFF
 
                     //OFF :
@@ -178,6 +173,7 @@ void RequestHandler::check_requested_method(Client* cli)
         }
         else
         {
+            
             if (cli->getTypeData() == READDATA)
             {
                 cli->setData();
@@ -186,7 +182,6 @@ void RequestHandler::check_requested_method(Client* cli)
                     cli->setTypeData(WRITEDATA);
                     cli->setreadWriteSize(0);
                     cli->_response.setHeader("Content-Type", getMimeType());
-                    // cli->_response.setHeader("Content-Length", cli->_response.getBody().size()/*StaticFile.length()*/);
                     cli->_response.setHeader("Content-Length", cli->getData().size()/*StaticFile.length()*/);
                     cli->closeFile();
                     cli->_response.setBody(cli->getData()/*StaticFile*/);
@@ -224,9 +219,6 @@ void RequestHandler::check_requested_method(Client* cli)
                         cli->_response.setStatus(403);
                         cli->setTypeData(WRITEDATA);
                         throw(403);
-                    // cli->_response.setHeader("Location", _path + '/');
-                    // cli->_response.setStatus(307);
-                    // throw(301);
                     }
                 }
             
@@ -406,39 +398,6 @@ void RequestHandler::check_requested_method(Client* cli)
                         throw(403);
                     }
             }
-
-
-
-        
-
-        //     get_requested_ressource(cli);
-        // // std::cout << "here status ok" << cli->_response.getStatus()  << " " << cli->getServer().locations[_blockIdx].getPath()<< std::endl;;
-        // if (get_ressource_type(cli) == "DIR")
-        // {
-        // }
-        // else 
-        // {
-        //     // ifLocationSupportCgi(cli->getServer().locations[_blockIdx]);
-        //     if (cli->getServer().locations[_blockIdx].getCgiSupport() != true)
-        //     {
-        //         cli->_response.setStatus(403);
-        //         throw(403);
-        //     }
-            
-        //     // std::ofstream outputFile("./test.jpg", std::ios::out);
-        //     // std::cout << "{{{{{{{{{}}}}}}}}}\n";
-        //     // if (outputFile.is_open())
-        //     //     std::cout << "not open file\n";
-        //     // cli->_request.getBody().find("\r\n");
-        //     // std::string buffer = cli->_request.getBody().substr(cli->_request.getBody().find("\r\n\r\n") + 4);
-        //     // outputFile.write(buffer.c_str(), buffer.length());
-        //     // outputFile.close();
-        //     // for (int i = 0; i < cli->_request.getSizeOfBodyPure(); i++)
-        //     //     outputFile << cli->_request.getElementBodyPure(i);
-        //     // outputFile.close();
-        //     // std::cout << "hnaya kayan uploud" << std::endl;
-        //     // std::cout << cli->_request.getPureBody[]
-        // }
     }
     else if (cli->_request.getMethod() == "DELETE") {
         if(cli->getOnetime() == false)
@@ -472,10 +431,6 @@ void RequestHandler::check_requested_method(Client* cli)
     return;
 }
 
-// bool RequestHandler::ifLocationSupportCgi(Location &location) const
-// {
-//     return 
-// }
 
 
 bool RequestHandler::is_dir_has_index_files(Client* cli)
@@ -485,15 +440,12 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
     for (int i = 0; i < cli->getServer()._indexFiles.size(); i++)
     {
         std::string filePath = abs_path + cli->getServer()._indexFiles[i];
-        std::cout << "filePath " << filePath << std::endl;
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
             abs_path = abs_path + cli->getServer()._indexFiles[i];
-            std::cout << abs_path << " " << cli->getServer()._indexFiles[i] << std::endl;
             return true;
         }
     }
-    std::cout << "pppppppppppppppppppppp" << std::endl;
     return false;
 }
 
@@ -517,11 +469,8 @@ void RequestHandler::get_requested_ressource(Client* cli)
     else
         _path = url;
     abs_path = cli->getServer().roots[0] + _path;
-    std::cout << "absulate path" << abs_path << std::endl;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
-        std::cout << "ERROR IS FORBIDEN ACCESS" << std::endl;
         cli->_response.setStatus(404);
-        //cli->setSizeFile(0);
         throw(404);
     }
 }
@@ -580,7 +529,6 @@ const std::string RequestHandler::getMimeType()
     MimeTypes[".txt"] = "text/plain";
     MimeTypes[".css"] = "text/css";
     MimeTypes[".mp4"] = "video/mp4";
-    //std::cout << "PATH" << _path << std::endl;
     std::string::size_type idx = _path.rfind('.');
     if (idx != std::string::npos)
     {
