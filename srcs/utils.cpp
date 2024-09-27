@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 14:39:01 by aech-che          #+#    #+#             */
-/*   Updated: 2024/06/07 00:14:51 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/09/21 13:17:35 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,44 +25,33 @@ Utils::Utils()
 
 Utils::~Utils(){
 }
+#include <string>
+#include <cctype>
 
 std::string Utils::strtrim(std::string s)
 {
+    size_t start = s.find_first_not_of(" \t\n\r\f\v");
+    if (start == std::string::npos)
+        return "";
 
-	int begin = -1;
-	int end = -1;
-    std::string trimmed = "";
-    
-
-    if(s.length()  == 0)
-        return(trimmed);    
-    if (s.find(" ") == std::string::npos 
-        && s.find("\t") == std::string::npos)
-        return(s);
-	for (size_t i = 0; i < s.length(); i += 1)
-	{
-		if ((s[i] != ' ' && s[i] != '\t') && begin != -1)
-			end = i;
-		else if (s[i] != ' ' && s[i] != '\t')
-			begin = i;
-		
-	}
-    trimmed = s.substr(begin, end - 1);
-	return(trimmed);
+    size_t end = s.find_last_not_of(" \t\n\r\f\v");
+    return s.substr(start, end - start + 1);
 }
 
 
-// void Utils::count_servers(std::ifstream &infile)
-// {
-//     std::string buff;
-//     while (infile)
-//     {
-//         std::getline(infile, buff);
-//         if (buff == "server:")
-//             __NUMBER_OF_SERVERS__ += 1;
-//     }
-//     infile.close();
-// }
+
+
+void Utils::count_servers(std::ifstream &infile)
+{
+    std::string buff;
+    while (infile)
+    {
+        std::getline(infile, buff);
+        if (buff == "server:")
+            __NUMBER_OF_SERVERS__ += 1;
+    }
+    infile.close();
+}
 
 
 
@@ -85,5 +74,4 @@ std::vector<std::string> Utils::split(std::string s, std::string c)
     vec.push_back(s);
     return(vec);
 }
-
 

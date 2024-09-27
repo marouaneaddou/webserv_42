@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   locations.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:18 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/09/05 13:03:20 by maddou           ###   ########.fr       */
+/*   Updated: 2024/09/24 10:54:47 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#ifndef LOCATIONS_HPP
+# define LOCATIONS_HPP
 
 #include "includes.hpp"
 #include <string>
@@ -26,19 +27,40 @@ class Locations
                 std::string directory;
                 std::string cgi_bin;
                 std::string cgi_extension;
-                bool    cgiSupport;
+                bool cgi_support;
+                std::vector<std::string> _methods;
+                bool directory_listing;
+                std::vector<std::string> _indexFiles;
+                std::string root;
+                std::string return_;
 
-        public:
-                std::vector<std::string> methods;
-            Locations();
-            ~Locations();
-            bool directory_listing;
-            std::string getPath() const;
-            std::string getReturn() const;
-            void setReturn(std::string ret);
-            void setPath(std::string path);
-            void setCgiSupport(bool u);
-            bool getCgiSupport() const ;
-            std::vector<std::string> getAcceptedMethod() const;
-
+        public :      
+                Locations();
+                ~Locations() {};
+                void setPath(std::string path);
+                void setReturn(std::string ret);
+                void setDefaultFile(std::string file);
+                void setDirectory(std::string dir);
+                void setCgiBin(std::string bin);
+                void setCgiExtension(std::string ext);
+                void setCgiSupport(bool support);
+                void setMethods(std::vector<std::string> methods);
+                void setDirectoryListing(bool listing);
+                void setIndexFiles(std::vector<std::string> indexFiles);
+                void setRoot(std::string root);
+                std::string getRoot();
+                std::vector<std::string> getIndexFiles();
+                bool getDirectoryListing();
+                std::vector<std::string> getMethods();
+                std::string getPath();
+                std::string getReturn();
+                std::string getDefaultFile();
+                std::string getDirectory();
+                std::string getCgiBin();
+                std::string getCgiExtension();
+                bool getCgiSupport();
 };
+
+
+
+#endif

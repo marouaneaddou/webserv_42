@@ -2,8 +2,20 @@
 #include <unistd.h>
 #include <vector>
 #include <map>
+#include <string>
+#include <sstream>
+#include <cstdlib>
 #include <list>
 #include <fstream>
+#include "errors.hpp"
+#include "parsing.hpp"
+#include "locations.hpp"
+#include "servers.hpp"
+#include "utils.hpp"
+#include "webserv.hpp"
+#include <algorithm>
+
+
 
 
 
