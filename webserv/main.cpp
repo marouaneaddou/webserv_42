@@ -23,7 +23,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     first.methods.push_back("POST");
     first.methods.push_back("DELETE");
 
-    first.setCgiSupport(1);
+    first.setCgiSupport(0);
     // first
     second.methods.push_back("GET");
     second.methods.push_back("POST");
@@ -49,7 +49,7 @@ void fill_Conf(std::vector<Servers> &Confs)
     // one.locations.second
 
     two.ports.clear();
-    two.roots.push_back("/Users/aech-che/Desktop/webserv_dyal_cgi/webserv/test");
+    // two.roots.push_back("/Users/aech-che/Desktop/webserv_dyal_cgi/webserv/test");
     // two.ports.push_back(7777);
     // two.ports.push_back(3052);
     // two.ports.push_back(4242);

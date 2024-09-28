@@ -16,6 +16,7 @@ WebServ::~WebServ()
         delete _servers[i];
 }
 
+
 void WebServ::run_servers(std::vector<Servers> Confs)
 {
     int pos;
@@ -60,15 +61,6 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                             _clients[idx]->_request.findTypeOfPostMethod();
                             _clients[idx]->_request.setBody(_buffer);
 
-                            // _clients[idx]->_request.parceBody();
-
-                            /************/
-                            std::cout << "here GET\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-                            // _clients[idx]->_request.printRequest();
-                            std::cout << "here GET\n\n\n\n\n";
-
-                            /************/
-
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -76,14 +68,10 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                     }
                     else if (_clients[idx]->_request.getHeader("Content-Length")  != _clients[idx]->_request.getEndHeaders())
                     {
-                        std::cout << "size read====>" << _buffer.size() << " "<< stoi(_clients[idx]->_request.getHeader("Content-Length")->second) << std::endl;
                         if (_buffer.size() == stoi(_clients[idx]->_request.getHeader("Content-Length")->second))
                         {
-                            std::cout << "POST PRINT BODY\n";
                             _clients[idx]->_request.findTypeOfPostMethod();
-                            // std::cout << "body is ==>\n "<<_buffer << std::endl;
                             _clients[idx]->_request.setBody(_buffer);
-                            // _clients[idx]->_request.printRequest();
                             _buffer.clear();
                             FD_CLR(idx, &current_Rsockets);
                             FD_SET(idx, &current_Wsockets);
@@ -100,20 +88,16 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                 if (_clients.at(idx)->_response.getStatus() == 200)
                 {
                     if (_clients.at(idx)->getOnetime() == false) {
-                        std::cout << "create handler" << std::endl;
                         handler = createHandler(_clients.at(idx)->_request);
                     }
                     handler->handleRequest(_clients.at(idx));
                 }
-                // in this condition start send data to socket file client 
                 if (_clients.at(idx)->getTypeData() == WRITEDATA)
                 {
                     _clients.at(idx)->_response.Send(idx);
                     if ( _clients.at(idx)->_response.getResponse().size() == 0) {
                         _clients.at(idx)->setTypeData(CLOSESOCKET);
-                        std::cout << "close socket client\n";
                     }
-                    // _clients.at(idx)->setSizeFile(_clients.at(idx)->_response.getResponse().size());
                 }
                 if (_clients.at(idx)->getTypeData() == CLOSESOCKET)
                 {
@@ -131,22 +115,18 @@ void WebServ::read_request(int fd_R)
 {
     if ((_nbytes = recv(fd_R, _buf, 25000, 0)) <= 0)
     {
-        // got error or connection closed by client
         if (_nbytes == 0)
         {
             std::cout << std::strerror(errno) << std::endl;
-            printf("selectserver: socket %d hung up\n", fd_R);
         }
         else
             perror("read");
         close(fd_R);
         FD_CLR(fd_R, &current_Rsockets);
-        // continue;
     }
     if (_nbytes < sizeof(_buf))
         _buf[_nbytes] = '\0';
     _buffer.append(_buf, _nbytes);
-    //std::cout << "nbyte " << _nbytes << std::endl;
 }
 
 void WebServ::start_parsing(int fd_R)
@@ -162,7 +142,6 @@ void WebServ::start_parsing(int fd_R)
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
             _clients.at(fd_R)->_request.setHeader(_buffer);
-            // _clients.at(fd_R)->_request.printRequest();
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
             FD_CLR(fd_R, &current_Rsockets);
             FD_SET(fd_R, &current_Wsockets);

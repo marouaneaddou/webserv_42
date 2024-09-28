@@ -4,6 +4,26 @@
 RequestHandler::RequestHandler()
 {}
 
+std::string generateHTML_file(std::string print, bool type) {
+    std::string htmlfile = "<!DOCTYPE html>\n";
+    htmlfile += "<html lang=\"en\">\n";
+    htmlfile += "<head>\n";
+    htmlfile += "    <meta charset=\"UTF-8\">\n";
+    htmlfile += "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+    htmlfile += "    <title>Document</title>\n";
+    htmlfile += "</head>\n";
+    htmlfile += "<body>\n";
+    htmlfile += "    <div>\n";
+    if (type == 0) htmlfile += "        <p style=\"color: brown; font-size: 35px;\">"+ print + "</p>\n";
+    else htmlfile += "        <p style=\"color: green; font-size: 35px;\">"+ print + "</p>\n";
+    htmlfile += "    </div>\n";
+    htmlfile += "</body>\n";
+    htmlfile += "</html>\n";
+    return htmlfile;
+}
+
+
+
 void RequestHandler::req_uri_location(Client* cli)
 {
     std::string url = cli->_request.getURL();
@@ -15,7 +35,6 @@ void RequestHandler::req_uri_location(Client* cli)
     //Exact Match
     for (int i = 0; i < cli->getServer().locations.size(); i++)
     {
-        std::cout << cli->getServer().locations[i].getPath() << std::endl;
         if (cli->getServer().locations[i].getPath()[0] == '=' && cli->getServer().locations[i].getPath().substr(2) == _path)
         {
             _blockIdx = i;
@@ -37,11 +56,8 @@ void RequestHandler::req_uri_location(Client* cli)
     }
     if (!(longestMatch.empty()))
     {
-        //std::cout << "LONGEST MATCH\n";
         return;
     }
-    // cli->_response.setStatus(404); // default location is always there, we dont need this
-    // throw(404);
 }
 
 void RequestHandler::is_location_have_redirection(Client* cli)
@@ -66,44 +82,6 @@ void RequestHandler::is_method_allowed_in_location(Client* cli)
     cli->_response.setStatus(405);
     throw(405);
 }
-
-
-// void check_execution(std::string cgi_path, struct stat *file_info)
-// {
-
-//     //if cgi_extension exist conf and path_python exist and url ends with cgi extens
-    
-//     if (stat(cgi_path.c_str(), file_info) == -1)
-//         throw (7);
-//     if (file_info->)
-//     //fill av execve
-//     char **av;
-//     av = malloc(3*sizeof(char *));
-//     av[0] = malloc("/usr/local/bin/python3".size());
-//     av[0] = scrcpy("/usr/local/bin/python3");
-//     av[1] = malloc(cgi_path.size());
-//     av[1] = strcpy(cgi_path.c_str());
-//     av[2] = NULL;
-//     //fill envp execve
-//     void    HttpRequestHandler::add_standard_CGI_environment_variable()
-//     {
-//         std::map<std::string, std::string>::iterator it = request_headers.find("Content-Length");
-//         if (it != request_headers.end())
-//             envp_as_vec.push_back("CONTENT_LENGTH=" + it->second);
-//         it = request_headers.find("Content-Type");
-//         if (it != request_headers.end())
-//             envp_as_vec.push_back("CONTENT_TYPE=" + it->second);
-//         envp_as_vec.push_back("SCRIPT_FILENAME=" + requested_resource_path);
-//         envp_as_vec.push_back("SCRIPT_NAME=" +  request_url_as_vector.back());
-//         envp_as_vec.push_back("QUERY_STRING=");
-//         envp_as_vec.push_back("REQUEST_METHOD=" + request_method);
-//         envp_as_vec.push_back("REDIRECT_STATUS=200");
-//         envp_as_vec.push_back("SERVER_NAME=webserv");
-//         envp_as_vec.push_back("SERVER_PROTOCOL=HTTP/1.1");
-//     }
-//     //convert envp_as_vec to c style 
-//     //change status
-// }
 
 
 
@@ -179,7 +157,6 @@ std::string cgi_exec(std::string _path, int flag_python)
             char buffer[1024];
             int len = read(fd[0], buffer, 1024);
             buffer[len] = '\0';
-            std::cout << buffer << std::endl;
             cgi_response = buffer;
             waitpid(pid, NULL, 0);
 
@@ -215,7 +192,6 @@ void RequestHandler::check_requested_method(Client* cli)
             {
                 if (_path[_path.length() - 1] != '/')
                 {
-                    std::cout << "directory in GET\n";
                     cli->_response.setHeader("Location", _path + '/');
                     cli->_response.setHeader("Content-Length", 0);
                     cli->_response.setStatus(301);
@@ -256,42 +232,15 @@ void RequestHandler::check_requested_method(Client* cli)
             cli->setTypeData(READDATA);
         }
         if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path)) {
-             /*****************************************/
-            /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
-            // std::cout << "@@ PATH" << _path << std::endl;
-            // exit(0);
             std::string cgi_response = cgi_exec(abs_path, 1);
-
-                        
-
-
-            /*****************************************/
-
-            // check return cgi !!!!!!!!!!
-            /*****this just test ====>***/ cli->_response.setStatus(200);
-
-            /****************************************/
-                            // std::string htmlfile = "<!DOCTYPE html>\n"
-                            //                     "<html lang=\"en\">\n"
-                            //                     "<head>\n"
-                            //                     "    <meta charset=\"UTF-8\">\n"
-                            //                     "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                            //                     "    <title>Document</title>\n"
-                            //                     "</head>\n"
-                            //                     "<body>\n"
-                            //                     "    <div>\n"
-                            //                     "        <p style=\"color: brown; font-size: 35px;\">CGI GET method.</p>\n"
-                            //                     "    </div>\n"
-                            //                     "</body>\n"
-                            //                     "</html>\n";
-                        std::string htmlfile = cgi_response;
-                        cli->_response.setHeader("Content-Type", "text/html");
-                        cli->_response.setHeader("Content-Length", htmlfile.length());
-                        cli->_response.setBody(htmlfile);
-                        cli->_response.generateHeaderResponse();
+            cli->_response.setStatus(200);                         
+            std::string htmlfile = generateHTML_file(cgi_response, 1);
+            cli->_response.setHeader("Content-Type", "text/html");
+            cli->_response.setHeader("Content-Length", htmlfile.length());
+            cli->_response.setBody(htmlfile);
+            cli->_response.generateHeaderResponse();
             cli->setTypeData(WRITEDATA);
-            /****************************************/
-            // throw(200);
+            throw(200);
         }
         else
         {
@@ -304,10 +253,9 @@ void RequestHandler::check_requested_method(Client* cli)
                     cli->setTypeData(WRITEDATA);
                     cli->setreadWriteSize(0);
                     cli->_response.setHeader("Content-Type", getMimeType());
-                    // cli->_response.setHeader("Content-Length", cli->_response.getBody().size()/*StaticFile.length()*/);
-                    cli->_response.setHeader("Content-Length", cli->getData().size()/*StaticFile.length()*/);
+                    cli->_response.setHeader("Content-Length", cli->getData().size());
                     cli->closeFile();
-                    cli->_response.setBody(cli->getData()/*StaticFile*/);
+                    cli->_response.setBody(cli->getData());
                     cli->_response.generateHeaderResponse();
                 }
             }
@@ -321,20 +269,7 @@ void RequestHandler::check_requested_method(Client* cli)
             if (get_ressource_type(abs_path) == "DIR") {
                 if (_path[_path.length() - 1] != '/') {
                     if (access(abs_path.c_str(), R_OK) != 0) {
-                        std::cout << "NOT access\n";
-                        std::string htmlfile = "<!DOCTYPE html>\n"
-                                                            "<html lang=\"en\">\n"
-                                                            "<head>\n"
-                                                            "    <meta charset=\"UTF-8\">\n"
-                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                                            "    <title>Document</title>\n"
-                                                            "</head>\n"
-                                                            "<body>\n"
-                                                            "    <div>\n"
-                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
-                                                            "    </div>\n"
-                                                            "</body>\n"
-                                                            "</html>\n";
+                        std::string htmlfile = generateHTML_file("ERROR: forbiden access", 0);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
                         cli->_response.setBody(htmlfile);
@@ -342,29 +277,15 @@ void RequestHandler::check_requested_method(Client* cli)
                         cli->_response.setStatus(403);
                         cli->setTypeData(WRITEDATA);
                         throw(403);
-                    // cli->_response.setHeader("Location", _path + '/');
-                    // cli->_response.setStatus(307);
-                    // throw(301);
                     }
+                    cli->_response.setHeader("Location", _path + '/');
+                    cli->_response.setStatus(307);
+                    throw(301);
                 }
             
                 if (is_dir_has_index_files(cli) == true) {
-
                     if (access(abs_path.c_str(), R_OK) != 0) {
-                        std::cout << "NOT access\n";
-                        std::string htmlfile = "<!DOCTYPE html>\n"
-                                                            "<html lang=\"en\">\n"
-                                                            "<head>\n"
-                                                            "    <meta charset=\"UTF-8\">\n"
-                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                                            "    <title>Document</title>\n"
-                                                            "</head>\n"
-                                                            "<body>\n"
-                                                            "    <div>\n"
-                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
-                                                            "    </div>\n"
-                                                            "</body>\n"
-                                                            "</html>\n";
+                        std::string htmlfile = generateHTML_file("ERROR: forbiden access", 0);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
                         cli->_response.setBody(htmlfile);
@@ -373,7 +294,6 @@ void RequestHandler::check_requested_method(Client* cli)
                         cli->setTypeData(WRITEDATA);
                         throw(403);
                     }
-                    // check location have or support uploud 
                     if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
                                         /*****************************************/
 
@@ -387,19 +307,7 @@ void RequestHandler::check_requested_method(Client* cli)
                                         /*****this just test ====>***/ cli->_response.setStatus(200);
 
                                         /****************************************/
-                                        std::string htmlfile = "<!DOCTYPE html>\n"
-                                                            "<html lang=\"en\">\n"
-                                                            "<head>\n"
-                                                            "    <meta charset=\"UTF-8\">\n"
-                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                                            "    <title>Document</title>\n"
-                                                            "</head>\n"
-                                                            "<body>\n"
-                                                            "    <div>\n"
-                                                            "        <p style=\"color: brown; font-size: 35px;\">The file upload was successful.</p>\n"
-                                                            "    </div>\n"
-                                                            "</body>\n"
-                                                            "</html>\n";
+                                        std::string htmlfile = generateHTML_file("The file upload was successful.", 1);
 
                                         cli->_response.setHeader("Content-Type", "text/html");
                                         cli->_response.setHeader("Content-Length", htmlfile.length());
@@ -410,30 +318,22 @@ void RequestHandler::check_requested_method(Client* cli)
                         // throw(200);
                     }
                     else {
-                        std::string htmlfile = "<!DOCTYPE html>\n"
-                                                            "<html lang=\"en\">\n"
-                                                            "<head>\n"
-                                                            "    <meta charset=\"UTF-8\">\n"
-                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                                            "    <title>Document</title>\n"
-                                                            "</head>\n"
-                                                            "<body>\n"
-                                                            "    <div>\n"
-                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
-                                                            "    </div>\n"
-                                                            "</body>\n"
-                                                            "</html>\n";
+                        std::string htmlfile = generateHTML_file("ERROR: NOT Support CGI", 0);
                         cli->_response.setStatus(403);
                         cli->_response.setBody(htmlfile);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
                         cli->_response.generateHeaderResponse();
                         cli->setTypeData(WRITEDATA);
-                        std::cout << "return responce if server not support cgi\n";
                         throw(403);
                     }
                 }
                 else {
+                    std::string htmlfile = generateHTML_file("ERROR: NOT index file", 0);
+                    cli->_response.setStatus(403);
+                    cli->_response.setBody(htmlfile);
+                    cli->_response.setHeader("Content-Type", "text/html");
+                    cli->_response.setHeader("Content-Length", htmlfile.length());
                     cli->_response.setStatus(403);
                     cli->_response.generateHeaderResponse();
                     cli->setTypeData(WRITEDATA);
@@ -442,20 +342,7 @@ void RequestHandler::check_requested_method(Client* cli)
             }
             else {
                  if (access(abs_path.c_str(), R_OK) != 0) {
-                        std::cout << "NOT access\n";
-                        std::string htmlfile = "<!DOCTYPE html>\n"
-                                                            "<html lang=\"en\">\n"
-                                                            "<head>\n"
-                                                            "    <meta charset=\"UTF-8\">\n"
-                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                                            "    <title>Document</title>\n"
-                                                            "</head>\n"
-                                                            "<body>\n"
-                                                            "    <div>\n"
-                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
-                                                            "    </div>\n"
-                                                            "</body>\n"
-                                                            "</html>\n";
+                        std::string htmlfile = generateHTML_file("ERROR: forbiden access", 0);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
                         cli->_response.setBody(htmlfile);
@@ -478,19 +365,7 @@ void RequestHandler::check_requested_method(Client* cli)
                                         /*****this just test ====>***/ cli->_response.setStatus(200);
 
                                         /****************************************/
-                                        std::string htmlfile = "<!DOCTYPE html>\n"
-                                                            "<html lang=\"en\">\n"
-                                                            "<head>\n"
-                                                            "    <meta charset=\"UTF-8\">\n"
-                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                                            "    <title>Document</title>\n"
-                                                            "</head>\n"
-                                                            "<body>\n"
-                                                            "    <div>\n"
-                                                            "        <p style=\"color: brown; font-size: 35px;\">The file upload was successful.</p>\n"
-                                                            "    </div>\n"
-                                                            "</body>\n"
-                                                            "</html>\n";
+                                         std::string htmlfile = generateHTML_file("The file upload was successful.", 1);
 
                                         cli->_response.setHeader("Content-Type", "text/html");
                                         cli->_response.setHeader("Content-Length", htmlfile.length());
@@ -501,62 +376,17 @@ void RequestHandler::check_requested_method(Client* cli)
                         // throw(200);
                     }
                     else {
-                        std::string htmlfile = "<!DOCTYPE html>\n"
-                                                            "<html lang=\"en\">\n"
-                                                            "<head>\n"
-                                                            "    <meta charset=\"UTF-8\">\n"
-                                                            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                                                            "    <title>Document</title>\n"
-                                                            "</head>\n"
-                                                            "<body>\n"
-                                                            "    <div>\n"
-                                                            "        <p style=\"color: brown; font-size: 35px;\">ERROR</p>\n"
-                                                            "    </div>\n"
-                                                            "</body>\n"
-                                                            "</html>\n";
+                        std::string htmlfile = generateHTML_file("ERROR: NOT seport CGI", 0);
                         cli->_response.setStatus(403);
                         cli->_response.setBody(htmlfile);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
                         cli->_response.generateHeaderResponse();
                         cli->setTypeData(WRITEDATA);
-                        std::cout << "return responce if server not support cgi\n";
                         throw(403);
                     }
             }
 
-
-
-        
-
-        //     get_requested_ressource(cli);
-        // // std::cout << "here status ok" << cli->_response.getStatus()  << " " << cli->getServer().locations[_blockIdx].getPath()<< std::endl;;
-        // if (get_ressource_type(cli) == "DIR")
-        // {
-        // }
-        // else 
-        // {
-        //     // ifLocationSupportCgi(cli->getServer().locations[_blockIdx]);
-        //     if (cli->getServer().locations[_blockIdx].getCgiSupport() != true)
-        //     {
-        //         cli->_response.setStatus(403);
-        //         throw(403);
-        //     }
-            
-        //     // std::ofstream outputFile("./test.jpg", std::ios::out);
-        //     // std::cout << "{{{{{{{{{}}}}}}}}}\n";
-        //     // if (outputFile.is_open())
-        //     //     std::cout << "not open file\n";
-        //     // cli->_request.getBody().find("\r\n");
-        //     // std::string buffer = cli->_request.getBody().substr(cli->_request.getBody().find("\r\n\r\n") + 4);
-        //     // outputFile.write(buffer.c_str(), buffer.length());
-        //     // outputFile.close();
-        //     // for (int i = 0; i < cli->_request.getSizeOfBodyPure(); i++)
-        //     //     outputFile << cli->_request.getElementBodyPure(i);
-        //     // outputFile.close();
-        //     // std::cout << "hnaya kayan uploud" << std::endl;
-        //     // std::cout << cli->_request.getPureBody[]
-        // }
     }
     else if (cli->_request.getMethod() == "DELETE") 
     {
@@ -657,8 +487,13 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url;
     abs_path = cli->getServer().roots[0] + _path;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
+        std::string htmlfile = generateHTML_file("ERROR: NOT FOUND", 0);
+        cli->_response.setHeader("Content-Type", "text/html");
+        cli->_response.setHeader("Content-Length", htmlfile.length());
+        cli->_response.setBody(htmlfile);
+        cli->_response.generateHeaderResponse();
+        cli->setTypeData(WRITEDATA);
         cli->_response.setStatus(404);
-        //cli->setSizeFile(0);
         throw(404);
     }
 }
@@ -717,7 +552,6 @@ const std::string RequestHandler::getMimeType()
     MimeTypes[".txt"] = "text/plain";
     MimeTypes[".css"] = "text/css";
     MimeTypes[".mp4"] = "video/mp4";
-
     std::string::size_type idx = _path.rfind('.');
     if (idx != std::string::npos)
     {
@@ -764,7 +598,6 @@ const std::string RequestHandler::getDirListing()
         if (entry->d_name == curr[0] || entry->d_name == curr[1])  
             continue;
         filePath = abs_path + "/" + entry->d_name;
-
         struct stat fileStat;
 
         stat(filePath.c_str(), &fileStat);
