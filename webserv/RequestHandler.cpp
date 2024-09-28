@@ -244,7 +244,6 @@ void RequestHandler::check_requested_method(Client* cli)
         }
         else
         {
-
             if (cli->getTypeData() == READDATA)
             {
                 cli->setData();
@@ -465,6 +464,7 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
             abs_path = abs_path + cli->getServer()._indexFiles[i];
+            std::cout << abs_path << std::endl;
             return true;
         }
     }

@@ -8,14 +8,15 @@
 #include <vector>
 #include "../includes/servers.hpp"
 
-WebServ::WebServ(){}
+WebServ::WebServ(){
+    this->max_fd = 0;
+}
 
 WebServ::~WebServ()
 {
     for (int i = 0; i < _servers.size(); i++)
         delete _servers[i];
 }
-
 
 void WebServ::run_servers(std::vector<Servers> Confs)
 {
@@ -28,88 +29,97 @@ void WebServ::run_servers(std::vector<Servers> Confs)
     {
         ready_Rsockets = current_Rsockets;
         ready_Wsockets = current_Wsockets;
-        if (select(FD_SETSIZE, &ready_Rsockets, &ready_Wsockets, NULL, NULL) < 0)
+        int selectResult = select(max_fd + 1, &ready_Rsockets, &ready_Wsockets, NULL, NULL);
+        if (selectResult < 0) {
             std::cerr << "Error in select(): " << strerror(errno) << std::endl;
-        for (int idx = 0; idx < FD_SETSIZE; idx++)
+            exit(EXIT_FAILURE);
+        }
+        //Loop through the Server FDs//////////
+        for (int idx = 0; idx < servers_fds.size(); idx++)
         {
-            if (FD_ISSET(idx, &ready_Rsockets))
+            if (FD_ISSET(servers_fds[idx], &ready_Rsockets))
             {
-                std::vector<int>::iterator it = std::find(servers_fds.begin(), servers_fds.end(), idx);
-                if (it != servers_fds.end() /*&& servers[i]->getClients().size() < MAX_CONNECTIONS*/)
-                {
-                    int new_socket = 0;
-                    socklen_t _sockaddr_len = sizeof(_sockaddr);
-                    if ((new_socket = accept(*it, (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0)
-                        perror("Server failed to accept incoming connection");
-                    set_non_blocking(new_socket);
-                    std::cout << "clientFD: "<< new_socket << std::endl;
-                    _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
-                    Servers server = getConf(*it, Confs);
-                    _clients[new_socket]->setConf(server);
-                    // clients_fds.push_back(new_socket);
-                    FD_SET(new_socket, &current_Rsockets);
-                    printf("New connection accepted.\n");
+                int new_socket = 0;
+                socklen_t _sockaddr_len = sizeof(_sockaddr);
+                if ((new_socket = accept(servers_fds[idx], (sockaddr *)&_sockaddr,  &_sockaddr_len)) < 0){
+                    perror("Server failed to accept incoming connection");
+                    continue;
                 }
-                else
-                {
-                    read_request(idx);
-                    start_parsing(idx);
-                    if ( _clients[idx]->_request.getHeader("Transfer-Encoding") != _clients[idx]->_request.getEndHeaders())
-                    {
-                        if (_buffer.find("0\r\n\r\n") != -1)
-                        {
-                            _clients[idx]->_request.findTypeOfPostMethod();
-                            _clients[idx]->_request.setBody(_buffer);
-
-                            _buffer.clear();
-                            FD_CLR(idx, &current_Rsockets);
-                            FD_SET(idx, &current_Wsockets);
-                        }
-                    }
-                    else if (_clients[idx]->_request.getHeader("Content-Length")  != _clients[idx]->_request.getEndHeaders())
-                    {
-                        if (_buffer.size() == stoi(_clients[idx]->_request.getHeader("Content-Length")->second))
-                        {
-                            _clients[idx]->_request.findTypeOfPostMethod();
-                            _clients[idx]->_request.setBody(_buffer);
-                            _buffer.clear();
-                            FD_CLR(idx, &current_Rsockets);
-                            FD_SET(idx, &current_Wsockets);
-                        }
-                    }
-                    // else {
-                    //     std::cout << "\n\nkayna chi haja machi normale \n\n";
-                    // }
-
+                if (set_non_blocking(new_socket) < 0) {
+                    std::cerr << "Failed to set non-blocking for socket " << new_socket << ": " << strerror(errno) << std::endl;
+                    close(new_socket);
+                    continue;
                 }
-            }
-            else if (FD_ISSET(idx, &ready_Wsockets))
-            {
-                if (_clients.at(idx)->_response.getStatus() == 200)
-                {
-                    if (_clients.at(idx)->getOnetime() == false) {
-                        handler = createHandler(_clients.at(idx)->_request);
-                    }
-                    handler->handleRequest(_clients.at(idx));
-                }
-                if (_clients.at(idx)->getTypeData() == WRITEDATA)
-                {
-                    _clients.at(idx)->_response.Send(idx);
-                    if ( _clients.at(idx)->_response.getResponse().size() == 0) {
-                        _clients.at(idx)->setTypeData(CLOSESOCKET);
-                    }
-                }
-                if (_clients.at(idx)->getTypeData() == CLOSESOCKET)
-                {
-                    FD_CLR(idx, &current_Wsockets);
-                    close(idx);
-                    itClient it = _clients.find(idx);
-                    _clients.erase(it);
-                }
+                std::cout << "New connection accepted on clientFD: " << new_socket << std::endl;
+                _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
+                Servers server = getConf(servers_fds[idx], Confs);
+                _clients[new_socket]->setConf(server);
+                FD_SET(new_socket, &current_Rsockets);
+                if (new_socket > this->max_fd)
+                    this->max_fd = new_socket;
             }
         }
+        ////////////////////
+
+        //Loop through the Clients FDs//////////
+        for (itClient it_cli = _clients.begin();  it_cli != _clients.end();)
+        {
+            if (FD_ISSET(it_cli->first, &ready_Rsockets))
+            {
+                read_request(it_cli->first);
+                start_parsing(it_cli->first);
+                if ( _clients[it_cli->first]->_request.getHeader("Transfer-Encoding") != _clients[it_cli->first]->_request.getEndHeaders())
+                {
+                    if (_buffer.find("0\r\n\r\n") != -1)
+                    {
+                        _clients[it_cli->first]->_request.findTypeOfPostMethod();
+                        _clients[it_cli->first]->_request.setBody(_buffer);
+                        _buffer.clear();
+                        FD_CLR(it_cli->first, &current_Rsockets);
+                        FD_SET(it_cli->first, &current_Wsockets);
+                    }
+                }
+                else if (_clients[it_cli->first]->_request.getHeader("Content-Length")  != _clients[it_cli->first]->_request.getEndHeaders())
+                {
+                    if (_buffer.size() == stoi(_clients[it_cli->first]->_request.getHeader("Content-Length")->second))
+                    {
+                        _clients[it_cli->first]->_request.findTypeOfPostMethod();
+                        _clients[it_cli->first]->_request.setBody(_buffer);
+                        _buffer.clear();
+                        FD_CLR(it_cli->first, &current_Rsockets);
+                        FD_SET(it_cli->first, &current_Wsockets);
+                    }
+                }
+            }
+            if (FD_ISSET(it_cli->first, &ready_Wsockets))
+            {
+                if (_clients.at(it_cli->first)->getOnetime() == false) {
+                    handler = createHandler(_clients.at(it_cli->first)->_request);
+                }
+                handler->handleRequest(_clients.at(it_cli->first));
+                if (_clients.at(it_cli->first)->getTypeData() == WRITEDATA)
+                {
+                    _clients.at(it_cli->first)->_response.Send(it_cli->first);
+                    if ( _clients.at(it_cli->first)->_response.getResponse().size() == 0) {
+                            _clients.at(it_cli->first)->setTypeData(CLOSESOCKET);
+                    }
+                }
+                if (_clients.at(it_cli->first)->getTypeData() == CLOSESOCKET)
+                {
+                    FD_CLR(it_cli->first, &current_Wsockets);
+                    close(it_cli->first);
+                    itClient temp = it_cli;
+                    ++it_cli;
+                    _clients.erase(temp);
+                    continue;
+                }
+            }
+            ++it_cli;
+        }
+        ///////////////////
     }
 }
+
 
 void WebServ::read_request(int fd_R)
 {
@@ -168,17 +178,20 @@ void WebServ::SetListeners()
         {
             servers_fds.push_back(_servers[i]->getSocket()[j]);
             FD_SET(_servers[i]->getSocket()[j], &current_Rsockets);
+            if (_servers[i]->getSocket()[j] > this->max_fd)
+                max_fd = _servers[i]->getSocket()[j];
         }
     }
 }
 
-void WebServ::set_non_blocking(int sock) 
+int WebServ::set_non_blocking(int sock) 
 {
     if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1) 
     {
         perror("fcntl F_SETFL");
-        exit(EXIT_FAILURE);
+        return(-1);
     }
+    return (0);
 }
 
 

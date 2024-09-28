@@ -12,11 +12,13 @@
 #include "PhpCgiHandler.hpp"
 #include "../includes/servers.hpp"
 # include <algorithm>
+#include <sys/time.h>
 typedef  std::map<int, Client *>::iterator itClient;
 
 class WebServ
 {
     private:
+        int max_fd;
         int _nbytes;
         char _buf[250000];
         std::string _buffer;
@@ -36,7 +38,7 @@ class WebServ
         void run_servers(std::vector<Servers> Confs);
         Servers getConf(int fd, std::vector<Servers> Confs);
         void SetListeners();
-        void set_non_blocking(int sock);
+        int set_non_blocking(int sock);
         void read_request(int fd_R);
         void start_parsing(int fd_R);
         RequestHandler* createHandler(Request &request);

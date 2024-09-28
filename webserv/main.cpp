@@ -9,25 +9,38 @@ void fill_Conf(std::vector<Servers> &Confs)
     Servers two;
     Locations first;
     Locations second;
+    Locations third;
 
+
+    // First
     first.setPath("/");
-    // second.setPath("/python.py");
+    first.setCgiSupport(1);
+    first.methods.push_back("GET");
+    first.directory_listing = true;
 
     // first.setReturn("/first");
     // second.setReturn("/second");
     // first.setMethod("GET");
     // first.setMethod("POST");
 
-    first.methods.push_back("GET");
-    first.directory_listing = true;
-    first.methods.push_back("POST");
-    first.methods.push_back("DELETE");
+    // first.methods.push_back("POST");
+    // first.methods.push_back("DELETE");
 
-    first.setCgiSupport(0);
-    // first
-    second.methods.push_back("GET");
+    // second
+    // second.methods.push_back("GET");
+    // second.setPath(".bla");
+    // second.setPath("/python.py");
+    second.setCgiSupport(1);
     second.methods.push_back("POST");
+    second.directory_listing = true;
 
+
+
+    // Third
+    third.setPath("/directory/");
+    third.setCgiSupport(1);
+    third.methods.push_back("POST");
+    third.directory_listing = true;
 // one.roots.push_back("/home/marouan/Desktop/project_42/webserv_42/webserv");
     // one.roots.push_back("/home/mel-gand/webserv42/webserv_42/webserv/test");
     // one.roots.push_back("/Users/maddou/Desktop/project42/webserv_42/webserv/test/web_dir");

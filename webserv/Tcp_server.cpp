@@ -15,11 +15,11 @@ TCPserver::~TCPserver()
     close_server();
 }
 
-void TCPserver::exit_error(const std::string err_msg)
-{
-    std::cout << "ERROR: " << err_msg << std::endl;
-    exit (1);
-}
+// void TCPserver::exit_error(const std::string err_msg)
+// {
+//     std::cout << "ERROR: " << err_msg << std::endl;
+//     exit (1);
+// }
 
 int TCPserver::start_server(Servers &server)
 {
@@ -43,7 +43,13 @@ int TCPserver::start_server(Servers &server)
             perror("error");
             exit(1);
         }
-        setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval));
+        if (int res = setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval)) < 0)
+        {
+            perror("error");
+            exit(1);
+        }
+        
+            
         _Socket.push_back(ssocket);
         if (bind(ssocket, res->ai_addr, res->ai_addrlen) < 0)
         {

@@ -20,9 +20,12 @@ class Request;
 
 class Client
 {
+    private:
+
     public:
         Client(int &new_socket);
         ~Client();
+
         void setCheck();
         void setOnetime();
         void setConf(Servers &server);
