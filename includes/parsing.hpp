@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
+/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:27:43 by aech-che          #+#    #+#             */
-/*   Updated: 2024/09/24 13:01:20 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/09/27 15:58:36 by maddou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Parsing
     public:
         Parsing();
         ~Parsing();
-        static int parse_file(char *filename, std::vector<std::string> &data);
+        static std::vector<std::vector<Servers> > parse_file(char *filename, std::vector<std::string> &data);
 
 
 

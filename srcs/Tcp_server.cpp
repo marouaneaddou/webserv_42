@@ -1,0 +1,83 @@
+#include "Tcp_server.hpp"
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <sys/socket.h>
+
+
+TCPserver::TCPserver(Servers &server)
+{
+    start_server(server);
+}
+
+TCPserver::~TCPserver()
+{
+    close_server();
+}
+
+void TCPserver::exit_error(const std::string err_msg)
+{
+    std::cout << "ERROR: " << err_msg << std::endl;
+    exit (1);
+}
+
+int TCPserver::start_server(Servers &server)
+{
+    int ssocket;
+    int optval = 1;
+    int status;
+    struct addrinfo hints, *res;
+
+    for (int i = 0; i < server.ports.size(); i++)
+    {
+        memset(&hints, 0, sizeof hints);
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        // hints.ai_flags = AI_PASSIVE;
+        if ((status = getaddrinfo(server.host.c_str(), std::to_string(server.ports[i]).c_str(), &hints, &res)) != 0) {
+            perror("error");
+            exit(1);
+        }
+        if ((ssocket = socket(res->ai_family, res->ai_socktype, 0)) < 0)
+        {
+            perror("error");
+            exit(1);
+        }
+        setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval));
+        _Socket.push_back(ssocket);
+        if (bind(ssocket, res->ai_addr, res->ai_addrlen) < 0)
+        {
+            perror("error");
+            close(ssocket);
+            exit(1);
+        }
+        if (listen(ssocket, BACKLOGS) < 0)
+        {
+            perror("error");
+            close(ssocket);
+            exit(1);
+        }
+        set_non_blocking(ssocket);
+    }
+    return (0);
+}
+
+void TCPserver::close_server()
+{
+    for (int i = 0; i < _Socket.size(); i++)
+        close(_Socket[i]);
+}
+
+ std::vector<int> TCPserver::getSocket()  {return (_Socket);}
+
+void TCPserver::set_non_blocking(int sock) {
+    int flags = fcntl(sock, F_GETFL, 0);
+    if (flags == -1) {
+        perror("fcntl F_GETFL");
+        exit(EXIT_FAILURE);
+    }
+    if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1) {
+        perror("fcntl F_SETFL");
+        exit(EXIT_FAILURE);
+    }
+}

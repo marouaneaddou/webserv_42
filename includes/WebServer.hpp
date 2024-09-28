@@ -12,6 +12,7 @@
 #include "PhpCgiHandler.hpp"
 #include "../includes/servers.hpp"
 # include <algorithm>
+
 typedef  std::map<int, Client *>::iterator itClient;
 
 class WebServ
@@ -33,8 +34,8 @@ class WebServ
         WebServ();
         ~WebServ();
         
-        void run_servers(std::vector<Servers> Confs);
-        Servers getConf(int fd, std::vector<Servers> Confs);
+        void run_servers(std::vector<std::vector<Servers> > confs);
+        Servers getConf(int fd, std::vector<std::vector<Servers> > conf);
         void SetListeners();
         void set_non_blocking(int sock);
         void read_request(int fd_R);
