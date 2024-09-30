@@ -1,7 +1,7 @@
 
 
 
-# include "cgi.hpp"
+# include "../includes/cgi.hpp"
 
 
 Cgi::Cgi(Request &request) : _request(request)

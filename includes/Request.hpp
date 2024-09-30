@@ -1,11 +1,8 @@
 #pragma once
 
 
-#include <string>
-#include <vector>
-# include "Response.hpp"
-#include <map>
-#include "../includes/utils.hpp"
+#include "includes_util.hpp"
+#include "Response.hpp"
  
 
 typedef std::map<std::string, std::string>::const_iterator itHeaders;

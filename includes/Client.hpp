@@ -1,11 +1,11 @@
 #pragma once
 
-# include <iostream>
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include "Request.hpp"
 # include "Response.hpp"
-#include "../includes/servers.hpp"
+#include "servers.hpp"
+
 # include "cgi.hpp"
 
 /******** */
@@ -80,7 +80,6 @@ class Client
         bool _check;
 
         Servers _server;
-        struct sockaddr_in _sockaddr;
         std::string raw_request;
         std::string method;
 

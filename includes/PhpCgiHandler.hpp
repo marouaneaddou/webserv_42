@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Client.hpp"
 #include "RequestHandler.hpp"
 
 class PhpCgiHandler : public RequestHandler {

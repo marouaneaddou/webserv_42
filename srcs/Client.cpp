@@ -1,4 +1,4 @@
-#include "Client.hpp"
+#include "../includes/Client.hpp"
 
 // Client::Client(int new_socket, struct sockaddr_in new_addr)
 // {
@@ -22,17 +22,13 @@ Client::~Client(){
     // delete _response;
 }
 
-
-
-
 void Client::setOnetime()
 {onetime = true;}
 
-
-
 void Client::setCheck()
-{_check = true;}
-
+{
+    _check = true;
+}
 
 
 bool Client::getOnetime() const{

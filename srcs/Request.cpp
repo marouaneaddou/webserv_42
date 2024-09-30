@@ -1,5 +1,6 @@
-#include "Request.hpp"
-
+#include "../includes/Request.hpp"
+#include "../includes/utils.hpp"
+#include "../includes/Response.hpp"
 
 Request::Request()
 {
@@ -102,19 +103,19 @@ void Request::findTypeOfPostMethod()
     itHeaders it = _headers.find("Content-Type");
     if (it != _headers.end())
     {
-        if (it->second.find("boundary") != -1)
+        if (it->second.find("boundary") != std::string::npos)
         {
             std::string type = it->second.substr(it->second.find("=") + 1);
             type.insert(0, "--");
             _headers["typeMethodPost"] = type;
             _headers["type"] = "form-data";
         }
-        else if (it->second.find("application/x-www-form") != -1)
+        else if (it->second.find("application/x-www-form") != std::string::npos)
             _headers["type"] = "form";
-        else 
+        else
             _headers["type"] = "none";
     }
-    else 
+    else
         _headers["type"] = "none";
 }
 
@@ -140,30 +141,34 @@ void Request::isReqWellFormed(Response &response)
             {
                 response.setStatus(501);
                 response.setStatusMsg("Not Implemented");
+                throw(501);
             }
         }
         if ( _method == "POST" && it1 == _headers.end() && it2 == _headers.end() )
         {
             response.setStatus(400);
             response.setStatusMsg("Bad Request");
-            std::cout << response.getStatus() << std::endl;
+            throw(400);
         }
     }
     if (_URL.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=") != std::string::npos)
     {
         response.setStatus(400);
         response.setStatusMsg("Bad Request");
+        throw(400);
     }
     if (_URL.size() > 2048)
     {
         response.setStatus(414);
         response.setStatusMsg("Request-URI Too Large");
+        throw(414);
     }
-    #define CLIENT_MAX_BODY 1000000 /*get client max body size in config file*/ 
-    if(getBody().size() > CLIENT_MAX_BODY)
+    /*get client max body size in config file*/ 
+    if(getBody().size() > /*CLIENT_MAX_BODY*/  1000000)
     {
         response.setStatus(413);
         response.setStatusMsg("Request Entity Too Large");
+        throw(413);
     }
 }
 

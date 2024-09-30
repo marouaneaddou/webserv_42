@@ -1,12 +1,6 @@
-#include "WebServer.hpp"
-#include <cstdlib>
-#include <iostream>
-#include <map>
-#include <sys/fcntl.h>
-#include <unistd.h>
-#include <utility>
-#include <vector>
-#include "../includes/servers.hpp"
+
+#include "../includes/WebServer.hpp"
+#include "../includes/PhpCgiHandler.hpp"
 
 WebServ::WebServ(){
     this->max_fd = 0;
@@ -14,17 +8,20 @@ WebServ::WebServ(){
 
 WebServ::~WebServ()
 {
-    for (int i = 0; i < _servers.size(); i++)
+    for (unsigned int i = 0; i < _servers.size(); i++)
         delete _servers[i];
 }
 
-void WebServ::run_servers(std::vector<Servers> Confs)
+void WebServ::run_servers(std::vector<std::vector<Servers> > confs)
 {
-    int pos;
-    int find;
-    for (int i = 0; i <  Confs.size(); i++)
-        _servers.push_back(new TCPserver(Confs[i]));
+    // int pos;
+    // int find;
+
+     for (unsigned int i = 0; i <  confs.size(); i++)
+        for (unsigned int j = 0; j <  confs[i].size(); j++)
+            _servers.push_back(new TCPserver(confs[i][j]));
     SetListeners();
+
     while (true)
     {
         ready_Rsockets = current_Rsockets;
@@ -35,7 +32,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             exit(EXIT_FAILURE);
         }
         //Loop through the Server FDs//////////
-        for (int idx = 0; idx < servers_fds.size(); idx++)
+        for (unsigned int idx = 0; idx < servers_fds.size(); idx++)
         {
             if (FD_ISSET(servers_fds[idx], &ready_Rsockets))
             {
@@ -52,7 +49,7 @@ void WebServ::run_servers(std::vector<Servers> Confs)
                 }
                 std::cout << "New connection accepted on clientFD: " << new_socket << std::endl;
                 _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
-                Servers server = getConf(servers_fds[idx], Confs);
+                Servers server = getConf(servers_fds[idx], confs);
                 _clients[new_socket]->setConf(server);
                 FD_SET(new_socket, &current_Rsockets);
                 if (new_socket > this->max_fd)
@@ -67,28 +64,55 @@ void WebServ::run_servers(std::vector<Servers> Confs)
             if (FD_ISSET(it_cli->first, &ready_Rsockets))
             {
                 read_request(it_cli->first);
-                start_parsing(it_cli->first);
-                if ( _clients[it_cli->first]->_request.getHeader("Transfer-Encoding") != _clients[it_cli->first]->_request.getEndHeaders())
+                try
                 {
-                    if (_buffer.find("0\r\n\r\n") != -1)
+                    start_parsing(it_cli->first);
+                    if ( _clients[it_cli->first]->_request.getHeader("Transfer-Encoding") != _clients[it_cli->first]->_request.getEndHeaders())
                     {
-                        _clients[it_cli->first]->_request.findTypeOfPostMethod();
-                        _clients[it_cli->first]->_request.setBody(_buffer);
-                        _buffer.clear();
-                        FD_CLR(it_cli->first, &current_Rsockets);
-                        FD_SET(it_cli->first, &current_Wsockets);
+                        if (_buffer.find("0\r\n\r\n") != std::string::npos)
+                        {
+                            _clients[it_cli->first]->_request.findTypeOfPostMethod();
+                            _clients[it_cli->first]->_request.setBody(_buffer);
+                            _buffer.clear();
+                            FD_CLR(it_cli->first, &current_Rsockets);
+                            FD_SET(it_cli->first, &current_Wsockets);
+                        }
+                    }
+                    else if (_clients[it_cli->first]->_request.getHeader("Content-Length")  != _clients[it_cli->first]->_request.getEndHeaders())
+                    {
+                        if (_buffer.size() == static_cast<size_t>(stoi(_clients[it_cli->first]->_request.getHeader("Content-Length")->second)))
+                        {
+                            _clients[it_cli->first]->_request.findTypeOfPostMethod();
+                            _clients[it_cli->first]->_request.setBody(_buffer);
+                            _buffer.clear();
+                            FD_CLR(it_cli->first, &current_Rsockets);
+                            FD_SET(it_cli->first, &current_Wsockets);
+                        }
                     }
                 }
-                else if (_clients[it_cli->first]->_request.getHeader("Content-Length")  != _clients[it_cli->first]->_request.getEndHeaders())
+                catch(...) 
                 {
-                    if (_buffer.size() == stoi(_clients[it_cli->first]->_request.getHeader("Content-Length")->second))
-                    {
-                        _clients[it_cli->first]->_request.findTypeOfPostMethod();
-                        _clients[it_cli->first]->_request.setBody(_buffer);
-                        _buffer.clear();
-                        FD_CLR(it_cli->first, &current_Rsockets);
-                        FD_SET(it_cli->first, &current_Wsockets);
-                    }
+                    std::string htmlfile = "<!DOCTYPE html>\n";
+                                htmlfile += "<html lang=\"en\">\n";
+                                htmlfile += "<head>\n";
+                                htmlfile += "    <meta charset=\"UTF-8\">\n";
+                                htmlfile += "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+                                htmlfile += "    <title>Document</title>\n";
+                                htmlfile += "</head>\n";
+                                htmlfile += "<body>\n";
+                                htmlfile += "    <div>\n";
+                                htmlfile += "        <p style=\"color: red; font-size: 35px;\"> ERROR </p>\n";
+                                htmlfile += "    </div>\n";
+                                htmlfile += "</body>\n";
+                                htmlfile += "</html>\n";
+                    _clients[it_cli->first]->_response.setHeader("Content-Type", "text/html");
+                    _clients[it_cli->first]->_response.setHeader("Content-Length", htmlfile.length());
+                    _clients[it_cli->first]->_response.setBody(htmlfile);
+                    _clients[it_cli->first]->_response.generateHeaderResponse();
+                    FD_CLR(it_cli->first, &current_Rsockets);
+                    FD_SET(it_cli->first, &current_Wsockets);
+                    _clients.at(it_cli->first)->_response.Send(it_cli->first);
+                    _clients.at(it_cli->first)->setTypeData(CLOSESOCKET);
                 }
             }
             if (FD_ISSET(it_cli->first, &ready_Wsockets))
@@ -134,14 +158,14 @@ void WebServ::read_request(int fd_R)
         close(fd_R);
         FD_CLR(fd_R, &current_Rsockets);
     }
-    if (_nbytes < sizeof(_buf))
+    if (_nbytes < static_cast<int>(sizeof(_buf)))
         _buf[_nbytes] = '\0';
     _buffer.append(_buf, _nbytes);
 }
 
 void WebServ::start_parsing(int fd_R)
 {
-    if (_clients.at(fd_R)->getCheck() == false &&_buffer.find("\r\n\r\n") != -1)
+    if (_clients.at(fd_R)->getCheck() == false &&_buffer.find("\r\n\r\n") != std::string::npos)
     {
         int findPos = _buffer.find("\r\n");
         _clients.at(fd_R)->setCheck();
@@ -172,9 +196,9 @@ void WebServ::SetListeners()
 {
     FD_ZERO(&current_Rsockets);
     FD_ZERO(&current_Wsockets);
-    for (int i = 0; i < _servers.size(); i++)
+    for (unsigned int i = 0; i < _servers.size(); i++)
     {
-        for (int j = 0; j < _servers[i]->getSocket().size(); j++)
+        for (unsigned int j = 0; j < _servers[i]->getSocket().size(); j++)
         {
             servers_fds.push_back(_servers[i]->getSocket()[j]);
             FD_SET(_servers[i]->getSocket()[j], &current_Rsockets);
@@ -216,17 +240,17 @@ bool WebServ::isPHPCGIRequest(const std::string url)
     return false;
 }
 
-Servers WebServ::getConf(int fd, std::vector<Servers> Confs)
+Servers WebServ::getConf(int fd, std::vector<std::vector<Servers> > confs)
 {
-    for (int i = 0; i < _servers.size(); i++)
+    for (unsigned int i = 0; i < _servers.size(); i++)
     {
-        for (int j = 0; j < _servers[i]->getSocket().size(); j++) 
+        for (unsigned int j = 0; j < _servers[i]->getSocket().size(); j++)
         {
             if (_servers[i]->getSocket()[j] == fd)
             {
-                return Confs[i];
+                return confs[i][j];
             }
         }
     }
-    return (Confs[0]);
+    return confs[0][0];
 }

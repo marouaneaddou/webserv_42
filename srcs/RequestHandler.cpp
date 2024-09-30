@@ -1,8 +1,12 @@
-#include "RequestHandler.hpp"
+#include "../includes/RequestHandler.hpp"
 
 
 RequestHandler::RequestHandler()
-{}
+{
+    _path = "";
+    abs_path = "";
+    _blockIdx = -1;
+}
 
 std::string generateHTML_file(std::string print, bool type) {
     std::string htmlfile = "<!DOCTYPE html>\n";
@@ -33,9 +37,9 @@ void RequestHandler::req_uri_location(Client* cli)
     else
         _path = url;
     //Exact Match
-    for (int i = 0; i < cli->getServer().locations.size(); i++)
+    for (unsigned int i = 0; i < cli->getServer().get_locations().size(); i++)
     {
-        if (cli->getServer().locations[i].getPath()[0] == '=' && cli->getServer().locations[i].getPath().substr(2) == _path)
+        if (cli->getServer().get_locations()[i].getPath()[0] == '=' && cli->getServer().get_locations()[i].getPath().substr(2) == _path)
         {
             _blockIdx = i;
             return;
@@ -43,13 +47,13 @@ void RequestHandler::req_uri_location(Client* cli)
     }
     //Prefix Match + default if no longer prefix found
     std::string longestMatch;
-    for (int i = 0; i < cli->getServer().locations.size(); i++)
+    for (unsigned int i = 0; i < cli->getServer().get_locations().size(); i++)
     {
-        if (cli->getServer().locations[i].getPath()[0] != '=' && _path.find(cli->getServer().locations[i].getPath()) == 0)
+        if (cli->getServer().get_locations()[i].getPath()[0] != '=' && cli->getServer().get_locations()[i].getPath().find(_path) == 0)
         {
-            if (cli->getServer().locations[i].getPath().length() > longestMatch.length())
+            if (cli->getServer().get_locations()[i].getPath().length() > longestMatch.length())
             {
-                longestMatch = cli->getServer().locations[i].getPath();
+                longestMatch = cli->getServer().get_locations()[i].getPath();
                 _blockIdx = i;
             }
         }
@@ -58,13 +62,16 @@ void RequestHandler::req_uri_location(Client* cli)
     {
         return;
     }
+    
 }
 
 void RequestHandler::is_location_have_redirection(Client* cli)
 {
-    if (!(cli->getServer().locations[_blockIdx].getReturn().empty()))
+    if (!(cli->getServer().get_locations()[_blockIdx].getReturn().empty()))
     {
-        cli->_response.setHeader("Location", cli->getServer().locations[_blockIdx].getReturn());
+        //KAYN BUFFEROVERFLOW HNA ALMODIR, getReturn()  ... NORMALEMENT RETURN MKYNACH KHASSO YKOUN EMPTY O MYDKHLCH L CONDITION, 7EYED FLAG DYL SANITIZE GHDI YBANLK FIH GARBAGE VALUE
+        std::cout << "RETURN FILE: " << cli->getServer().get_locations()[_blockIdx].getReturn() << std::endl;
+        cli->_response.setHeader("Location", cli->getServer().get_locations()[_blockIdx].getReturn());
         cli->_response.setStatus(301);
         cli->_response.setHeader("Content-Length", 0);
         throw(301);
@@ -74,9 +81,9 @@ void RequestHandler::is_location_have_redirection(Client* cli)
 
 void RequestHandler::is_method_allowed_in_location(Client* cli)
 {
-    for (int i = 0; i < cli->getServer().locations[_blockIdx].getAcceptedMethod().size(); i++)
+    for (unsigned int i = 0; i < cli->getServer().get_locations()[_blockIdx].getMethods().size(); i++)
     {
-        if (cli->getServer().locations[_blockIdx].getAcceptedMethod()[i] == cli->_request.getMethod())
+        if (cli->getServer().get_locations()[_blockIdx].getMethods()[i] == cli->_request.getMethod())
             return;
     }
     cli->_response.setStatus(405);
@@ -124,6 +131,7 @@ char **custom_cgi_envp()
     }
 
     envp[envp_size] = NULL;
+    return (envp);
 }
 
 
@@ -203,7 +211,7 @@ void RequestHandler::check_requested_method(Client* cli)
                     //check autoindex/directorylisting : ON/OFF
 
                     //OFF :
-                    if (cli->getServer().locations[_blockIdx].directory_listing == false)
+                    if (cli->getServer().get_locations()[_blockIdx].getDirectoryListing() == false)
                     {
                         cli->_response.setStatus(403);
                         cli->_response.setHeader("Content-Length", 0);
@@ -231,7 +239,7 @@ void RequestHandler::check_requested_method(Client* cli)
             cli->openFile(abs_path.c_str());
             cli->setTypeData(READDATA);
         }
-        if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path)) {
+        if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path)) {
             std::string cgi_response = cgi_exec(abs_path, 1);
             cli->_response.setStatus(200);                         
             std::string htmlfile = generateHTML_file(cgi_response, 1);
@@ -293,7 +301,7 @@ void RequestHandler::check_requested_method(Client* cli)
                         cli->setTypeData(WRITEDATA);
                         throw(403);
                     }
-                    if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
+                    if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)  {
                                         /*****************************************/
 
 
@@ -351,7 +359,7 @@ void RequestHandler::check_requested_method(Client* cli)
                         throw(403);
                     }
                     // check location have or support uploud 
-                    if (cli->getServer().locations[_blockIdx].getCgiSupport() == 1)  {
+                    if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)  {
                                         /*****************************************/
 
 
@@ -429,7 +437,7 @@ void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
             cli->_response.setStatus(409);
             throw(409);
         }
-        if(cli->getServer().locations[_blockIdx].getCgiSupport() == 1)
+        if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
         {
             if (is_dir_has_index_files(cli) == true)
                 std::string cgi_response = cgi_exec(abs_path, 1);
@@ -445,7 +453,7 @@ void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
     }
     else
     {
-        if(cli->getServer().locations[_blockIdx].getCgiSupport() == 1)
+        if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
             std::string cgi_response = cgi_exec(abs_path, 1);
         else
             std::remove(abs_path.c_str());  
@@ -458,12 +466,12 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
 {
     struct stat fileInfo;
 
-    for (int i = 0; i < cli->getServer()._indexFiles.size(); i++)
+    for (unsigned int i = 0; i < cli->getServer().get_indexFiles().size(); i++)
     {
-        std::string filePath = abs_path + cli->getServer()._indexFiles[i];
+        std::string filePath = abs_path + cli->getServer().get_indexFiles()[i];
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
-            abs_path = abs_path + cli->getServer()._indexFiles[i];
+            abs_path = abs_path + cli->getServer().get_indexFiles()[i];
             std::cout << abs_path << std::endl;
             return true;
         }
@@ -485,7 +493,7 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-    abs_path = cli->getServer().roots[0] + _path;
+    abs_path = cli->getServer().get_roots()[0] + _path;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
         std::string htmlfile = generateHTML_file("ERROR: NOT FOUND", 0);
         cli->_response.setHeader("Content-Type", "text/html");
@@ -511,7 +519,7 @@ const std::string RequestHandler::get_ressource_type(std::string abs_path)
     return (pathType);
 }
 
-const size_t RequestHandler::getPathSize()
+size_t RequestHandler::getPathSize()
 {
     struct stat fileInfo;
     stat(_path.c_str(), &fileInfo);

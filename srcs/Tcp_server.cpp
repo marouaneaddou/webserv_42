@@ -1,8 +1,5 @@
-#include "Tcp_server.hpp"
-#include <cstdio>
-#include <cstdlib>
-#include <string>
-#include <sys/socket.h>
+#include "../includes/servers.hpp"
+#include "../includes/Tcp_server.hpp"
 
 
 TCPserver::TCPserver(Servers &server)
@@ -15,11 +12,11 @@ TCPserver::~TCPserver()
     close_server();
 }
 
-// void TCPserver::exit_error(const std::string err_msg)
-// {
-//     std::cout << "ERROR: " << err_msg << std::endl;
-//     exit (1);
-// }
+void TCPserver::exit_error(const std::string err_msg)
+{
+    std::cout << "ERROR: " << err_msg << std::endl;
+    exit (1);
+}
 
 int TCPserver::start_server(Servers &server)
 {
@@ -28,14 +25,14 @@ int TCPserver::start_server(Servers &server)
     int status;
     struct addrinfo hints, *res;
 
-    for (int i = 0; i < server.ports.size(); i++)
+    for (unsigned int i = 0; i < server.get_ports().size(); i++)
     {
         memset(&hints, 0, sizeof hints);
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
         // hints.ai_flags = AI_PASSIVE;
-        if ((status = getaddrinfo(server.host.c_str(), std::to_string(server.ports[i]).c_str(), &hints, &res)) != 0) {
-            perror("error");
+        if ((status = getaddrinfo(server.get_host().c_str(), std::to_string(server.get_ports()[i]).c_str(), &hints, &res)) != 0) {
+            std::cerr << "getaddrinfo: " << gai_strerror(status) << std::endl;
             exit(1);
         }
         if ((ssocket = socket(res->ai_family, res->ai_socktype, 0)) < 0)
@@ -43,23 +40,17 @@ int TCPserver::start_server(Servers &server)
             perror("error");
             exit(1);
         }
-        if (int res = setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval)) < 0)
-        {
-            perror("error");
-            exit(1);
-        }
-        
-            
+        setsockopt(ssocket, SOL_SOCKET, SO_REUSEADDR,  &optval, sizeof(optval));
         _Socket.push_back(ssocket);
         if (bind(ssocket, res->ai_addr, res->ai_addrlen) < 0)
         {
-            perror("error");
+            std::cerr << "Error: " << strerror(errno) << std::endl;
             close(ssocket);
             exit(1);
         }
         if (listen(ssocket, BACKLOGS) < 0)
         {
-            perror("error");
+            std::cerr << "Error: " << strerror(errno) << std::endl;
             close(ssocket);
             exit(1);
         }
@@ -70,7 +61,7 @@ int TCPserver::start_server(Servers &server)
 
 void TCPserver::close_server()
 {
-    for (int i = 0; i < _Socket.size(); i++)
+    for (unsigned int i = 0; i < _Socket.size(); i++)
         close(_Socket[i]);
 }
 

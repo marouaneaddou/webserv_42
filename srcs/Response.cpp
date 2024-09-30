@@ -1,14 +1,9 @@
 
-#include "Response.hpp"
-#include <string>
-#include <sys/socket.h>
-#include <cstring>
-#include <cerrno>
-#include <signal.h>
+#include "../includes/Response.hpp"
+
 Response::Response()
 {
     setStatus(200);
-    setStatusMsg("OK");
 }
 
 Response::~Response()

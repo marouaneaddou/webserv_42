@@ -1,27 +1,14 @@
 #pragma once
 
 #include "Client.hpp"
-#include <cstddef>
-#include <cstdlib>
-#include <string>
-#include <fcntl.h>
-#include <cstdio>
-#include <cstring>
-#include <dirent.h>
-#include <sys/dirent.h>
-#include <sys/unistd.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <string.h>
-#include <stdio.h>
+#include "locations.hpp"
+#include "includes_util.hpp"
 
 class RequestHandler {
 public:
     RequestHandler();
-    virtual ~RequestHandler() {}
+    virtual ~RequestHandler() {
+    }
     virtual void handleRequest(Client* cli) = 0;
 protected:
     std::string _path;
@@ -38,7 +25,7 @@ protected:
     const std::string get_ressource_type(std::string abs_path);
     bool is_dir_has_index_files(Client* cli);
     bool if_location_has_cgi(Client* cli);
-    const size_t getPathSize();
+    size_t getPathSize();
     const std::string getFileContent();
     const std::string getDirListing();
     const std::string getMimeType();

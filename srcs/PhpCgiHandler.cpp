@@ -1,5 +1,5 @@
-#include "PhpCgiHandler.hpp"
-#include "Client.hpp"
+#include "../includes/PhpCgiHandler.hpp"
+#include "../includes/Client.hpp"
 
 PhpCgiHandler::PhpCgiHandler()
 {}

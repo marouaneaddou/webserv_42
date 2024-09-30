@@ -1,9 +1,6 @@
 #pragma once
 
-# include <map>
-#include <iostream>
-#include <sstream>
-#include <string>
+#include "includes_util.hpp"
 
 typedef std::map<std::string, std::string>::iterator it_Header;
 class Response {
