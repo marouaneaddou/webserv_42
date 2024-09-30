@@ -49,7 +49,7 @@ void RequestHandler::req_uri_location(Client* cli)
     std::string longestMatch;
     for (unsigned int i = 0; i < cli->getServer().get_locations().size(); i++)
     {
-        if (cli->getServer().get_locations()[i].getPath()[0] != '=' && cli->getServer().get_locations()[i].getPath().find(_path) == 0)
+        if (cli->getServer().get_locations()[i].getPath()[0] != '=' && _path.find(cli->getServer().get_locations()[i].getPath()) == 0)
         {
             if (cli->getServer().get_locations()[i].getPath().length() > longestMatch.length())
             {
@@ -493,7 +493,14 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-    abs_path = cli->getServer().get_roots()[0] + _path;
+     std::string pathExact;
+    if (_blockIdx == -1)
+        pathExact = cli->getServer().get_roots()[0];
+    else 
+        pathExact = cli->getServer().get_locations()[_blockIdx].getRoot();
+    std::cout << cli->getServer().get_roots()[0] << std::endl;
+    abs_path = pathExact.substr(1, pathExact.size() - 2) + _path;
+    std::cout << "abs_path: " << abs_path << std::endl;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
         std::string htmlfile = generateHTML_file("ERROR: NOT FOUND", 0);
         cli->_response.setHeader("Content-Type", "text/html");
@@ -501,6 +508,7 @@ void RequestHandler::get_requested_ressource(Client* cli)
         cli->_response.setBody(htmlfile);
         cli->_response.generateHeaderResponse();
         cli->setTypeData(WRITEDATA);
+        std::cout << "ERRRRRRRRRRRROR\n\n\n\n";
         cli->_response.setStatus(404);
         throw(404);
     }

@@ -24,7 +24,6 @@ int TCPserver::start_server(Servers &server)
     int optval = 1;
     int status;
     struct addrinfo hints, *res;
-
     for (unsigned int i = 0; i < server.get_ports().size(); i++)
     {
         memset(&hints, 0, sizeof hints);
@@ -65,7 +64,7 @@ void TCPserver::close_server()
         close(_Socket[i]);
 }
 
- std::vector<int> TCPserver::getSocket()  {return (_Socket);}
+std::vector<int> TCPserver::getSocket()  {return (_Socket);}
 
 void TCPserver::set_non_blocking(int sock) {
     int flags = fcntl(sock, F_GETFL, 0);

@@ -12,16 +12,19 @@ WebServ::~WebServ()
         delete _servers[i];
 }
 
-void WebServ::run_servers(std::vector<std::vector<Servers> > confs)
+void WebServ::run_servers(std::map<int, std::vector<Servers> > grouped, std::vector<Servers> confs)
 {
+    (void)grouped;
     // int pos;
     // int find;
-
-     for (unsigned int i = 0; i <  confs.size(); i++)
-        for (unsigned int j = 0; j <  confs[i].size(); j++)
-            _servers.push_back(new TCPserver(confs[i][j]));
+    for (unsigned int i = 0; i <  confs.size(); i++)
+    {
+        // for (unsigned int j = 0; j < confs[i].size(); j++){
+            _servers.push_back(new TCPserver(confs[i]));
+        // }
+    }
     SetListeners();
-
+// exit(0);
     while (true)
     {
         ready_Rsockets = current_Rsockets;
@@ -48,9 +51,11 @@ void WebServ::run_servers(std::vector<std::vector<Servers> > confs)
                     continue;
                 }
                 std::cout << "New connection accepted on clientFD: " << new_socket << std::endl;
-                _clients.insert(std::make_pair(new_socket, new Client(new_socket)));
-                Servers server = getConf(servers_fds[idx], confs);
-                _clients[new_socket]->setConf(server);
+                Client *newClient = new Client(new_socket);
+                _clients.insert(std::make_pair(new_socket, newClient));
+                std::cout << "new clients :" << new_socket << std::endl;
+                // Servers server = getConf(servers_fds[idx], grouped);
+                // _clients[new_socket]->setConf(server);
                 FD_SET(new_socket, &current_Rsockets);
                 if (new_socket > this->max_fd)
                     this->max_fd = new_socket;
@@ -61,12 +66,14 @@ void WebServ::run_servers(std::vector<std::vector<Servers> > confs)
         //Loop through the Clients FDs//////////
         for (itClient it_cli = _clients.begin();  it_cli != _clients.end();)
         {
+            std::cout << "hello start client "<<it_cli->first << std::endl;
+            // exit(0);
             if (FD_ISSET(it_cli->first, &ready_Rsockets))
             {
                 read_request(it_cli->first);
                 try
                 {
-                    start_parsing(it_cli->first);
+                    start_parsing(it_cli->first, grouped);
                     if ( _clients[it_cli->first]->_request.getHeader("Transfer-Encoding") != _clients[it_cli->first]->_request.getEndHeaders())
                     {
                         if (_buffer.find("0\r\n\r\n") != std::string::npos)
@@ -163,7 +170,7 @@ void WebServ::read_request(int fd_R)
     _buffer.append(_buf, _nbytes);
 }
 
-void WebServ::start_parsing(int fd_R)
+void WebServ::start_parsing(int fd_R, std::map<int, std::vector<Servers> > grouped)
 {
     if (_clients.at(fd_R)->getCheck() == false &&_buffer.find("\r\n\r\n") != std::string::npos)
     {
@@ -171,12 +178,20 @@ void WebServ::start_parsing(int fd_R)
         _clients.at(fd_R)->setCheck();
 
         _firstline = _buffer.substr(0, findPos);
+        std::cout << _firstline << std::endl;
         _clients.at(fd_R)->_request.parse_request_line(_firstline);
         _buffer = _buffer.substr(findPos + 2);
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
+            // std::cout << "start << \n" << _buffer  << "\n<< end"<< std::endl;
             _clients.at(fd_R)->_request.setHeader(_buffer);
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
+            std::cout << _clients[fd_R]->_request.getHeader("Host")->second << std::endl;
+            // Servers server = getConf(server s_fds[idx], grouped);
+                // _clients[new_socket]->setConf(server);
+            Servers server = getConf(fd_R, grouped,  _clients[fd_R]->_request.getHeader("Host")->second);
+            _clients[fd_R]->setConf(server);
+            // exit(0);
             FD_CLR(fd_R, &current_Rsockets);
             FD_SET(fd_R, &current_Wsockets);
             _buffer.clear();
@@ -186,6 +201,8 @@ void WebServ::start_parsing(int fd_R)
             findPos = _buffer.find("\r\n\r\n");
             _clients.at(fd_R)->_request.setHeader(_buffer.substr(0, findPos + 2));
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
+            Servers server = getConf(fd_R, grouped,  _clients[fd_R]->_request.getHeader("Host")->second);
+            _clients[fd_R]->setConf(server);
             _buffer = _buffer.substr(findPos + 4);
         }
     }
@@ -240,17 +257,30 @@ bool WebServ::isPHPCGIRequest(const std::string url)
     return false;
 }
 
-Servers WebServ::getConf(int fd, std::vector<std::vector<Servers> > confs)
+Servers WebServ::getConf(int fd, std::map<int, std::vector<Servers> > confs, std::string host)
 {
-    for (unsigned int i = 0; i < _servers.size(); i++)
-    {
-        for (unsigned int j = 0; j < _servers[i]->getSocket().size(); j++)
-        {
-            if (_servers[i]->getSocket()[j] == fd)
-            {
-                return confs[i][j];
-            }
-        }
+    (void)fd;
+    int twoPoint = host.find(":");
+    std::string ip = host.substr(0, twoPoint);
+    int port = stoi(host.substr(twoPoint + 1));
+    std::cout << port << " " << ip << std::endl;
+    std::cout << fd << std::endl;
+    // for (unsigned int i = 0; i < _servers.size(); i++)
+    // {
+    //     for (unsigned int j = 0; j < _servers[i]->getSocket().size(); j++)
+    //     {
+    //         if (_servers[i]->getSocket()[j] == fd)
+    //         {
+    //             std::cout << "here here\n";
+    //             std::cout << i << " " << j << std::endl;
+    //             return confs[i][j];
+    //         }
+    //     }
+    // }
+    std::vector<Servers> servers = confs[port];
+    for (size_t i = 0; i < servers.size(); i++) {
+        if (servers[i].get_host() == ip) return servers[i];
+        std::cout << servers[i].get_host() << std::endl;
     }
-    return confs[0][0];
+    return servers[0];
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/09/28 22:40:41 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/09/30 22:07:42 by maddou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Parsing::~Parsing(){
 }
 
 
-std::vector<std::vector<Servers> >  Parsing::parse_file(char *filename, std::vector<std::string> &data)
+std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::vector<std::string> &data, std::vector<Servers> &serversvec)
 {
     (void)data;
     std::ifstream infile_count(filename);
@@ -52,7 +52,7 @@ std::vector<std::vector<Servers> >  Parsing::parse_file(char *filename, std::vec
     int switch_server = 0;
     int line = 0;
     std::string save_arg = "";
-    std::vector<Servers> serversvec;
+    // std::vector<Servers> serversvec;
     std::vector<Locations> locationsvec;
     Servers server;
     while (true) {
@@ -143,6 +143,8 @@ std::vector<std::vector<Servers> >  Parsing::parse_file(char *filename, std::vec
             }
             else if (arg == "root:") {
                 std::vector<std::string> roots = Utils::split(Utils::split(buff, ":")[1], ", ");
+                
+                std::cout << "hna kayn rooot " << roots[0] <<std::endl;
                 for (std::vector<std::string>::iterator it = roots.begin(); it != roots.end(); ++it) {
                     if (!Errors::valid_root(Utils::strtrim(*it))) {
                     infile.close();
@@ -474,24 +476,39 @@ std::vector<std::vector<Servers> >  Parsing::parse_file(char *filename, std::vec
     
     Errors::check_dupservers(serversvec);
 
-    std::vector<std::vector<Servers> > serversvov = parse_server(serversvec);
+    // std::vector<std::vector<Servers> > serversvov = parse_server(serversvec);
     
-    for (std::size_t i = 0; i < serversvov.size(); ++i)
-    {
-        std::cout << "Group " << i + 1 << ":" << std::endl;
+    // for (std::size_t i = 0; i < serversvov.size(); ++i)
+    // {
+    //     std::cout << "Group " << i + 1 << ":" << std::endl;
         
-        for (std::size_t j = 0; j < serversvov[i].size(); ++j)
-        {
-            std::cout << serversvov[i][j].get_host() << std::endl;
+    //     for (std::size_t j = 0; j < serversvov[i].size(); ++j)
+    //     {
+    //         std::cout << serversvov[i][j].get_host() << std::endl;
+    //     }
+        
+    //     std::cout << "-------------------------" << std::endl;
+    // }
+    std::map<int, std::vector<Servers> > groupedServer;
+    // std::cout << serversvec.size() << std::endl;
+    for (size_t i = 0; i < serversvec.size(); i++) {
+        std::vector<int> ports = serversvec[i].get_ports();
+        // std::cout << ports.size() << std::endl;
+        for (size_t j = 0; j < ports.size(); j++) {
+            groupedServer[ports[j]].push_back(serversvec[i]);
         }
-        
-        std::cout << "-------------------------" << std::endl;
     }
-
-
+    // for (auto& key : groupedServer) {
+    //     std::cout << "PORT ---> " << key.first << std::endl;
+    //     for (auto& serv : key.second) {
+    //         std::cout << "                     " << serv.get_host() << std::endl;
+    //     }
+    // }
 
     infile.close();
-    return serversvov;
+    // exit(0);
+    return groupedServer;
+    // return serversvov;
 }
 
 

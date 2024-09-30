@@ -19,8 +19,10 @@ void StaticFileHandler::handleRequest(Client* cli)
             std::cout << "Location Root: " << cli->getServer().get_locations()[_blockIdx].getRoot() << std::endl;
             std::cout << "Method: " << cli->_request.getMethod() << std::endl;
             std::cout << "Path: " << _path << std::endl;
-            is_location_have_redirection(cli);
-            is_method_allowed_in_location(cli);
+            if (_blockIdx != -1) {
+                is_location_have_redirection(cli); 
+                is_method_allowed_in_location(cli);
+            }
         }
         setStatusMessage(cli);
         check_requested_method(cli);

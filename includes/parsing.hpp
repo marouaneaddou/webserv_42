@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:27:43 by aech-che          #+#    #+#             */
-/*   Updated: 2024/09/28 23:37:49 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/09/30 16:17:38 by maddou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class Parsing
     public:
         Parsing();
         ~Parsing();
-        static std::vector<std::vector<Servers> > parse_file(char *filename, std::vector<std::string> &data);
+        static std::map<int, std::vector<Servers> > parse_file(char *filename, std::vector<std::string> &data, std::vector<Servers> &serversvec);
 
 
 

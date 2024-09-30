@@ -7,7 +7,7 @@ SRC = srcs/main.cpp srcs/errors.cpp srcs/parsing.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 CC = g++
-FLAGS := -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
+FLAGS := -Wall -Wextra -Werror -std=c++98 #-g -fsanitize=address
 
 all: $(NAME)
 

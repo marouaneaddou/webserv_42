@@ -30,12 +30,14 @@ class WebServ
         WebServ();
         ~WebServ();
         
-        void run_servers(std::vector<std::vector<Servers> > confs);
-        Servers getConf(int fd, std::vector<std::vector<Servers> > conf);
+        void run_servers(std::map<int, std::vector<Servers> > grouped, std::vector<Servers> confs);
+        // void run_servers(std::vector<std::vector<Servers> > confs);
+        Servers getConf(int fd, std::map<int, std::vector<Servers> > conf, std::string host);
+        // Servers getConf(int fd, std::vector<std::vector<Servers> > conf);
         void SetListeners();
         int set_non_blocking(int sock);
         void read_request(int fd_R);
-        void start_parsing(int fd_R);
+        void start_parsing(int fd_R, std::map<int, std::vector<Servers> > grouped);
         RequestHandler* createHandler(Request &request);
         bool isPHPCGIRequest(std::string URL);
         fd_set current_Rsockets, ready_Rsockets;

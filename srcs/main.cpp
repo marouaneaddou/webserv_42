@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 11:35:07 by aech-che          #+#    #+#             */
-/*   Updated: 2024/09/30 02:13:25 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/09/30 16:21:53 by maddou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,14 @@ int main(int ac, char **av)
                 Errors::check_filepermission(av[1]);
                 std::vector<std::string> data;
                 std::ifstream infile(av[1]);
-                std::vector<std::vector<Servers> > configFile;
-                configFile = Parsing::parse_file(av[1], data);
+                std::vector<Servers> serverConf;
+                std::map<int, std::vector<Servers> > configFile;
+                configFile = Parsing::parse_file(av[1], data, serverConf);
                 // for (size_t i = 0; i < configFile.size(); i++) {
-                //         __UNIT_TEST__(configFile[i]);
+                        // __UNIT_TEST__(serverConf);
                 // }
                 WebServ WebServ;
-                WebServ.run_servers(configFile);
+                WebServ.run_servers(configFile, serverConf);
                 
         }
         catch(char const* e) {
