@@ -14,18 +14,21 @@ void StaticFileHandler::handleRequest(Client* cli)
         if (cli->getOnetime() == false)
         {
             req_uri_location(cli);
-            std::cout << "Location: " << cli->getServer().get_locations()[_blockIdx].getPath() << std::endl;
-            std::cout << "Location BlockIdx: " << _blockIdx << std::endl;
-            std::cout << "Location Root: " << cli->getServer().get_locations()[_blockIdx].getRoot() << std::endl;
-            std::cout << "Method: " << cli->_request.getMethod() << std::endl;
+            // std::cout << "Location: " << cli->getServer().get_locations()[_blockIdx].getPath() << std::endl;
+            // std::cout << "Location BlockIdx: " << _blockIdx << std::endl;
+            std::cout << "Location Root:" << cli->getServer().get_root() << std::endl;
+            // std::cout << "Method: " << cli->_request.getMethod() << std::endl;
             std::cout << "Path: " << _path << std::endl;
             if (_blockIdx != -1) {
-                is_location_have_redirection(cli); 
+                 //ILA KAN DEFAULT ROOT O BGHINA NDIRU CHECK L RETURN O METHODES GHDI TKOUN BLOCK LOCATION DYL DK DEFAULT ROOT
+                is_location_have_redirection(cli);
                 is_method_allowed_in_location(cli);
             }
         }
+        // if (_blockIdx != -1) {
         setStatusMessage(cli);
         check_requested_method(cli);
+        // }
 
     }
     catch (...)

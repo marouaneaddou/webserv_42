@@ -6,7 +6,7 @@
 /*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:08:28 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/09/30 05:40:16 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/01 07:02:27 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Servers
                 std::vector<int> ports;
                 size_t client_body_size;
                 std::vector<std::string> server_names;
-                std::vector<std::string> roots;
+                std::string root;
                 bool default_server;
                 std::vector<std::map<std::string, std::string> > error_pages;
                 std::vector<std::string> indexFiles;
@@ -44,7 +44,7 @@ class Servers
             void set_ports(std::vector<int> ports);
             void set_client_body_size(size_t client_body_size);
             void set_server_names(std::vector<std::string> server_names);
-            void set_roots(std::vector<std::string> roots);
+            void set_root(std::string root);
             void set_default_server(bool default_server);
             void set_error_pages(std::vector<std::map<std::string, std::string> > error_pages);
             void set_locations(std::vector<Locations> locations);
@@ -53,7 +53,7 @@ class Servers
             std::vector<int> get_ports();
             size_t get_client_body_size();
             std::vector<std::string> get_server_names();
-            std::vector<std::string> get_roots();
+            std::string get_root();
             bool get_default_server();
             std::vector<std::map<std::string, std::string> > get_error_pages();
             std::vector<Locations> &get_locations();

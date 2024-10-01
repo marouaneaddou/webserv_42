@@ -69,7 +69,6 @@ void RequestHandler::is_location_have_redirection(Client* cli)
 {
     if (!(cli->getServer().get_locations()[_blockIdx].getReturn().empty()))
     {
-        //KAYN BUFFEROVERFLOW HNA ALMODIR, getReturn()  ... NORMALEMENT RETURN MKYNACH KHASSO YKOUN EMPTY O MYDKHLCH L CONDITION, 7EYED FLAG DYL SANITIZE GHDI YBANLK FIH GARBAGE VALUE
         std::cout << "RETURN FILE: " << cli->getServer().get_locations()[_blockIdx].getReturn() << std::endl;
         cli->_response.setHeader("Location", cli->getServer().get_locations()[_blockIdx].getReturn());
         cli->_response.setStatus(301);
@@ -239,7 +238,7 @@ void RequestHandler::check_requested_method(Client* cli)
             cli->openFile(abs_path.c_str());
             cli->setTypeData(READDATA);
         }
-        if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path)) {
+        if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path))  {
             std::string cgi_response = cgi_exec(abs_path, 1);
             cli->_response.setStatus(200);                         
             std::string htmlfile = generateHTML_file(cgi_response, 1);
@@ -466,13 +465,12 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
 {
     struct stat fileInfo;
 
-    for (unsigned int i = 0; i < cli->getServer().get_indexFiles().size(); i++)
+    for (unsigned int i = 0; i < cli->getServer().get_locations()[_blockIdx].getIndexFiles().size(); i++)
     {
-        std::string filePath = abs_path + cli->getServer().get_indexFiles()[i];
+        std::string filePath = abs_path + cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i];
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
-            abs_path = abs_path + cli->getServer().get_indexFiles()[i];
-            std::cout << abs_path << std::endl;
+            abs_path = abs_path + cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i];
             return true;
         }
     }
@@ -495,10 +493,10 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url;
      std::string pathExact;
     if (_blockIdx == -1)
-        pathExact = cli->getServer().get_roots()[0];
+        pathExact = cli->getServer().get_root();
     else 
         pathExact = cli->getServer().get_locations()[_blockIdx].getRoot();
-    std::cout << cli->getServer().get_roots()[0] << std::endl;
+    // std::cout << cli->getServer().get_roots()[0] << std::endl;
     abs_path = pathExact.substr(1, pathExact.size() - 2) + _path;
     std::cout << "abs_path: " << abs_path << std::endl;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
@@ -508,7 +506,7 @@ void RequestHandler::get_requested_ressource(Client* cli)
         cli->_response.setBody(htmlfile);
         cli->_response.generateHeaderResponse();
         cli->setTypeData(WRITEDATA);
-        std::cout << "ERRRRRRRRRRRROR\n\n\n\n";
+        std::cout << "\n\n\n\nERRRRRRRRRRRROR\n\n\n\n";
         cli->_response.setStatus(404);
         throw(404);
     }

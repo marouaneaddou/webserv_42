@@ -66,8 +66,6 @@ void WebServ::run_servers(std::map<int, std::vector<Servers> > grouped, std::vec
         //Loop through the Clients FDs//////////
         for (itClient it_cli = _clients.begin();  it_cli != _clients.end();)
         {
-            std::cout << "hello start client "<<it_cli->first << std::endl;
-            // exit(0);
             if (FD_ISSET(it_cli->first, &ready_Rsockets))
             {
                 read_request(it_cli->first);
@@ -178,7 +176,7 @@ void WebServ::start_parsing(int fd_R, std::map<int, std::vector<Servers> > group
         _clients.at(fd_R)->setCheck();
 
         _firstline = _buffer.substr(0, findPos);
-        std::cout << _firstline << std::endl;
+        // std::cout << _firstline << std::endl;
         _clients.at(fd_R)->_request.parse_request_line(_firstline);
         _buffer = _buffer.substr(findPos + 2);
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
@@ -186,7 +184,7 @@ void WebServ::start_parsing(int fd_R, std::map<int, std::vector<Servers> > group
             // std::cout << "start << \n" << _buffer  << "\n<< end"<< std::endl;
             _clients.at(fd_R)->_request.setHeader(_buffer);
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
-            std::cout << _clients[fd_R]->_request.getHeader("Host")->second << std::endl;
+            // std::cout << _clients[fd_R]->_request.getHeader("Host")->second << std::endl;
             // Servers server = getConf(server s_fds[idx], grouped);
                 // _clients[new_socket]->setConf(server);
             Servers server = getConf(fd_R, grouped,  _clients[fd_R]->_request.getHeader("Host")->second);
@@ -263,24 +261,13 @@ Servers WebServ::getConf(int fd, std::map<int, std::vector<Servers> > confs, std
     int twoPoint = host.find(":");
     std::string ip = host.substr(0, twoPoint);
     int port = stoi(host.substr(twoPoint + 1));
-    std::cout << port << " " << ip << std::endl;
-    std::cout << fd << std::endl;
-    // for (unsigned int i = 0; i < _servers.size(); i++)
-    // {
-    //     for (unsigned int j = 0; j < _servers[i]->getSocket().size(); j++)
-    //     {
-    //         if (_servers[i]->getSocket()[j] == fd)
-    //         {
-    //             std::cout << "here here\n";
-    //             std::cout << i << " " << j << std::endl;
-    //             return confs[i][j];
-    //         }
-    //     }
-    // }
+    // std::cout << port << " " << ip << std::endl;
+    // std::cout << fd << std::endl;
+    
     std::vector<Servers> servers = confs[port];
     for (size_t i = 0; i < servers.size(); i++) {
         if (servers[i].get_host() == ip) return servers[i];
-        std::cout << servers[i].get_host() << std::endl;
+        // std::cout << servers[i].get_host() << std::endl;
     }
     return servers[0];
 }

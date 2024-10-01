@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/09/30 22:07:42 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/01 07:10:55 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,16 +142,12 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                 server.set_server_names(server_names);
             }
             else if (arg == "root:") {
-                std::vector<std::string> roots = Utils::split(Utils::split(buff, ":")[1], ", ");
-                
-                std::cout << "hna kayn rooot " << roots[0] <<std::endl;
-                for (std::vector<std::string>::iterator it = roots.begin(); it != roots.end(); ++it) {
-                    if (!Errors::valid_root(Utils::strtrim(*it))) {
-                    infile.close();
-                        throw( "[ERROR] : Error in root");
-                    }
+                std::string root = Utils::strtrim(Utils::split(buff, ": ")[1]);
+                if (!Errors::valid_root(Utils::strtrim(root))) {
+                infile.close();
+                    throw( "[ERROR] : Error in root");
                 }
-                server.set_roots(roots);
+                server.set_root(root);
             }
             else if (arg == "default_server:") {
                 if (Utils::strtrim(data_splited[1]) == "true")

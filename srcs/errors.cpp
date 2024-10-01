@@ -6,7 +6,7 @@
 /*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:26 by aech-che          #+#    #+#             */
-/*   Updated: 2024/09/30 00:45:12 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/01 07:05:34 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -447,7 +447,7 @@ int Errors::valid_server_data(Servers &server)
         server.set_server_names(server_names);
     }
 
-    if(server.get_roots().empty()){
+    if(server.get_root().empty()){
         throw("No root found");
     }
     if(server.get_indexFiles().empty()){
@@ -475,7 +475,7 @@ int Errors::valid_server_data(Servers &server)
         }
         if(it->getRoot().empty()){
             std::cout << "[INFO] : No location root found, default [server root]" << std::endl;
-            it->setRoot(server.get_roots()[0]);  // Modify the original location
+            it->setRoot(server.get_root());  // Modify the original location
         }
         if(it->getIndexFiles().empty()){
             std::cout << "[INFO] : No location index file, default [server index]" << std::endl;

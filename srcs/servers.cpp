@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:08:23 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/09/30 12:08:11 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/01 07:02:13 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,9 @@ void Servers::set_error_pages(std::vector<std::map<std::string, std::string> > e
     
 }
 
-void Servers::set_roots(std::vector<std::string> roots)
+void Servers::set_root(std::string root)
 {
-    this->roots = roots;
+    this->root = root;
 }
 
 std::string Servers::get_host()
@@ -112,9 +112,9 @@ std::vector<std::map<std::string, std::string> > Servers::get_error_pages()
     return (error_pages);
 }
 
-std::vector<std::string> Servers::get_roots()
+std::string Servers::get_root()
 {
-    return (roots);
+    return (root);
 }
 
 void Servers::set_indexFiles(std::vector<std::string> indexFiles)
