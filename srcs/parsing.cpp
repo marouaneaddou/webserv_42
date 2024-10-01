@@ -6,7 +6,7 @@
 /*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 13:45:04 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/10/01 14:36:31 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,6 +161,8 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                 infile.close();
                     throw( "[ERROR] : Error in root");
                 }
+                root.erase(0, 1);
+                root.erase(root.size() - 1, 1);
                 server.set_root(root);
             }
             else if (arg == "default_server:") {
@@ -276,24 +278,24 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                         arg.erase(arg.size() - 1, 1);
                         location.setReturn(arg);
                     }
-                    else if(arg == "default_file") {
-                        count += 1;
-                        if(return_flag > 0) {
-                            infile.close();
-                            throw( "[ERROR] : Error in return, only return in location");
+                    // else if(arg == "default_file") {
+                    //     count += 1;
+                    //     if(return_flag > 0) {
+                    //         infile.close();
+                    //         throw( "[ERROR] : Error in return, only return in location");
 
-                        }
-                        if (location_data.size() != 2){
-                            infile.close();
-                            throw( "[ERROR] : Error in default file, check arguments");
+                    //     }
+                    //     if (location_data.size() != 2){
+                    //         infile.close();
+                    //         throw( "[ERROR] : Error in default file, check arguments");
 
-                        }
-                        if(!Errors::valid_defaultfile(location_data[1])) {
-                            // infile.close();
-                            // return -1;
-                        }
-                        location.setDefaultFile(location_data[1]);
-                    }
+                    //     }
+                    //     if(!Errors::valid_defaultfile(location_data[1])) {
+                    //         // infile.close();
+                    //         // return -1;
+                    //     }
+                    //     location.setDefaultFile(location_data[1]);
+                    // }
                     else if(arg == "methods"){
                         count += 1;
                         if(return_flag > 0) {
@@ -429,6 +431,8 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                             throw( "[ERROR] : Error in root location");
 
                         }
+                        arg.erase(0, 1);
+                        arg.erase(arg.size() - 1, 1);
                         location.setRoot(arg);
                     }
                     else if(arg == "cgi_extension") {
