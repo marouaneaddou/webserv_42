@@ -6,7 +6,7 @@
 /*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 13:26:37 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/01 15:54:34 by maddou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,21 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
         }
 
         if(switch_server % 2 == 0) {
-            
+            // modify location vec and add root location
+            for(size_t i = 0; i < locationsvec.size(); i += 1){
+                if(locationsvec[i].getPath() == "/"){
+                    server.set_rootlocation(true);
+                }
+            }
+
+            if(!server.get_rootlocation()){
+                    Locations location;
+                    location.setPath("/");
+                    locationsvec.push_back(location);
+                    reverse(locationsvec.begin(), locationsvec.end());
+                
+            }
+            // end
             server.set_locations(locationsvec);
             if(!Errors::valid_server_data(server)){
                 infile.close();
@@ -147,6 +161,8 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                 infile.close();
                     throw( "[ERROR] : Error in root");
                 }
+                root.erase(0, 1);
+                root.erase(root.size() - 1, 1);
                 server.set_root(root);
             }
             else if (arg == "default_server:") {
@@ -167,7 +183,7 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                 server.set_indexFiles(index_files);
             }
             else if (arg == "error_pages") {
-                std::vector<std::map<std::string, std::string> > error_pages;
+                std::map<std::string, std::string> error_pages;
                 while (std::getline(infile, buff)) {
                     line += 1;
                     buff = Utils::strtrim(buff);
@@ -175,10 +191,13 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                         continue;
                     if (buff == "}")
                     {
+                        server.set_error_pages(error_pages);
                         save_arg = buff;
                         break;
                     }
                     std::vector<std::string> error_data = Utils::split(buff, " ");
+                    
+                    // for (size_t i = 0; i < error_data.size(); i++) std::cout << "error page "<<error_data[i] <<std::endl;
                     if (error_data.size() != 2) {
                         infile.close();
                         throw( "[ERROR] : Error in error pages, check arguments");
@@ -187,11 +206,13 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                        infile.close();
                         throw( "[ERROR] : Error in error pages");
                     }
-                    std::map<std::string, std::string> error_page;
-                    error_page[error_data[0]] = error_data[1];
-                    error_pages.push_back(error_page);
+                    error_data[1].erase(0, 1);
+                    error_data[1].erase(error_data[1].size() - 1, 1);
+                    error_data[0] = error_data[0].substr(0, error_data[0].size() - 1);
+                    std::cout << error_data[0] << " : " << error_data[1] << std::endl;
+                    error_pages[error_data[0]] = error_data[1];
                 }
-                server.set_error_pages(error_pages);
+                   
             }
             else if (arg == "router" || arg == "locations") {
                 int return_flag = 0;
@@ -261,24 +282,24 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                         arg.erase(arg.size() - 1, 1);
                         location.setReturn(arg);
                     }
-                    else if(arg == "default_file") {
-                        count += 1;
-                        if(return_flag > 0) {
-                            infile.close();
-                            throw( "[ERROR] : Error in return, only return in location");
+                    // else if(arg == "default_file") {
+                    //     count += 1;
+                    //     if(return_flag > 0) {
+                    //         infile.close();
+                    //         throw( "[ERROR] : Error in return, only return in location");
 
-                        }
-                        if (location_data.size() != 2){
-                            infile.close();
-                            throw( "[ERROR] : Error in default file, check arguments");
+                    //     }
+                    //     if (location_data.size() != 2){
+                    //         infile.close();
+                    //         throw( "[ERROR] : Error in default file, check arguments");
 
-                        }
-                        if(!Errors::valid_defaultfile(location_data[1])) {
-                            // infile.close();
-                            // return -1;
-                        }
-                        location.setDefaultFile(location_data[1]);
-                    }
+                    //     }
+                    //     if(!Errors::valid_defaultfile(location_data[1])) {
+                    //         // infile.close();
+                    //         // return -1;
+                    //     }
+                    //     location.setDefaultFile(location_data[1]);
+                    // }
                     else if(arg == "methods"){
                         count += 1;
                         if(return_flag > 0) {
@@ -414,6 +435,8 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                             throw( "[ERROR] : Error in root location");
 
                         }
+                        arg.erase(0, 1);
+                        arg.erase(arg.size() - 1, 1);
                         location.setRoot(arg);
                     }
                     else if(arg == "cgi_extension") {
@@ -461,8 +484,26 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
         line += 1;
     }
 
-    
-    
+    // modify location vec and add root location
+    for(size_t i = 0; i < locationsvec.size(); i += 1){
+        if(locationsvec[i].getPath() == "/"){
+            server.set_rootlocation(true);
+        }
+    }
+
+    if(!server.get_rootlocation()){
+            Locations location;
+            location.setPath("/");
+            std::vector<std::string> methodsvec;
+            methodsvec.push_back("GET");
+            methodsvec.push_back("POST");
+            methodsvec.push_back("DELETE");
+            location.setMethods(methodsvec);
+            locationsvec.push_back(location);
+            reverse(locationsvec.begin(), locationsvec.end());
+        
+    }
+    // end
     server.set_locations(locationsvec);
     if(!Errors::valid_server_data(server)){
         infile.close();

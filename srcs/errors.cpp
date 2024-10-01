@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errors.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:26 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 07:05:34 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/01 16:00:20 by maddou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,13 +287,12 @@ int Errors::valid_defaultserver(std::string ds)
 // error pages : 400, 401, 403, 404, 405, 500, 501
 int Errors::valid_errorpage(std::string ds)
 {
-
     if(ds!="400:" && ds!="401:" && ds!="403:" && ds!="404:" 
     && ds!="405:" && ds!="500:" && ds!="501:" && ds!="502:" 
-    && ds!="503:" && ds!="504:" && ds!="505:") 
+    && ds!="503:" && ds!="504:" && ds!="505:" && ds!="414:"
+    && ds!="409:") 
     {
         throw("Not a valid error page, invalid data");
-        
     }
     return(1);
 }
@@ -314,7 +313,7 @@ int Errors::exit_error(std::string arg){
         if(arg == data[i])
         {
             return(0);
-        }
+        } 
     }
     if (arg == "server:" || arg == "location:" || arg == "router:")
     {

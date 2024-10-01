@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:08:23 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/10/01 07:02:13 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/01 13:33:00 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 Servers::Servers()
 {
     client_body_size = 0;
+    rootlocation = false;
 }
 
 
@@ -65,7 +66,7 @@ void Servers::set_locations(std::vector<Locations> locations)
     this->locations = locations;
 }
 
-void Servers::set_error_pages(std::vector<std::map<std::string, std::string> > error_pages)
+void Servers::set_error_pages(std::map<std::string, std::string> error_pages)
 {
     this->error_pages = error_pages;
     
@@ -107,7 +108,7 @@ std::vector<Locations> &Servers::get_locations()
 }
 
 
-std::vector<std::map<std::string, std::string> > Servers::get_error_pages()
+std::map<std::string, std::string> Servers::get_error_pages()
 {
     return (error_pages);
 }
@@ -129,3 +130,5 @@ std::vector<std::string> Servers::get_indexFiles()
 
 
 
+void Servers::set_rootlocation(bool rootloc){rootlocation = rootloc;}
+bool Servers::get_rootlocation(){return (rootlocation);}
