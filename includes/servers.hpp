@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:08:28 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/10/01 07:02:27 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/01 10:55:37 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class Servers
                 std::vector<Locations> locations;
                 std::vector<std::string> _indexFiles;
                 std::vector<Servers> servers;
+                bool rootlocation;
 
         public:
             Servers();
@@ -58,6 +59,9 @@ class Servers
             std::vector<std::map<std::string, std::string> > get_error_pages();
             std::vector<Locations> &get_locations();
             std::vector<std::string> get_indexFiles();
+            void set_rootlocation(bool rootlocation);
+            bool get_rootlocation();
+            
         
             
             

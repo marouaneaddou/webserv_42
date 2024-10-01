@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 07:10:55 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/01 11:27:43 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,21 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
         }
 
         if(switch_server % 2 == 0) {
-            
+            // modify location vec and add root location
+            for(size_t i = 0; i < locationsvec.size(); i += 1){
+                if(locationsvec[i].getPath() == "/"){
+                    server.set_rootlocation(true);
+                }
+            }
+
+            if(!server.get_rootlocation()){
+                    Locations location;
+                    location.setPath("/");
+                    locationsvec.push_back(location);
+                    reverse(locationsvec.begin(), locationsvec.end());
+                
+            }
+            // end
             server.set_locations(locationsvec);
             if(!Errors::valid_server_data(server)){
                 infile.close();
@@ -461,8 +475,21 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
         line += 1;
     }
 
-    
-    
+    // modify location vec and add root location
+    for(size_t i = 0; i < locationsvec.size(); i += 1){
+        if(locationsvec[i].getPath() == "/"){
+            server.set_rootlocation(true);
+        }
+    }
+
+    if(!server.get_rootlocation()){
+            Locations location;
+            location.setPath("/");
+            locationsvec.push_back(location);
+            reverse(locationsvec.begin(), locationsvec.end());
+        
+    }
+    // end
     server.set_locations(locationsvec);
     if(!Errors::valid_server_data(server)){
         infile.close();
