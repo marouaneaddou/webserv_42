@@ -6,7 +6,7 @@
 /*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 11:36:27 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/10/01 13:45:04 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                 server.set_indexFiles(index_files);
             }
             else if (arg == "error_pages") {
-                std::vector<std::map<std::string, std::string> > error_pages;
+                std::map<std::string, std::string> error_pages;
                 while (std::getline(infile, buff)) {
                     line += 1;
                     buff = Utils::strtrim(buff);
@@ -189,6 +189,7 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                         continue;
                     if (buff == "}")
                     {
+                        server.set_error_pages(error_pages);
                         save_arg = buff;
                         break;
                     }
@@ -201,11 +202,11 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                        infile.close();
                         throw( "[ERROR] : Error in error pages");
                     }
-                    std::map<std::string, std::string> error_page;
-                    error_page[error_data[0]] = error_data[1];
-                    error_pages.push_back(error_page);
+                    error_data[1].erase(0, 1);
+                    error_data[1].erase(error_data[1].size() - 1, 1);
+                    std::cout << error_data[0] << " : " << error_data[1] << std::endl;
+                    error_pages[error_data[0]] = error_data[1];
                 }
-                server.set_error_pages(error_pages);
             }
             else if (arg == "router" || arg == "locations") {
                 int return_flag = 0;
