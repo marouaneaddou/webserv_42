@@ -6,7 +6,7 @@
 /*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 11:27:43 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/10/01 11:36:27 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -485,6 +485,11 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
     if(!server.get_rootlocation()){
             Locations location;
             location.setPath("/");
+            std::vector<std::string> methodsvec;
+            methodsvec.push_back("GET");
+            methodsvec.push_back("POST");
+            methodsvec.push_back("DELETE");
+            location.setMethods(methodsvec);
             locationsvec.push_back(location);
             reverse(locationsvec.begin(), locationsvec.end());
         
