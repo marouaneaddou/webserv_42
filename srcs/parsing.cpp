@@ -6,7 +6,7 @@
 /*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 15:54:34 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/01 18:11:43 by maddou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,11 +175,13 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
             {
                 std::vector<std::string> index_files = Utils::split(Utils::split(buff, ":")[1], ", ");
                 for (std::vector<std::string>::iterator it = index_files.begin(); it != index_files.end(); ++it) {
-                    if (!Errors::valid_servername(Utils::strtrim(*it))) {
+                    *it = Utils::strtrim(*it);
+                    if (!Errors::valid_servername(*it)) {
                       infile.close();
                         throw( "[ERROR] : Error in index files");
                     }
                 }
+                
                 server.set_indexFiles(index_files);
             }
             else if (arg == "error_pages") {
@@ -232,12 +234,12 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                     std::vector<std::string> location_data = Utils::split(buff, ": ");
                     arg = Utils::strtrim(location_data[0]);
                     if(arg == "path") {
-                        count += 1;
-                        if(return_flag > 0) {
-                            infile.close();
-                            throw( "[ERROR] : Error in return, only return in location");
+                        // count += 1;
+                        // if(return_flag > 0) {
+                        //     infile.close();
+                        //     throw( "[ERROR] : Error in return, only return in location");
 
-                        }
+                        // }
                         location_data = Utils::split(buff, " ");
                         if (location_data.size() != 2){
                             infile.close();

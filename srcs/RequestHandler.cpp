@@ -67,6 +67,9 @@ std::string generateHTML_file(std::string print, bool type, int status) {
 
 }
 
+// std::string readFile(std::string path, std::string exactPath) {
+
+// }
 
 void RequestHandler::req_uri_location(Client* cli)
 {
@@ -244,6 +247,7 @@ void RequestHandler::check_requested_method(Client* cli)
                     cli->_response.setStatus(301);
                     throw(301);
                 }
+
                 if (is_dir_has_index_files(cli) == false)
                 {
                 // std::cout <<"path =>> " << _path[_path.length() - 1] << std::endl;
@@ -331,6 +335,7 @@ void RequestHandler::check_requested_method(Client* cli)
             
                 if (is_dir_has_index_files(cli) == true) {
                     if (access(abs_path.c_str(), R_OK) != 0) {
+                        
                         std::string htmlfile = generateHTML_file("ERROR: forbiden access", 0, 403);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
@@ -364,6 +369,10 @@ void RequestHandler::check_requested_method(Client* cli)
                         // throw(200);
                     }
                     else {
+                        // std::string htmlfile;
+                        // if (cli->getServer().get_error_pages().find("403") != cli->getServer().get_error_pages().end()) {
+                        //     htmlfile
+                        // }
                         std::string htmlfile = generateHTML_file("ERROR: NOT Support CGI", 0, 403);
                         cli->_response.setStatus(403);
                         cli->_response.setBody(htmlfile);
@@ -375,6 +384,7 @@ void RequestHandler::check_requested_method(Client* cli)
                     }
                 }
                 else {
+                        
                     std::string htmlfile = generateHTML_file("ERROR: NOT index file", 0, 403);
                     // cli->_response.setStatus(403);
                     cli->_response.setBody(htmlfile);
@@ -450,6 +460,7 @@ void RequestHandler::deleteDirectoryRecursively(Client* cli, const char* dirPath
      DIR *dir = opendir(dirPath);
     if (dir == NULL)
     {
+        
         cli->_response.setStatus(403);
         throw(403);
     }
@@ -482,6 +493,7 @@ void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
                 std::string cgi_response = cgi_exec(abs_path, 1);
             else
             {
+                
                 cli->_response.setStatus(403);
                 throw(403);
             }
@@ -504,10 +516,11 @@ void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
 bool RequestHandler::is_dir_has_index_files(Client* cli)
 {
     struct stat fileInfo;
-
+    std::cout << cli->getServer().get_locations()[_blockIdx].getIndexFiles().size() << std::endl;
     for (unsigned int i = 0; i < cli->getServer().get_locations()[_blockIdx].getIndexFiles().size(); i++)
     {
         std::string filePath = abs_path + cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i];
+        std::cout << "\"" << abs_path << "\"" << "\"" << cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i] << "\""<< std::endl;
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
             abs_path = abs_path + cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i];
@@ -537,7 +550,7 @@ void RequestHandler::get_requested_ressource(Client* cli)
     else 
         pathExact = cli->getServer().get_locations()[_blockIdx].getRoot();
     // std::cout << cli->getServer().get_roots()[0] << std::endl;
-    abs_path = pathExact.substr(1, pathExact.size() - 2) + _path;
+    abs_path = pathExact + _path;
     std::cout << "abs_path: " << abs_path << std::endl;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
         std::string htmlfile = generateHTML_file("ERROR: NOT FOUND", 0, 404);
