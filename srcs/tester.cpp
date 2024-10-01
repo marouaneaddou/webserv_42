@@ -24,6 +24,19 @@ void __UNIT_TEST__(std::vector<Servers> servers)  {
     /********* __NUMBER__SERVER__*******/
 
         std::cout << COLOR_GREEN <<"__serverNumber__ "<< server - servers.begin() << COLOR_GREEN << std::endl;
+        /********************************__ERROR__PAGES__**********************************/
+
+            std::vector<std::map<std::string, std::string> >::iterator errorPage = server->get_error_pages().begin();
+            std::vector<std::map<std::string, std::string> >::iterator endErrorPage = server->get_error_pages().end();
+
+        for (; errorPage != endErrorPage; ++errorPage) {
+            // Now errorPage points to a map, so iterate through the map
+            // for (std::map<std::string, std::string>::iterator it = errorPage->begin(); it != errorPage->end(); ++it) {
+                std::cout << " __STATUS__CODE : " << errorPage->begin()->first  << " -> " << errorPage->begin()->second << std::endl;
+            // }
+        }
+
+        /********************************__ERROR__PAGES__**********************************/
 
         /**************** __GLOBAL__DATA__FOR__SERVER__ ********************/
 
