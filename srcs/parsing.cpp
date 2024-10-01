@@ -6,7 +6,7 @@
 /*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 14:36:31 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/10/01 16:02:01 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,12 +228,12 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                     std::vector<std::string> location_data = Utils::split(buff, ": ");
                     arg = Utils::strtrim(location_data[0]);
                     if(arg == "path") {
-                        count += 1;
-                        if(return_flag > 0) {
-                            infile.close();
-                            throw( "[ERROR] : Error in return, only return in location");
+                        // count += 1;
+                        // if(return_flag > 0) {
+                        //     infile.close();
+                        //     throw( "[ERROR] : Error in return, only return in location");
 
-                        }
+                        // }
                         location_data = Utils::split(buff, " ");
                         if (location_data.size() != 2){
                             infile.close();

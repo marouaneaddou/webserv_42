@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errors.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:26 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 07:05:34 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/01 16:08:47 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,12 +172,12 @@ int Errors::check_filename(char *file_name)
     size_t n = stdcount_mine(file_name, '.');
     if(n != 1)
     {
-        throw("Too much . in the file name, please try another file <example.conf>\n");
+        throw("[ERROR] : Too much . in the file name, please try another file <example.conf>\n");
     }
     std::vector<std::string> vec = Utils::split(file_name, std::string(".", 1));
     if(vec.size() != 2 ||vec[1]  != "conf" )
     {
-        throw("Wrong suff <example.conf>\n");
+        throw("[ERROR] : Wrong suff <example.conf>\n");
     }
 
     return(0);
@@ -214,7 +214,7 @@ int Errors::valid_port(std::string port)
     {
         if (!isdigit(port[i]))
         {
-            throw("Not a valid port, invalid data");
+            throw("[ERROR] : Not a valid port, invalid data");
             
         }
     }
@@ -224,7 +224,7 @@ int Errors::valid_port(std::string port)
         
         if (port_check < 0 || port_check > 65535)
         {
-            throw("Not a valid port, not in the range");
+            throw("[ERROR] : Not a valid port, not in the range");
             
         }
     // // }
@@ -245,7 +245,7 @@ int Errors::check_num(std::string input)
     {
         if (!isdigit(input[i]))
         {
-            throw("Not a valid client body size, invalid data");
+            throw("[ERROR] : Not a valid client body size, invalid data");
         }
     }
     return(0);
@@ -256,7 +256,7 @@ int Errors::valid_servername(std::string servername)
     if(servername.length() < 3 || servername.length() > 253 
         || servername.find(".") == std::string::npos)
     {
-        throw("Not a valid server name, invalid data");
+        throw("[ERROR] : Not a valid server name, invalid data");
         
     }
     return(1);
@@ -267,7 +267,7 @@ int Errors::valid_root(std::string root)
     if(root.length() < 3 || root.length() > 253 
         || root.find("/") == std::string::npos)
     {
-        throw("Not a valid root path, invalid data");
+        throw("[ERROR] : Not a valid root path, invalid data");
         
     }
     return(1);
@@ -278,7 +278,7 @@ int Errors::valid_defaultserver(std::string ds)
     
     if(ds!="on" && ds!="false")
     {
-        throw("Not a valid default server, invalid data");
+        throw("[ERROR] : Not a valid default server, invalid data");
         
     }
     return(1);
@@ -292,7 +292,7 @@ int Errors::valid_errorpage(std::string ds)
     && ds!="405:" && ds!="500:" && ds!="501:" && ds!="502:" 
     && ds!="503:" && ds!="504:" && ds!="505:") 
     {
-        throw("Not a valid error page, invalid data");
+        throw("[ERROR] : Not a valid error page, invalid data");
         
     }
     return(1);
@@ -328,15 +328,15 @@ int Errors::valid_path(std::string arg){
     
     if(arg[0] != '"' || arg[arg.size() - 1] != '"')
     {
-        throw("Error in path, make it in double quotes");
+        throw("[ERROR] : Error in path, make it in double quotes");
     }
     if(arg.size() < 3)
     {
-        throw("Error in path, invalid data");
+        throw("[ERROR] : Error in path, invalid data");
     }
     if(arg.find("/") == std::string::npos)
     {
-        throw("Error in path, invalid data");
+        throw("[ERROR] : Error in path, invalid data");
     }
     return(1);
 }
@@ -344,11 +344,11 @@ int Errors::valid_path(std::string arg){
 int Errors::valid_defaultfile(std::string arg){
     if(arg.size() < 3)
     {
-        throw("Error in default file, invalid data");
+        throw("[ERROR] : Error in default file, invalid data");
     }
     if(arg.find(".") == std::string::npos)
     {
-        throw("Error in default file, invalid data");
+        throw("[ERROR] : Error in default file, invalid data");
     }
     return(1);
 }
@@ -361,7 +361,7 @@ int Errors::valid_method(std::string arg){
     }
     if(arg!="GET" && arg!="DELETE" && arg!="POST")
     {
-        throw("Error in methods, invalid data");
+        throw("[ERROR] : Error in methods, invalid data");
     }
     return(1);
 }
@@ -371,15 +371,15 @@ int Errors::valid_directory(std::string arg){
     
     if(arg[0] != '"' || arg[arg.size() - 1] != '"')
     {
-        throw("Error in directory, make it in double quotes");
+        throw("[ERROR] : Error in directory, make it in double quotes");
     }
     if(arg.size() < 3)
     {
-        throw("Error in directory, invalid data");
+        throw("[ERROR] : Error in directory, invalid data");
     }
     if(arg.find("/") == std::string::npos)
     {
-        throw("Error in directory, invalid data");
+        throw("[ERROR] : Error in directory, invalid data");
     }
     return(1);
 }
@@ -388,7 +388,7 @@ int Errors::valid_directory_listing(std::string arg){
     
     if(arg != "on" && arg != "off")
     {
-        throw("Error in directory listing, invalid data");
+        throw("[ERROR] : Error in directory listing, invalid data");
     }
     return(1);
 }
@@ -397,7 +397,7 @@ int Errors::valid_directory_listing(std::string arg){
 int Errors::valid_cgi_bin(std::string arg){
     if(arg != "/usr/local/bin/python3")
     {
-        throw("Error in cgi bin, only python3 allowed {/usr/local/bin/python3}");
+        throw("[ERROR] : Error in cgi bin, only python3 allowed {/usr/local/bin/python3}");
     }
     return(1);
 }
@@ -448,10 +448,10 @@ int Errors::valid_server_data(Servers &server)
     }
 
     if(server.get_root().empty()){
-        throw("No root found");
+        throw("[ERROR] : No root found");
     }
     if(server.get_indexFiles().empty()){
-        throw("No index files found");
+        throw("[ERROR] : No index files found");
     }
     if(server.get_default_server() == 0){
         std::cout << "[INFO] : No default server found, default [false]" << std::endl;
@@ -465,13 +465,16 @@ int Errors::valid_server_data(Servers &server)
     for (std::vector<Locations>::iterator it = server.get_locations().begin(); it != server.get_locations().end(); ++it)
     {
         if(it->getReturn() != ""){
-            continue;
+            if(it->getPath().empty())
+               throw("[ERROR] : No path found");
+            else
+                continue;
         }
         if(it->getPath().empty()){
-            throw("No path found");
+            throw("[ERROR] : No path found");
         }
         if(it->getMethods().empty()){
-            throw("No methods found");
+            throw("[ERROR] : No methods found");
         }
         if(it->getRoot().empty()){
             std::cout << "[INFO] : No location root found, default [server root]" << std::endl;
