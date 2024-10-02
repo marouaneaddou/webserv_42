@@ -74,6 +74,7 @@ std::string generateHTML_file(std::string print, bool type, int status) {
 void RequestHandler::req_uri_location(Client* cli)
 {
     std::string url = cli->_request.getURL();
+    std::cout << "\n\nURL ------->" << cli->_request.getURL() << "\n\n\n" << std::endl;
     std::size_t query_pos = url.find("?");
     if (query_pos != std::string::npos)
         _path = url.substr(0, query_pos);
@@ -108,29 +109,28 @@ void RequestHandler::req_uri_location(Client* cli)
     
 }
 
-void RequestHandler::is_location_have_redirection(Client* cli)
-{
-    if (!(cli->getServer().get_locations()[_blockIdx].getReturn().empty()))
-    {
-        std::cout << "RETURN FILE: " << cli->getServer().get_locations()[_blockIdx].getReturn() << std::endl;
-        cli->_response.setHeader("Location", cli->getServer().get_locations()[_blockIdx].getReturn());
-        cli->_response.setStatus(301);
-        cli->_response.setHeader("Content-Length", 0);
-        throw(301);
-    }
-    return;
-}
+// void RequestHandler::is_location_have_redirection(Client* cli)
+// {
+//     if (!(cli->getServer().get_locations()[_blockIdx].getReturn().empty()))
+//     {
+//         std::cout << "RETURN FILE: " << cli->getServer().get_locations()[_blockIdx].getReturn() << std::endl;
+//         cli->_response.setHeader("Location", cli->getServer().get_locations()[_blockIdx].getReturn());
+//         cli->_response.setStatus(301);
+//         cli->_response.setHeader("Content-Length", 0);
+//         throw(301);
+//     }
+// }
 
-void RequestHandler::is_method_allowed_in_location(Client* cli)
-{
-    for (unsigned int i = 0; i < cli->getServer().get_locations()[_blockIdx].getMethods().size(); i++)
-    {
-        if (cli->getServer().get_locations()[_blockIdx].getMethods()[i] == cli->_request.getMethod())
-            return;
-    }
-    cli->_response.setStatus(405);
-    throw(405);
-}
+// void RequestHandler::is_method_allowed_in_location(Client* cli)
+// {
+//     for (unsigned int i = 0; i < cli->getServer().get_locations()[_blockIdx].getMethods().size(); i++)
+//     {
+//         if (cli->getServer().get_locations()[_blockIdx].getMethods()[i] == cli->_request.getMethod())
+//             return;
+//     }
+//     cli->_response.setStatus(405);
+//     throw(405);
+// }
 
 
 
@@ -544,7 +544,8 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-     std::string pathExact;
+    std::cout << "path is here " << _path << std::endl;
+    std::string pathExact;
     if (_blockIdx == -1)
         pathExact = cli->getServer().get_root();
     else 

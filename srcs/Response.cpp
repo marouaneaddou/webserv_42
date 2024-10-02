@@ -70,6 +70,7 @@ void Response::generateHeaderResponse()
     }
     _Response += "\r\n\r\n";
     _Response += _body;
+    std::cout << "\"" <<_Response <<"\""<< std::endl;
 }
 
 

@@ -4,6 +4,7 @@
 
 WebServ::WebServ(){
     this->max_fd = 0;
+    _exactLocation = -1;
 }
 
 WebServ::~WebServ()
@@ -72,6 +73,7 @@ void WebServ::run_servers(std::map<int, std::vector<Servers> > grouped, std::vec
                 try
                 {
                     start_parsing(it_cli->first, grouped);
+                    if (_clients[it_cli->first]->getTypeData() != WRITEDATA) {
                     if ( _clients[it_cli->first]->_request.getHeader("Transfer-Encoding") != _clients[it_cli->first]->_request.getEndHeaders())
                     {
                         if (_buffer.find("0\r\n\r\n") != std::string::npos)
@@ -93,6 +95,7 @@ void WebServ::run_servers(std::map<int, std::vector<Servers> > grouped, std::vec
                             FD_CLR(it_cli->first, &current_Rsockets);
                             FD_SET(it_cli->first, &current_Wsockets);
                         }
+                    }
                     }
                 }
                 catch(...) 
@@ -122,15 +125,16 @@ void WebServ::run_servers(std::map<int, std::vector<Servers> > grouped, std::vec
             }
             if (FD_ISSET(it_cli->first, &ready_Wsockets))
             {
-                if (_clients.at(it_cli->first)->getOnetime() == false) {
-                    handler = createHandler(_clients.at(it_cli->first)->_request);
+                if (_clients.at(it_cli->first)->getOnetime() == false && _clients.at(it_cli->first)->_response.getStatus() != 301) {
+                    handler = createHandler(_clients.at(it_cli->first)->_request, _exactLocation, _path);
                 }
-                handler->handleRequest(_clients.at(it_cli->first));
+                if (_clients.at(it_cli->first)->_response.getStatus() != 301)
+                    handler->handleRequest(_clients.at(it_cli->first));
                 if (_clients.at(it_cli->first)->getTypeData() == WRITEDATA)
                 {
                     _clients.at(it_cli->first)->_response.Send(it_cli->first);
                     if ( _clients.at(it_cli->first)->_response.getResponse().size() == 0) {
-                            _clients.at(it_cli->first)->setTypeData(CLOSESOCKET);
+                        _clients.at(it_cli->first)->setTypeData(CLOSESOCKET);
                     }
                 }
                 if (_clients.at(it_cli->first)->getTypeData() == CLOSESOCKET)
@@ -176,20 +180,24 @@ void WebServ::start_parsing(int fd_R, std::map<int, std::vector<Servers> > group
         _clients.at(fd_R)->setCheck();
 
         _firstline = _buffer.substr(0, findPos);
-        // std::cout << _firstline << std::endl;
         _clients.at(fd_R)->_request.parse_request_line(_firstline);
         _buffer = _buffer.substr(findPos + 2);
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {
-            // std::cout << "start << \n" << _buffer  << "\n<< end"<< std::endl;
             _clients.at(fd_R)->_request.setHeader(_buffer);
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
-            // std::cout << _clients[fd_R]->_request.getHeader("Host")->second << std::endl;
-            // Servers server = getConf(server s_fds[idx], grouped);
-                // _clients[new_socket]->setConf(server);
+
             Servers server = getConf(fd_R, grouped,  _clients[fd_R]->_request.getHeader("Host")->second);
             _clients[fd_R]->setConf(server);
-            // exit(0);
+
+            req_uri_location(_clients[fd_R]);
+
+            if (is_location_have_redirection(_clients[fd_R]) == 0)
+                is_method_allowed_in_location(_clients[fd_R]);
+            else 
+                _clients[fd_R]->_response.generateHeaderResponse();
+
+            _clients.at(fd_R)->setTypeData(WRITEDATA);
             FD_CLR(fd_R, &current_Rsockets);
             FD_SET(fd_R, &current_Wsockets);
             _buffer.clear();
@@ -199,9 +207,22 @@ void WebServ::start_parsing(int fd_R, std::map<int, std::vector<Servers> > group
             findPos = _buffer.find("\r\n\r\n");
             _clients.at(fd_R)->_request.setHeader(_buffer.substr(0, findPos + 2));
             _clients[fd_R]->_request.isReqWellFormed(_clients[fd_R]->getResponse());
+
             Servers server = getConf(fd_R, grouped,  _clients[fd_R]->_request.getHeader("Host")->second);
             _clients[fd_R]->setConf(server);
-            _buffer = _buffer.substr(findPos + 4);
+
+            req_uri_location(_clients[fd_R]);
+
+            if (is_location_have_redirection(_clients[fd_R]) == 0)
+                is_method_allowed_in_location(_clients[fd_R]);
+            else if (is_location_have_redirection(_clients[fd_R]) == 1){
+                _clients[fd_R]->_response.generateHeaderResponse();
+                _clients.at(fd_R)->setTypeData(WRITEDATA);
+                FD_CLR(fd_R, &current_Rsockets);
+                FD_SET(fd_R, &current_Wsockets);
+            }
+            else
+                _buffer = _buffer.substr(findPos + 4);
         }
     }
 
@@ -233,20 +254,7 @@ int WebServ::set_non_blocking(int sock)
     return (0);
 }
 
-
-RequestHandler* WebServ::createHandler(Request &request) 
-{
-    if (isPHPCGIRequest(request.getURL()))
-    {
-        return new PhpCgiHandler();
-    }
-    else
-    {
-        return new StaticFileHandler();
-    }
-}
-
-bool WebServ::isPHPCGIRequest(const std::string url) 
+bool WebServ::isPHPCGIRequest(std::string url) 
 {
     if (url.find(".php") != std::string::npos) // this check is not 100% done!!!!
     {
@@ -254,6 +262,19 @@ bool WebServ::isPHPCGIRequest(const std::string url)
     }
     return false;
 }
+
+RequestHandler* WebServ::createHandler(Request &request, int &_exactLocation, std::string &_path)
+{
+    if (isPHPCGIRequest(request.getURL()))
+    {
+        return new PhpCgiHandler(_exactLocation, _path);
+    }
+    else
+    {
+        return new StaticFileHandler(_exactLocation, _path);
+    }
+}
+
 
 Servers WebServ::getConf(int fd, std::map<int, std::vector<Servers> > confs, std::string host)
 {
@@ -270,4 +291,87 @@ Servers WebServ::getConf(int fd, std::map<int, std::vector<Servers> > confs, std
         // std::cout << servers[i].get_host() << std::endl;
     }
     return servers[0];
+}
+
+
+
+
+
+
+
+
+
+void WebServ::req_uri_location(Client* cli)
+{
+    std::string url = cli->_request.getURL();
+
+    std::size_t query_pos = url.find("?");
+    if (query_pos != std::string::npos)
+        _path = url.substr(0, query_pos);
+    else
+        _path = url;
+    std::string path = url.substr(0, query_pos);
+    //Exact Match
+    for (unsigned int i = 0; i < cli->getServer().get_locations().size(); i++)
+    {
+        if (cli->getServer().get_locations()[i].getPath()[0] == '=' && cli->getServer().get_locations()[i].getPath().substr(2) == _path)
+        {
+            _exactLocation = i;
+            return ;
+        }
+    }
+    //Prefix Match + default if no longer prefix found
+    std::string longestMatch;
+    // int index = -1;
+    for (unsigned int i = 0; i < cli->getServer().get_locations().size(); i++)
+    {
+        if (cli->getServer().get_locations()[i].getPath()[0] != '=' && path.find(cli->getServer().get_locations()[i].getPath()) == 0)
+        {
+            if (cli->getServer().get_locations()[i].getPath().length() > longestMatch.length())
+            {
+                longestMatch = cli->getServer().get_locations()[i].getPath();
+                _exactLocation = i;
+            }
+        }
+    }
+    if (!(longestMatch.empty()))
+    {
+        return; // ******************* you must test this code ******************* //
+    }
+    return;
+}
+
+
+
+void WebServ::setExactIndexLocation(int &index) {
+    _exactLocation = index;
+}
+
+int WebServ::getExactIndexLocation() const {
+    return _exactLocation;
+}
+
+
+
+bool WebServ::is_location_have_redirection(Client* cli)
+{
+    if (!(cli->getServer().get_locations()[_exactLocation].getReturn().empty()))
+    {
+        cli->_response.setHeader("Location", cli->getServer().get_locations()[_exactLocation].getReturn());
+        cli->_response.setStatus(301);
+        cli->_response.setStatusMsg("Moved Permanently");
+        cli->_response.setHeader("Content-Length", 0);
+        return 1;
+    }
+    return 0;
+}
+
+void WebServ::is_method_allowed_in_location(Client* cli)
+{
+    for (unsigned int i = 0; i < cli->getServer().get_locations()[_exactLocation].getMethods().size(); i++)
+    {
+        if (cli->getServer().get_locations()[_exactLocation].getMethods()[i] == cli->_request.getMethod())
+            return;
+    }
+    cli->_response.setStatus(405);
 }

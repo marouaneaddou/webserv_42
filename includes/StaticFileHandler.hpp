@@ -5,7 +5,7 @@
 
 class StaticFileHandler : public RequestHandler {
 public:
-    StaticFileHandler();
+    StaticFileHandler(int &index, std::string &_path);
     ~StaticFileHandler();
     void handleRequest(Client* cli);
 private:

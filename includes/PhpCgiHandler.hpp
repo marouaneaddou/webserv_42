@@ -4,7 +4,7 @@
 
 class PhpCgiHandler : public RequestHandler {
 public:
-    PhpCgiHandler();
+    PhpCgiHandler(int &index, std::string &_path);
     ~PhpCgiHandler();
     void handleRequest(Client* cli);
 private:

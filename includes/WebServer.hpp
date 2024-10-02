@@ -26,6 +26,8 @@ class WebServ
         std::map<int, Servers> _myconf;
         struct sockaddr_in _sockaddr;
         RequestHandler* handler;
+        int _exactLocation;
+        std::string _path;
     public:
         WebServ();
         ~WebServ();
@@ -38,8 +40,18 @@ class WebServ
         int set_non_blocking(int sock);
         void read_request(int fd_R);
         void start_parsing(int fd_R, std::map<int, std::vector<Servers> > grouped);
-        RequestHandler* createHandler(Request &request);
+        RequestHandler* createHandler(Request &request, int &exactLocation, std::string &path);
         bool isPHPCGIRequest(std::string URL);
+
+        void req_uri_location(Client* cli);
+        bool is_location_have_redirection(Client* cli);
+        void is_method_allowed_in_location(Client* cli);
+
+        void setExactIndexLocation(int &index);
+        int getExactIndexLocation() const;
+
+
+
         fd_set current_Rsockets, ready_Rsockets;
         fd_set current_Wsockets, ready_Wsockets;
 
