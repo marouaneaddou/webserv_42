@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:44 by aech-che          #+#    #+#             */
-/*   Updated: 2024/09/30 00:45:18 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/02 11:21:22 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class Errors
         static int valid_server_data(Servers &server);
         static void check_dupservers(std::vector<Servers> serversvec);
         static int valid_return(std::string arg);
+        static int valid_cgi_support(std::string arg);
 };
 
 

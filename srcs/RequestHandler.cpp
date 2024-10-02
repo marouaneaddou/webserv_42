@@ -285,7 +285,7 @@ void RequestHandler::check_requested_method(Client* cli)
         if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path))  {
             std::string cgi_response = cgi_exec(abs_path, 1);
             cli->_response.setStatus(200);                         
-            std::string htmlfile = generateHTML_file(cgi_response, 1, 200);
+            std::string htmlfile = cgi_response;//generateHTML_file(cgi_response, 1, 200);
             cli->_response.setHeader("Content-Type", "text/html");
             cli->_response.setHeader("Content-Length", htmlfile.length());
             cli->_response.setBody(htmlfile);

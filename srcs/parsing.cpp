@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 15:28:06 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 18:11:43 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/02 11:21:38 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -396,6 +396,30 @@ std::map<int, std::vector<Servers> >  Parsing::parse_file(char *filename, std::v
                             location.setDirectoryListing(true);
                         else
                             location.setDirectoryListing(false);
+                    }
+                    else if(arg == "cgi_support") {
+                        count += 1;
+                        if(return_flag > 0) {
+                            infile.close();
+                            throw( "[ERROR] : Error in return, only return in location");
+
+                        }
+                        location_data = Utils::split(buff, " ");
+                        if (location_data.size() != 2){
+                            infile.close();
+                            throw( "[ERROR] : Error in cgi support, check arguments");
+
+                        }
+                        arg = Utils::strtrim(location_data[1]);
+                        if(!Errors::valid_cgi_support(arg)) {
+                            infile.close();
+                            throw( "[ERROR] : Error in cgi support");
+
+                        }
+                        if (arg == "on")
+                            location.setCgiSupport(true);
+                        else
+                            location.setCgiSupport(false);
                     }
                     else if(arg == "cgi_bin") {
                         count += 1;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errors.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:26 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 17:28:54 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/02 11:21:33 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,8 @@ int Errors::valid_keyword(std::string key, int router_flag)
         router_keywords.push_back("directory_listing:");
         router_keywords.push_back("cgi_bin:");
         router_keywords.push_back("cgi_extension:");
+        router_keywords.push_back("cgi_support:");
+
         for (size_t i = 0; i < router_keywords.size(); i += 1)
         {
             if(key == router_keywords[(int)i])
@@ -574,3 +576,11 @@ int Errors::valid_return(std::string arg){
 
 
 
+int Errors::valid_cgi_support(std::string arg){
+    
+    if(arg != "on" && arg != "off")
+    {
+        throw("[ERROR] : Error in cgi supportg, invalid data");
+    }
+    return(1);
+}
