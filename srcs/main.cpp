@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 11:35:07 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/01 15:16:54 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/02 15:45:44 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ int main(int ac, char **av)
                 configFile = Parsing::parse_file(av[1], data, serverConf);
                 
                 // for (size_t i = 0; i < configFile.size(); i++) {
-                        __UNIT_TEST__(serverConf);
+                        // __UNIT_TEST__(serverConf);
                 // }
                 WebServ WebServ;
                 WebServ.run_servers(configFile, serverConf);
