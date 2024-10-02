@@ -19,6 +19,7 @@ void Request::parse_request_line(std::string &_rawReq)
     _method = tokens[0];
     _URL = tokens[1];
     _http_version = tokens[2];
+    std::cout << " errrrrrrrrror <<" << _method << " \n" << _URL << "\n hello" << _http_version << std::endl;
 }
 
 

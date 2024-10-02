@@ -181,6 +181,7 @@ void WebServ::start_parsing(int fd_R, std::map<int, std::vector<Servers> > group
 
         _firstline = _buffer.substr(0, findPos);
         _clients.at(fd_R)->_request.parse_request_line(_firstline);
+        std::cout << "first line is ------> " << _firstline << std::endl;
         _buffer = _buffer.substr(findPos + 2);
         if (_clients.at(fd_R)->_request.getMethod() != "POST")
         {

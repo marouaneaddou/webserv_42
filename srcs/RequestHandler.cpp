@@ -134,29 +134,17 @@ void RequestHandler::req_uri_location(Client* cli)
 
 
 
-char **custom_cgi_envp()
+char **custom_cgi_envp(std::string abspath, std::string _path, std::string contentlength, std::string query)
 {
-    // std::map<std::string, std::string>::iterator it = request_headers.find("Content-Length");
-    // if (it != request_headers.end())
-    //     envp_as_vec.push_back("CONTENT_LENGTH=" + it->second);
-    // it = request_headers.find("Content-Type");
-    // if (it != request_headers.end())
-    // envp_as_vec.push_back("CONTENT_TYPE=" + it->second);
-    // envp_as_vec.push_back("SCRIPT_FILENAME=" + requested_resource_path);
-    // envp_as_vec.push_back("SCRIPT_NAME=" +  request_url_as_vector.back());
-    // envp_as_vec.push_back("QUERY_STRING=");
-    // envp_as_vec.push_back("REQUEST_METHOD=" + request_method);
-    // envp_as_vec.push_back("REDIRECT_STATUS=200");
-    // envp_as_vec.push_back("SERVER_NAME=webserv");
-    // envp_as_vec.push_back("SERVER_PROTOCOL=HTTP/1.1");
-
 
     std::vector<std::string> envp_as_vec;
+
     envp_as_vec.push_back("CONTENT_TYPE=text/html");
-    envp_as_vec.push_back("CONTENT_LENGTH=0");
-    envp_as_vec.push_back("SCRIPT_FILENAME=/path/to/your-cgi-script.py");
-    envp_as_vec.push_back("SCRIPT_NAME=/cgi-bin/your-cgi-script.py");
-    envp_as_vec.push_back("QUERY_STRING=");
+    envp_as_vec.push_back("CONTENT_LENGTH=" + contentlength);
+    envp_as_vec.push_back("SCRIPT_FILENAME=" + abspath);
+    envp_as_vec.push_back("SCRIPT_NAME=" + _path);
+    // envp_as_vec.push_back("QUERY_STRING=fname=maroaune&lname=addou&age=23&email=maddou@gmail.ma");
+    envp_as_vec.push_back("QUERY_STRING=" + query);
     envp_as_vec.push_back("REQUEST_METHOD=GET");
     envp_as_vec.push_back("REDIRECT_STATUS=200");
     envp_as_vec.push_back("SERVER_NAME=webserv");
@@ -178,53 +166,94 @@ char **custom_cgi_envp()
 
 
 
-std::string cgi_exec(std::string _path, int flag_python)
+std::string cgi_exec(std::string abspath, std::string _path, std::string contentlength, std::string query)
 {
-    std::string cgi_path = _path;
-    char **envp = custom_cgi_envp();
+    char **envp = custom_cgi_envp(abspath, _path, contentlength, query);
     std::string cgi_response;
     char **av;
     av = (char **)malloc(3 * sizeof(char *));
 
     av[0] = (char *)malloc(strlen("/usr/local/bin/python3") + 1);
     strcpy(av[0], "/usr/local/bin/python3");
-    av[1] = (char *)malloc(cgi_path.size() + 1);
-    strcpy(av[1], cgi_path.c_str());
+    av[1] = (char *)malloc(abspath.size() + 1);
+    strcpy(av[1], abspath.c_str());
     av[2] = NULL;
 
     int fd[2];
     pipe(fd);
-    if (flag_python == 1){
-        pid_t pid = fork();
-        if (pid == 0){
-            close(fd[0]);
-            dup2(fd[1], 1);
-            execve(av[0], av, envp);
-            exit(0);
-        }
-        else{
-            close(fd[1]);
-            char buffer[1024];
-            int len = read(fd[0], buffer, 1024);
-            buffer[len] = '\0';
-            cgi_response = buffer;
-            waitpid(pid, NULL, 0);
+    // if (flag_python == 1){
+    pid_t pid = fork();
+    if (pid == 0){
+        close(fd[0]);
+        dup2(fd[1], 1);
+        execve(av[0], av, envp);
+        exit(0);
+    }
+    else{
+        close(fd[1]);
+        char buffer[1024];
+        int len = read(fd[0], buffer, 1024);
+        buffer[len] = '\0';
+        cgi_response = buffer;
+        waitpid(pid, NULL, 0);
 
-        }
     }
-    else
-    {
-        std::ifstream file(cgi_path);
-        std::string str;
-        std::string cgi_response;
-        while (std::getline(file, str))
-        {
-            cgi_response += str;
-        }
-    }
+    // }
+    // else
+    // {
+    //     std::ifstream file(abspath);
+    //     std::string str;
+    //     std::string cgi_response;
+    //     while (std::getline(file, str))
+    //     {
+    //         cgi_response += str;
+    //     }
+    // }
     
     return (cgi_response);
 
+}
+
+std::string cgi_execPOST(std::string abspath, std::string _path, std::string contentlength, std::string body){
+    char **envp = custom_cgi_envp(abspath, _path, contentlength, "");
+    std::string cgi_response;
+    char **av;
+    av = (char **)malloc(3 * sizeof(char *));
+
+    av[0] = (char *)malloc(strlen("/usr/local/bin/python3") + 1);
+    strcpy(av[0], "/usr/local/bin/python3");
+    av[1] = (char *)malloc(abspath.size() + 1);
+    strcpy(av[1], abspath.c_str());
+    av[2] = NULL;
+
+    int fd[2];
+    int fd_in[2];
+    pipe(fd);
+    pipe(fd_in);
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        close(fd[0]);
+        dup2(fd[1], STDOUT_FILENO); 
+
+        close(fd_in[1]);
+        dup2(fd_in[0], STDIN_FILENO); 
+
+        execve(av[0], av, envp);
+        exit(0);
+    } else {
+        close(fd[1]);
+        close(fd_in[0]);
+        write(fd_in[1], body.c_str(), body.size());
+        close(fd_in[1]);
+        char buffer[1024];
+        int len = read(fd[0], buffer, sizeof(buffer) - 1);
+        buffer[len] = '\0';
+        cgi_response = buffer;
+        waitpid(pid, NULL, 0);
+    }
+
+    return cgi_response;
 }
 
 
@@ -283,7 +312,15 @@ void RequestHandler::check_requested_method(Client* cli)
             cli->setTypeData(READDATA);
         }
         if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path))  {
-            std::string cgi_response = cgi_exec(abs_path, 1);
+            std::cout << "\n\n*******\n\n";
+            std::cout << abs_path << std::endl;
+            std::cout << _path << std::endl;
+            std::cout << cli->_request.getHeader("Content-Length")->second.size() << std::endl;
+            std::cout << cli->_request.getURL() << std::endl;
+            std::cout << "\n\n*******\n\n";
+            int pos = cli->_request.getURL().find("?");
+            std::string query = cli->_request.getURL().substr(pos + 1);
+            std::string cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), query);
             cli->_response.setStatus(200);                         
             std::string htmlfile = cgi_response;//generateHTML_file(cgi_response, 1, 200);
             cli->_response.setHeader("Content-Type", "text/html");
@@ -490,7 +527,7 @@ void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
         if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
         {
             if (is_dir_has_index_files(cli) == true)
-                std::string cgi_response = cgi_exec(abs_path, 1);
+                std::string cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), "");
             else
             {
                 
@@ -505,7 +542,7 @@ void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
     else
     {
         if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
-            std::string cgi_response = cgi_exec(abs_path, 1);
+            std::string cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), "");
         else
             std::remove(abs_path.c_str());  
     }
