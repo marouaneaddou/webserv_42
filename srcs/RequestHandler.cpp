@@ -214,6 +214,48 @@ std::string cgi_exec(std::string abspath, std::string _path, std::string content
 
 }
 
+std::string cgi_execPOST(std::string abspath, std::string _path, std::string contentlength, std::string body){
+    char **envp = custom_cgi_envp(abspath, _path, contentlength, "");
+    std::string cgi_response;
+    char **av;
+    av = (char **)malloc(3 * sizeof(char *));
+
+    av[0] = (char *)malloc(strlen("/usr/local/bin/python3") + 1);
+    strcpy(av[0], "/usr/local/bin/python3");
+    av[1] = (char *)malloc(abspath.size() + 1);
+    strcpy(av[1], abspath.c_str());
+    av[2] = NULL;
+
+    int fd[2];
+    int fd_in[2];
+    pipe(fd);
+    pipe(fd_in);
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        close(fd[0]);
+        dup2(fd[1], STDOUT_FILENO); 
+
+        close(fd_in[1]);
+        dup2(fd_in[0], STDIN_FILENO); 
+
+        execve(av[0], av, envp);
+        exit(0);
+    } else {
+        close(fd[1]);
+        close(fd_in[0]);
+        write(fd_in[1], body.c_str(), body.size());
+        close(fd_in[1]);
+        char buffer[1024];
+        int len = read(fd[0], buffer, sizeof(buffer) - 1);
+        buffer[len] = '\0';
+        cgi_response = buffer;
+        waitpid(pid, NULL, 0);
+    }
+
+    return cgi_response;
+}
+
 
 void RequestHandler::check_requested_method(Client* cli)
 {
