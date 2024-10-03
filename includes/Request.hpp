@@ -46,7 +46,8 @@ class Request
         void parse_request_line(std::string &_rawReq);
         void parse_headers_body(std::string _rawReq);
         void isReqWellFormed(Response &response);
-        void remeveHexaDecimalInBody();
+        void removeHexaDecimalInBody();
+        void parceBodyChunked();
         // void removeBoundaryInFrontLastBody();
         /******************* PRINT DATA *****************/
 

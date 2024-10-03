@@ -134,18 +134,17 @@ void RequestHandler::req_uri_location(Client* cli)
 
 
 
-char **custom_cgi_envp(std::string abspath, std::string _path, std::string contentlength, std::string query)
+char **custom_cgi_envpGET(std::string abspath, std::string _path, std::string contentlength, std::string query)
 {
 
     std::vector<std::string> envp_as_vec;
 
-    envp_as_vec.push_back("CONTENT_TYPE=text/html");
+    envp_as_vec.push_back("CONTENT_TYPE=application/x-www-form-urlencoded");
     envp_as_vec.push_back("CONTENT_LENGTH=" + contentlength);
     envp_as_vec.push_back("SCRIPT_FILENAME=" + abspath);
     envp_as_vec.push_back("SCRIPT_NAME=" + _path);
-    // envp_as_vec.push_back("QUERY_STRING=fname=maroaune&lname=addou&age=23&email=maddou@gmail.ma");
     envp_as_vec.push_back("QUERY_STRING=" + query);
-    envp_as_vec.push_back("REQUEST_METHOD=GET");
+    envp_as_vec.push_back("REQUEST_METHOD=POST");
     envp_as_vec.push_back("REDIRECT_STATUS=200");
     envp_as_vec.push_back("SERVER_NAME=webserv");
     envp_as_vec.push_back("SERVER_PROTOCOL=HTTP/1.1");
@@ -168,7 +167,7 @@ char **custom_cgi_envp(std::string abspath, std::string _path, std::string conte
 
 std::string cgi_exec(std::string abspath, std::string _path, std::string contentlength, std::string query)
 {
-    char **envp = custom_cgi_envp(abspath, _path, contentlength, query);
+    char **envp = custom_cgi_envpGET(abspath, _path, contentlength, query);
     std::string cgi_response;
     char **av;
     av = (char **)malloc(3 * sizeof(char *));
@@ -214,52 +213,99 @@ std::string cgi_exec(std::string abspath, std::string _path, std::string content
 
 }
 
-std::string cgi_execPOST(std::string abspath, std::string _path, std::string contentlength, std::string body){
-    char **envp = custom_cgi_envp(abspath, _path, contentlength, "");
-    std::string cgi_response;
-    char **av;
-    av = (char **)malloc(3 * sizeof(char *));
 
+char **custom_cgi_envp(std::string abspath, std::string _path, std::string contentlength, std::string boundary) {
+    std::vector<std::string> envp_as_vec;
+
+    // Set the CONTENT_TYPE to include the boundary for multipart form data
+    envp_as_vec.push_back("CONTENT_TYPE=multipart/form-data; boundary=" + boundary);
+    envp_as_vec.push_back("CONTENT_LENGTH=" + contentlength);
+    envp_as_vec.push_back("SCRIPT_FILENAME=" + abspath);
+    envp_as_vec.push_back("SCRIPT_NAME=" + _path);
+    envp_as_vec.push_back("REQUEST_METHOD=POST");
+    envp_as_vec.push_back("REDIRECT_STATUS=200");
+    envp_as_vec.push_back("SERVER_NAME=webserv");
+    envp_as_vec.push_back("SERVER_PROTOCOL=HTTP/1.1");
+    envp_as_vec.push_back("UPLOAD_DIR=./upload/");
+
+
+    char **envp;
+    int envp_size = envp_as_vec.size();
+    envp = (char **)malloc((envp_size + 1) * sizeof(char *));
+
+    for (int i = 0; i < envp_size; i++) {
+        envp[i] = (char *)malloc(envp_as_vec[i].size() + 1);
+        strcpy(envp[i], envp_as_vec[i].c_str());
+    }
+    envp[envp_size] = NULL;
+    return envp;
+}
+
+std::string extract_boundary(const std::string &body) {
+    size_t pos = body.find("--");
+    if (pos != std::string::npos) {
+        size_t end_pos = body.find("\r\n", pos);
+        if (end_pos != std::string::npos) {
+            return body.substr(pos + 2, end_pos - (pos + 2)); // Skip the '--'
+        }
+    }
+    return "";
+}
+
+std::string cgi_execPOST(std::string abspath, std::string _path, std::string contentlength, std::string body) {
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++\n";
+    std::string boundary = extract_boundary(body);
+    std::cout << body << std::endl;
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++\n";
+    char **envp = custom_cgi_envp(abspath, _path, contentlength, boundary);
+    // std::cout << "\n\n\n\n\n\n" << boundary << std::endl;
+
+    std::string cgi_response;
+    char **av = (char **)malloc(3 * sizeof(char *));
     av[0] = (char *)malloc(strlen("/usr/local/bin/python3") + 1);
     strcpy(av[0], "/usr/local/bin/python3");
     av[1] = (char *)malloc(abspath.size() + 1);
     strcpy(av[1], abspath.c_str());
     av[2] = NULL;
 
-    int fd[2];
-    int fd_in[2];
-    pipe(fd);
-    pipe(fd_in);
+    // Temporary files for input (body) and output (response)
+    std::string input_file = "/tmp/cgi_input.txt";
+    std::string output_file = "/tmp/cgi_output.txt";
+
+    // Write the body data to the input file
+    std::ofstream infile(input_file.c_str());
+    infile << body;
+    infile.close();
 
     pid_t pid = fork();
     if (pid == 0) {
-        close(fd[0]);
-        dup2(fd[1], STDOUT_FILENO); 
-
-        close(fd_in[1]);
-        dup2(fd_in[0], STDIN_FILENO); 
+        freopen(input_file.c_str(), "r", stdin);
+        freopen(output_file.c_str(), "w", stdout);
 
         execve(av[0], av, envp);
         exit(0);
     } else {
-        close(fd[1]);
-        close(fd_in[0]);
-        write(fd_in[1], body.c_str(), body.size());
-        close(fd_in[1]);
-        char buffer[1024];
-        int len = read(fd[0], buffer, sizeof(buffer) - 1);
-        buffer[len] = '\0';
-        cgi_response = buffer;
         waitpid(pid, NULL, 0);
+        std::ifstream outfile(output_file.c_str());
+        std::string line;
+        while (std::getline(outfile, line)) {
+            cgi_response += line + "\n";  // Collect the response
+        }
+        outfile.close();
     }
 
+    // Clean up the temporary files
+    unlink(input_file.c_str());
+    unlink(output_file.c_str());
+    // std::cout << cgi_response << std::endl;
     return cgi_response;
 }
 
 
+
+
 void RequestHandler::check_requested_method(Client* cli)
 {
-
     if (cli->_request.getMethod() == "GET")
     {
         if(cli->getOnetime() == false)
@@ -383,11 +429,20 @@ void RequestHandler::check_requested_method(Client* cli)
                         throw(403);
                     }
                     if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)  {
+                        std::cout<<"hna1\n\n"<<std::endl;
+
                                         /*****************************************/
 
 
                                                     /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
+                                            std::cout << "*******\n";
+                                            // std::cout << cli->_request.getBody()<< "\n";
+                                            std::string cgi_responnse = cgi_execPOST(abs_path, _path, 
+                                                std::to_string(cli->_request.getHeader("Content-Length")->second.size()),
+                                                cli->_request.getBody());
 
+
+                                            std::cout << "*******\n";
 
                                         /*****************************************/
 
@@ -451,6 +506,9 @@ void RequestHandler::check_requested_method(Client* cli)
 
                                                     /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
 
+                                        std::string cgi_responnse = cgi_execPOST(abs_path, _path, 
+                                                std::to_string(cli->_request.getHeader("Content-Length")->second.size()),
+                                                cli->_request.getBody());
 
                                         /*****************************************/
 
@@ -784,6 +842,9 @@ void RequestHandler::setStatusMessage(Client* cli)
         break;
     }
 }
+
+
+
 
 
 
