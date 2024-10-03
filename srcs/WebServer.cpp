@@ -214,16 +214,16 @@ void WebServ::start_parsing(int fd_R, std::map<int, std::vector<Servers> > group
 
             req_uri_location(_clients[fd_R]);
 
-            if (is_location_have_redirection(_clients[fd_R]) == 0)
+            if (is_location_have_redirection(_clients[fd_R]) == 0){
                 is_method_allowed_in_location(_clients[fd_R]);
+                _buffer = _buffer.substr(findPos + 4);
+            }
             else if (is_location_have_redirection(_clients[fd_R]) == 1){
                 _clients[fd_R]->_response.generateHeaderResponse();
                 _clients.at(fd_R)->setTypeData(WRITEDATA);
                 FD_CLR(fd_R, &current_Rsockets);
                 FD_SET(fd_R, &current_Wsockets);
             }
-            else
-                _buffer = _buffer.substr(findPos + 4);
         }
     }
 
