@@ -187,8 +187,12 @@ void    Request::remeveHexaDecimalInBody()
         hexaToDecimal = stoi(_body.substr(pos, findCarriageReturn - pos), 0, 16);
         _body.erase(pos, (findCarriageReturn - pos) + 2);
         pos += hexaToDecimal + 2;
-        if (hexaToDecimal == 0)
+        // if (_body.find("\r\n", pos) != 0) error | 400 Bad Request
+        _body.erase(pos, 2);
+        if (hexaToDecimal == 0) {
+            // _body.erase(pos, end)
             break;
+        }
     }
 }
 
