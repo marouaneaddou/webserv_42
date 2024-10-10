@@ -3,24 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maddou <maddou@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 11:35:07 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/03 00:34:16 by maddou           ###   ########.fr       */
+/*   Updated: 2024/10/06 19:06:33 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-#include "../includes/includes.hpp"
-
+#include "../includes/WebServer.hpp"
+#include "../includes/errors.hpp"
+#include "../includes/parsing.hpp"
 
 
 
 int __NUMBER_OF_SERVERS__ = 0;
 int __NO_SERVERS__ = 0;
 int __IN_ROUTER__ = 0;
-
-
 
 int main(int ac, char **av)
 {
@@ -37,12 +36,8 @@ int main(int ac, char **av)
                 std::map<int, std::vector<Servers> > configFile;
                 configFile = Parsing::parse_file(av[1], data, serverConf);
                 
-                // for (size_t i = 0; i < configFile.size(); i++) {
-                        // __UNIT_TEST__(serverConf);
-                // }
                 WebServ WebServ;
-                WebServ.run_servers(configFile, serverConf);
-                
+                WebServ.run_servers(configFile, serverConf);  
         }
         catch(char const* e) {
                 std::cout << e << std::endl;

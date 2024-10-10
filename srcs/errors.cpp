@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errors.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:26 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/02 11:21:33 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/10/06 15:34:50 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ int Errors::valid_keyword(std::string key, int router_flag)
         router_keywords.push_back("cgi_bin:");
         router_keywords.push_back("cgi_extension:");
         router_keywords.push_back("cgi_support:");
+        router_keywords.push_back("upload_dir:");
 
         for (size_t i = 0; i < router_keywords.size(); i += 1)
         {
@@ -220,21 +221,12 @@ int Errors::valid_port(std::string port)
             
         }
     }
-    // try
-    // {
-        int port_check = std::stoi(port);
+    int port_check = std::stoi(port);
+    if (port_check < 0 || port_check > 65535)
+    {
+        throw("[ERROR] : Not a valid port, not in the range");
         
-        if (port_check < 0 || port_check > 65535)
-        {
-            throw("[ERROR] : Not a valid port, not in the range");
-            
-        }
-    // // }
-    // catch(std::exception& e)
-    // {
-    //     throw("Error in port, conversion error");
-        
-    // }
+    }
     return (1);
 }
 
@@ -286,13 +278,12 @@ int Errors::valid_defaultserver(std::string ds)
     return(1);
 }
 
-// error pages : 400, 401, 403, 404, 405, 500, 501
 int Errors::valid_errorpage(std::string ds)
 {
     if(ds!="400:" && ds!="401:" && ds!="403:" && ds!="404:" 
-    && ds!="405:" && ds!="500:" && ds!="501:" && ds!="502:" 
+    && ds!="405:" && ds!="500:" && ds!="501:" && ds!="502:"
     && ds!="503:" && ds!="504:" && ds!="505:" && ds!="414:"
-    && ds!="409:") 
+    && ds!="409:" && ds!="413:")
     {
         throw("Not a valid error page, invalid data");
     }
@@ -462,7 +453,6 @@ int Errors::valid_server_data(Servers &server)
         std::cout << "[INFO] : No error pages found, default [400, 401, 403, 404, 405, 500, 501]" << std::endl;
     }
 
-    // std::vector<Locations> &locations = server.get_locations();  // Use a reference to modify original data
     for (std::vector<Locations>::iterator it = server.get_locations().begin(); it != server.get_locations().end(); ++it)
     {
         if(it->getReturn() != ""){
@@ -479,7 +469,7 @@ int Errors::valid_server_data(Servers &server)
         }
         if(it->getRoot().empty()){
             std::cout << "[INFO] : No location root found, default [server root]" << std::endl;
-            it->setRoot(server.get_root());  // Modify the original location
+            it->setRoot(server.get_root());
         }
         if(it->getIndexFiles().empty()){
             std::cout << "[INFO] : No location index file, default [server index]" << std::endl;
@@ -538,21 +528,6 @@ bool compare_servers(Servers& s1, Servers& s2) {
     return false;
 }
 
-void Errors::check_dupservers(std::vector<Servers> serversvec)
-{
-    for (std::vector<Servers>::iterator it1 = serversvec.begin(); it1 != serversvec.end(); ++it1)
-    {
-        for (std::vector<Servers>::iterator it2 = it1 + 1; it2 != serversvec.end(); ++it2)
-        {
-            if (compare_servers(*it1, *it2))
-            {
-                Errors::print_error("Duplicate server found with the same name and host: "
-                          + join_server_names(it1->get_server_names()) + ", " 
-                          + it1->get_host());
-            }
-        }
-    }
-}
 
 int Errors::valid_return(std::string arg){
     
@@ -581,6 +556,18 @@ int Errors::valid_cgi_support(std::string arg){
     if(arg != "on" && arg != "off")
     {
         throw("[ERROR] : Error in cgi supportg, invalid data");
+    }
+    return(1);
+}
+
+int Errors::valid_upload_dir(std::string arg){
+    if(arg.size() < 3)
+    {
+        throw("[ERROR] : Error in upload dir, invalid data");
+    }
+    if(arg.find("/") == std::string::npos)
+    {
+        throw("[ERROR] : Error in upload dir, invalid data");
     }
     return(1);
 }

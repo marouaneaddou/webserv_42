@@ -17,8 +17,6 @@ class TCPserver
         std::vector<int> getSocket() ;
         std::vector<int> getCliSocket() ;
         
-        // const & Config getConfig();
-
     private:
         int _backlogs;
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   locations.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:18 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/09/30 02:07:04 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/05 21:23:45 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ class Locations
                 std::vector<std::string> _indexFiles;
                 std::string root;
                 std::string return_;
+                std::string upload_dir;
+
 
         public :      
                 Locations();
@@ -58,6 +60,10 @@ class Locations
                 std::string getCgiBin();
                 std::string getCgiExtension();
                 bool getCgiSupport();
+                std::string getUploadDir();
+                void setUploadDir(std::string dir);
+
+
 };
 
 

@@ -13,26 +13,3 @@
 
 
 
-
-/*add*/
-
-// #include "Tcp_server.hpp"
-
-// #include <iostream>
-// #include <vector>
-// #include <map>
-// # include "Client.hpp"
-// #include "RequestHandler.hpp"
-// #include "StaticFileHandler.hpp"
-// #include "PhpCgiHandler.hpp"
-// #include "../includes/servers.hpp"
-// # include <algorithm>
-
-
-
-/*add*/
-
-
-// own
-
-

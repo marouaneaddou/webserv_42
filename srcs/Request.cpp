@@ -10,16 +10,18 @@ Request::~Request(){};
 
 void Request::parse_request_line(std::string &_rawReq)
 {
+
+
     _lineRequest = _rawReq;
     std::string oneline;
     std::istringstream iss(_rawReq);
     std::getline(iss, oneline);
     std::string dele = " ";
     std::vector<std::string> tokens = Utils::split(oneline, dele);
+
     _method = tokens[0];
     _URL = tokens[1];
     _http_version = tokens[2];
-    std::cout << " errrrrrrrrror <<" << _method << " \n" << _URL << "\n hello" << _http_version << std::endl;
 }
 
 
@@ -176,7 +178,7 @@ void Request::isReqWellFormed(Response &response)
 /************************ Transfer-Encoding ***********************/
 
 
-void    Request::remeveHexaDecimalInBody()
+void Request::removeHexaDecimalInBody()
 {
     int pos = 0;
     int hexaToDecimal = 0;
@@ -186,11 +188,10 @@ void    Request::remeveHexaDecimalInBody()
         findCarriageReturn = _body.find("\r\n", pos);
         hexaToDecimal = stoi(_body.substr(pos, findCarriageReturn - pos), 0, 16);
         _body.erase(pos, (findCarriageReturn - pos) + 2);
-        pos += hexaToDecimal + 2;
-        // if (_body.find("\r\n", pos) != 0) error | 400 Bad Request
+        pos += hexaToDecimal;
         _body.erase(pos, 2);
         if (hexaToDecimal == 0) {
-            // _body.erase(pos, end)
+            _body.erase(pos);
             break;
         }
     }

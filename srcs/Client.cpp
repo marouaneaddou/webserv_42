@@ -1,25 +1,18 @@
 #include "../includes/Client.hpp"
 
-// Client::Client(int new_socket, struct sockaddr_in new_addr)
-// {
-//     socket = new_socket;
-//     _sockaddr = new_addr;
-// }
 
-Client::Client(int &new_socket /*class config*/)
+Client::Client(int &new_socket)
 {
+    
     onetime = false;
     socket = new_socket;
     _check = false;
     sizeFile = 0;
     readWriteSize = 0;
-    // _request = new Request(/*class config*/);
-    // _response = new Response(/*class config*/);
 };
 
 Client::~Client(){
-    // delete _request;
-    // delete _response;
+    // delete handler;
 }
 
 void Client::setOnetime()
@@ -54,21 +47,6 @@ Servers Client::getServer()
     return _server;
 }
 
-
-
-
-
-/********************************* CGI ****************************************/
-
-    // bool Client::runCgiLoginRegister(Cgi &cgi)
-    // {
-        
-    // }
-
-/********************************* CGI ****************************************/
-
-
-
 /*************************** DATA FILE **************************** */
 
 void Client::setSizeFile(int size) 
@@ -102,10 +80,6 @@ void Client::setData()
     if (fileData.gcount() != 1000000)
         buffer[fileData.gcount()] = '\0';
     readWriteSize += fileData.gcount();
-    // std::cout << 
-    //std::cout << "read " <<fileData.gcount() << std::endl;
-
-    // _response.setAppendBody(buffer);
     dataFile.append(buffer, fileData.gcount());
 }
 

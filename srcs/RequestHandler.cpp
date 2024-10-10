@@ -1,223 +1,144 @@
-#include "../includes/RequestHandler.hpp"
+// #include "../includes/RequestHandler.hpp"
+// #include "../includes/RequestHandler.hpp"
+#include "../includes/Client.hpp"
 
 
-RequestHandler::RequestHandler()
+RequestHandler::RequestHandler(int &index, std::string &_path)
 {
-    _path = "";
+    this->_path = _path;
+    _blockIdx = index;
     abs_path = "";
-    _blockIdx = -1;
 }
 
-// std::string generateHTML_file(std::string print, bool type) {
-//     std::string htmlfile = "<!DOCTYPE html>\n";
-//     htmlfile += "<html lang=\"en\">\n";
-//     htmlfile += "<head>\n";
-//     htmlfile += "    <meta charset=\"UTF-8\">\n";
-//     htmlfile += "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-//     htmlfile += "    <title>Document</title>\n";
-//     htmlfile += "</head>\n";
-//     htmlfile += "<body>\n";
-//     htmlfile += "    <div>\n";
-//     if (type == 0) htmlfile += "        <p style=\"color: brown; font-size: 35px;\">"+ print + "</p>\n";
-//     else htmlfile += "        <p style=\"color: green; font-size: 35px;\">"+ print + "</p>\n";
-//     htmlfile += "    </div>\n";
-//     htmlfile += "</body>\n";
-//     htmlfile += "</html>\n";
-//     return htmlfile;
-// }
 
-std::string generateHTML_file(std::string print, bool type, int status) {
-    (void)type;
-    std::string html = "<!DOCTYPE html>\n"
-                   "<html lang=\"en\">\n"
-                   "<head>\n"
-                   "    <meta charset=\"UTF-8\">\n"
-                   "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                   "    <title>Document</title>\n"
-                   "    <style>\n"
-                   "        body {\n"
-                   "            background-color: black;\n"
-                   "            display: flex;\n"
-                   "            justify-content: center;\n"
-                   "            align-items: center;\n"
-                   "            height: 100vh;\n"
-                   "            margin: 0;\n"
-                   "        }\n"
-                   "        .container {\n"
-                   "            width: 600px;\n"
-                   "            height: 400px;\n"
-                   "            border: 1px solid black;\n"
-                   "            border-radius: 25px;\n"
-                   "            background-color: white;\n"
-                   "        }\n"
-                   "        .container p {\n"
-                   "            color: brown;\n"
-                   "            text-align: center;\n"
-                   "        }\n"
-                   "    </style>\n"
-                   "</head>\n"
-                   "<body>\n"
-                   "    <div class=\"container\">\n"
-                   "        <p style=\"font-size: 80px;\">Oops !</p>\n"
-                   "        <p style=\"font-size: 30px;\"><span style=\"font-size: 50px;\">"+ std::to_string(status) + "</span> : " + print + "</p>\n"
-                   "    </div>\n"
-                   "</body>\n"
-                   "</html>";
-    return html;
-
-}
-
-// std::string readFile(std::string path, std::string exactPath) {
-
-// }
-
-void RequestHandler::req_uri_location(Client* cli)
+void RequestHandler::handleRequest(Client* cli)
 {
-    std::string url = cli->_request.getURL();
-    std::cout << "\n\nURL ------->" << cli->_request.getURL() << "\n\n\n" << std::endl;
-    std::size_t query_pos = url.find("?");
-    if (query_pos != std::string::npos)
-        _path = url.substr(0, query_pos);
-    else
-        _path = url;
-    //Exact Match
-    for (unsigned int i = 0; i < cli->getServer().get_locations().size(); i++)
+    try
     {
-        if (cli->getServer().get_locations()[i].getPath()[0] == '=' && cli->getServer().get_locations()[i].getPath().substr(2) == _path)
+        check_requested_method(cli);
+    }
+    catch (...)
+    {
+        setStatusMessage(cli);
+        try
         {
-            _blockIdx = i;
-            return;
+            cli->_response.generate_ErrorPages(cli);
         }
-    }
-    //Prefix Match + default if no longer prefix found
-    std::string longestMatch;
-    for (unsigned int i = 0; i < cli->getServer().get_locations().size(); i++)
-    {
-        if (cli->getServer().get_locations()[i].getPath()[0] != '=' && _path.find(cli->getServer().get_locations()[i].getPath()) == 0)
+        catch(int)
         {
-            if (cli->getServer().get_locations()[i].getPath().length() > longestMatch.length())
-            {
-                longestMatch = cli->getServer().get_locations()[i].getPath();
-                _blockIdx = i;
-            }
+            std::string htmlfile = cli->_response.generateHTML_file("ERROR NOT FOUND", 0, cli->_response.getStatus());
+            cli->_response.setBody(htmlfile);
+            cli->_response.setHeader("Content-Length", htmlfile.length());
+            cli->_response.setHeader("Content-Type", "text/html");
         }
-    }
-    if (!(longestMatch.empty()))
-    {
-        return;
-    }
+        cli->_response.generateHeaderResponse();
+        cli->setTypeData(WRITEDATA);
     
+    }
 }
-
-// void RequestHandler::is_location_have_redirection(Client* cli)
-// {
-//     if (!(cli->getServer().get_locations()[_blockIdx].getReturn().empty()))
-//     {
-//         std::cout << "RETURN FILE: " << cli->getServer().get_locations()[_blockIdx].getReturn() << std::endl;
-//         cli->_response.setHeader("Location", cli->getServer().get_locations()[_blockIdx].getReturn());
-//         cli->_response.setStatus(301);
-//         cli->_response.setHeader("Content-Length", 0);
-//         throw(301);
-//     }
-// }
-
-// void RequestHandler::is_method_allowed_in_location(Client* cli)
-// {
-//     for (unsigned int i = 0; i < cli->getServer().get_locations()[_blockIdx].getMethods().size(); i++)
-//     {
-//         if (cli->getServer().get_locations()[_blockIdx].getMethods()[i] == cli->_request.getMethod())
-//             return;
-//     }
-//     cli->_response.setStatus(405);
-//     throw(405);
-// }
-
-
 
 char **custom_cgi_envpGET(std::string abspath, std::string _path, std::string contentlength, std::string query)
 {
-
     std::vector<std::string> envp_as_vec;
 
-    envp_as_vec.push_back("CONTENT_TYPE=application/x-www-form-urlencoded");
+    envp_as_vec.push_back("CONTENT_TYPE=text/html");
     envp_as_vec.push_back("CONTENT_LENGTH=" + contentlength);
     envp_as_vec.push_back("SCRIPT_FILENAME=" + abspath);
     envp_as_vec.push_back("SCRIPT_NAME=" + _path);
     envp_as_vec.push_back("QUERY_STRING=" + query);
-    envp_as_vec.push_back("REQUEST_METHOD=POST");
+    envp_as_vec.push_back("REQUEST_METHOD=GET");
     envp_as_vec.push_back("REDIRECT_STATUS=200");
     envp_as_vec.push_back("SERVER_NAME=webserv");
     envp_as_vec.push_back("SERVER_PROTOCOL=HTTP/1.1");
 
-    char **envp;
     int envp_size = envp_as_vec.size();
-    envp = (char **)malloc((envp_size + 1) * sizeof(char *));
+    char **envp = new char*[envp_size + 1];
 
     for (int i = 0; i < envp_size; i++)
     {
-        envp[i] = (char *)malloc(envp_as_vec[i].size() + 1); 
-        strcpy(envp[i], envp_as_vec[i].c_str());              
+        envp[i] = new char[envp_as_vec[i].size() + 1]; 
+        std::strcpy(envp[i], envp_as_vec[i].c_str());
     }
 
-    envp[envp_size] = NULL;
-    return (envp);
+    envp[envp_size] = nullptr;
+    return envp;
 }
 
 
-
-std::string cgi_exec(std::string abspath, std::string _path, std::string contentlength, std::string query)
-{
+std::string cgi_exec(std::string abspath, std::string _path, std::string contentlength, std::string query) {
     char **envp = custom_cgi_envpGET(abspath, _path, contentlength, query);
     std::string cgi_response;
-    char **av;
-    av = (char **)malloc(3 * sizeof(char *));
 
-    av[0] = (char *)malloc(strlen("/usr/local/bin/python3") + 1);
-    strcpy(av[0], "/usr/local/bin/python3");
-    av[1] = (char *)malloc(abspath.size() + 1);
-    strcpy(av[1], abspath.c_str());
+    const char *av[3];
+    av[0] = "/usr/local/bin/python3";
+    av[1] = abspath.c_str();
     av[2] = NULL;
+    std::string output_file = "/tmp/cgi_output.txt";
 
-    int fd[2];
-    pipe(fd);
-    // if (flag_python == 1){
     pid_t pid = fork();
-    if (pid == 0){
-        close(fd[0]);
-        dup2(fd[1], 1);
-        execve(av[0], av, envp);
-        exit(0);
-    }
-    else{
-        close(fd[1]);
-        char buffer[1024];
-        int len = read(fd[0], buffer, 1024);
-        buffer[len] = '\0';
-        cgi_response = buffer;
-        waitpid(pid, NULL, 0);
+    if (pid == 0) {
+        int fd = open(output_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd < 0) {
+            std::cerr << "Failed to open output file in child process." << std::endl;
+            exit(1);
+        }
+        dup2(fd, STDOUT_FILENO);
+        close(fd);
 
-    }
-    // }
-    // else
-    // {
-    //     std::ifstream file(abspath);
-    //     std::string str;
-    //     std::string cgi_response;
-    //     while (std::getline(file, str))
-    //     {
-    //         cgi_response += str;
-    //     }
-    // }
-    
-    return (cgi_response);
+        execve(av[0], const_cast<char **>(av), envp);
+        exit(errno);
+    } 
+    else if (pid > 0) {
+        const int timeout_seconds = 2;
+        struct timeval start_time, current_time;
+        gettimeofday(&start_time, NULL);
 
+        while (true) {
+            int status;
+            pid_t result = waitpid(pid, &status, WNOHANG);
+            
+            if (result == pid) {
+                // Child process has finished
+                std::ifstream outfile(output_file.c_str());
+                if (outfile.is_open()) {
+                    std::string line;
+                    while (std::getline(outfile, line)) {
+                        cgi_response += line + "\n";
+                    }
+                    outfile.close();
+                }
+                break;
+            } 
+            else if (result == -1) {
+                std::cerr << "waitpid error: " << strerror(errno) << std::endl;
+                break;
+            }
+
+            gettimeofday(&current_time, NULL);
+            double elapsed = (current_time.tv_sec - start_time.tv_sec) + 
+                             (current_time.tv_usec - start_time.tv_usec) / 1000000.0;
+            
+            if (elapsed >= timeout_seconds) {
+                kill(pid, SIGKILL);
+                waitpid(pid, NULL, 0);
+                cgi_response = "<h1>GET CGI script timed out.<h1/>\n";
+                break;
+            }
+
+            usleep(10000);
+        }
+    }
+    for (int i = 0; envp[i] != NULL; i++) {
+        delete[] envp[i];
+    }
+    delete[] envp;
+    remove(output_file.c_str());
+    return cgi_response;
 }
 
-
-char **custom_cgi_envp(std::string abspath, std::string _path, std::string contentlength, std::string boundary) {
+char ** custom_cgi_envpPOST(std::string abspath, std::string _path, std::string contentlength, std::string boundary, std::string uploaddir) {
     std::vector<std::string> envp_as_vec;
 
-    // Set the CONTENT_TYPE to include the boundary for multipart form data
     envp_as_vec.push_back("CONTENT_TYPE=multipart/form-data; boundary=" + boundary);
     envp_as_vec.push_back("CONTENT_LENGTH=" + contentlength);
     envp_as_vec.push_back("SCRIPT_FILENAME=" + abspath);
@@ -226,86 +147,124 @@ char **custom_cgi_envp(std::string abspath, std::string _path, std::string conte
     envp_as_vec.push_back("REDIRECT_STATUS=200");
     envp_as_vec.push_back("SERVER_NAME=webserv");
     envp_as_vec.push_back("SERVER_PROTOCOL=HTTP/1.1");
-    envp_as_vec.push_back("UPLOAD_DIR=./upload/");
+    envp_as_vec.push_back("UPLOAD_DIR=" + uploaddir);
 
-
-    char **envp;
     int envp_size = envp_as_vec.size();
-    envp = (char **)malloc((envp_size + 1) * sizeof(char *));
+    char **envp = new char*[envp_size + 1]; // Allocate array of pointers
 
     for (int i = 0; i < envp_size; i++) {
-        envp[i] = (char *)malloc(envp_as_vec[i].size() + 1);
-        strcpy(envp[i], envp_as_vec[i].c_str());
+        envp[i] = new char[envp_as_vec[i].size() + 1]; // Allocate each string
+        std::strcpy(envp[i], envp_as_vec[i].c_str());
     }
-    envp[envp_size] = NULL;
+
+    envp[envp_size] = nullptr; // Null-terminate the array
     return envp;
 }
+
 
 std::string extract_boundary(const std::string &body) {
     size_t pos = body.find("--");
     if (pos != std::string::npos) {
         size_t end_pos = body.find("\r\n", pos);
         if (end_pos != std::string::npos) {
-            return body.substr(pos + 2, end_pos - (pos + 2)); // Skip the '--'
+            return body.substr(pos + 2, end_pos - (pos + 2));
         }
     }
     return "";
 }
 
-std::string cgi_execPOST(std::string abspath, std::string _path, std::string contentlength, std::string body) {
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++\n";
+std::string cgi_execPOST(std::string abspath, std::string _path, std::string contentlength, std::string body, std::string uploaddir) {
     std::string boundary = extract_boundary(body);
-    std::cout << body << std::endl;
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++\n";
-    char **envp = custom_cgi_envp(abspath, _path, contentlength, boundary);
-    // std::cout << "\n\n\n\n\n\n" << boundary << std::endl;
+    char  **envp = custom_cgi_envpPOST(abspath, _path, contentlength, boundary, uploaddir);
 
     std::string cgi_response;
-    char **av = (char **)malloc(3 * sizeof(char *));
-    av[0] = (char *)malloc(strlen("/usr/local/bin/python3") + 1);
-    strcpy(av[0], "/usr/local/bin/python3");
-    av[1] = (char *)malloc(abspath.size() + 1);
-    strcpy(av[1], abspath.c_str());
-    av[2] = NULL;
+    const char *av[] = {"/usr/local/bin/python3", abspath.c_str(), nullptr};
 
-    // Temporary files for input (body) and output (response)
     std::string input_file = "/tmp/cgi_input.txt";
     std::string output_file = "/tmp/cgi_output.txt";
 
-    // Write the body data to the input file
-    std::ofstream infile(input_file.c_str());
+    std::ofstream infile(input_file);
+    if (!infile) {
+        std::cerr << "Failed to open input file: " << strerror(errno) << std::endl;
+        return "Internal Server Error";
+    }
     infile << body;
     infile.close();
 
     pid_t pid = fork();
     if (pid == 0) {
-        freopen(input_file.c_str(), "r", stdin);
-        freopen(output_file.c_str(), "w", stdout);
-
-        execve(av[0], av, envp);
-        exit(0);
-    } else {
-        waitpid(pid, NULL, 0);
-        std::ifstream outfile(output_file.c_str());
-        std::string line;
-        while (std::getline(outfile, line)) {
-            cgi_response += line + "\n";  // Collect the response
+        int in_fd = open(input_file.c_str(), O_RDONLY);
+        int out_fd = open(output_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        
+        if (in_fd < 0 || out_fd < 0) {
+            std::cerr << "Failed to open file in child process: " << strerror(errno) << std::endl;
+            exit(1);
         }
-        outfile.close();
+        dup2(in_fd, STDIN_FILENO);
+        dup2(out_fd, STDOUT_FILENO);
+        close(in_fd);
+        close(out_fd);
+        execve(av[0], const_cast<char **>(av), envp);
+        std::cerr << "execve failed: " << strerror(errno) << std::endl;
+        exit(1);
+    } 
+    else if (pid > 0) {
+        const int timeout_seconds = 5;
+        struct timeval start_time, current_time;
+        gettimeofday(&start_time, NULL);
+
+        while (true) {
+            int status;
+            pid_t result = waitpid(pid, &status, WNOHANG);
+            
+            if (result == pid) {
+                std::ifstream outfile(output_file);
+                if (outfile) {
+                    std::string line;
+                    while (std::getline(outfile, line)) {
+                        cgi_response += line + "\n";
+                    }
+                }
+                break;
+            } 
+            else if (result == -1) {
+                std::cerr << "waitpid error: " << strerror(errno) << std::endl;
+                break;
+            }
+            gettimeofday(&current_time, NULL);
+            double elapsed = (current_time.tv_sec - start_time.tv_sec) + 
+                             (current_time.tv_usec - start_time.tv_usec) / 1000000.0;
+            
+            if (elapsed >= timeout_seconds) {
+                kill(pid, SIGKILL);
+                waitpid(pid, NULL, 0);
+                cgi_response = "CGI script timed out.\n";
+                break;
+            }
+
+            usleep(10000);
+        }
+    }
+    else {
+        std::cerr << "Fork failed: " << strerror(errno) << std::endl;
+        return "Internal Server Error";
     }
 
-    // Clean up the temporary files
-    unlink(input_file.c_str());
-    unlink(output_file.c_str());
-    // std::cout << cgi_response << std::endl;
+    if (unlink(input_file.c_str()) != 0 || unlink(output_file.c_str()) != 0) {
+        std::cerr << "Failed to remove temporary files: " << strerror(errno) << std::endl;
+    }
+    for (int i = 0; envp[i] != NULL; i++) {
+        delete[] envp[i];
+    }
+    delete[] envp;
     return cgi_response;
 }
 
 
 
-
 void RequestHandler::check_requested_method(Client* cli)
 {
+    std::string cgi_response;
     if (cli->_request.getMethod() == "GET")
     {
         if(cli->getOnetime() == false)
@@ -325,17 +284,12 @@ void RequestHandler::check_requested_method(Client* cli)
 
                 if (is_dir_has_index_files(cli) == false)
                 {
-                // std::cout <<"path =>> " << _path[_path.length() - 1] << std::endl;
-                    //check autoindex/directorylisting : ON/OFF
-
-                    //OFF :
                     if (cli->getServer().get_locations()[_blockIdx].getDirectoryListing() == false)
                     {
                         cli->_response.setStatus(403);
                         cli->_response.setHeader("Content-Length", 0);
                         throw(403);
                     }
-                    //ON :
                     else
                     {
                         std::string htmlFile = getDirListing();
@@ -358,23 +312,16 @@ void RequestHandler::check_requested_method(Client* cli)
             cli->setTypeData(READDATA);
         }
         if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1 && cli->checkExtensionFile(abs_path))  {
-            std::cout << "\n\n*******\n\n";
-            std::cout << abs_path << std::endl;
-            std::cout << _path << std::endl;
-            std::cout << cli->_request.getHeader("Content-Length")->second.size() << std::endl;
-            std::cout << cli->_request.getURL() << std::endl;
-            std::cout << "\n\n*******\n\n";
             int pos = cli->_request.getURL().find("?");
             std::string query = cli->_request.getURL().substr(pos + 1);
-            std::string cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), query);
-            cli->_response.setStatus(200);                         
-            std::string htmlfile = cgi_response;//generateHTML_file(cgi_response, 1, 200);
+            cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), query);
+            cli->_response.setStatus(200);
+            std::string htmlfile = cgi_response;
             cli->_response.setHeader("Content-Type", "text/html");
             cli->_response.setHeader("Content-Length", htmlfile.length());
             cli->_response.setBody(htmlfile);
             cli->_response.generateHeaderResponse();
             cli->setTypeData(WRITEDATA);
-            throw(200);
         }
         else
         {
@@ -396,13 +343,15 @@ void RequestHandler::check_requested_method(Client* cli)
     }
     else if (cli->_request.getMethod() == "POST")
     {
-        
             get_requested_ressource(cli);
             cli->setOnetime();
-            if (get_ressource_type(abs_path) == "DIR") {
-                if (_path[_path.length() - 1] != '/') {
-                    if (access(abs_path.c_str(), R_OK) != 0) {
-                        std::string htmlfile = generateHTML_file("ERROR: forbiden access", 0, 403);
+            if (get_ressource_type(abs_path) == "DIR")
+            {
+                if (_path[_path.length() - 1] != '/')
+                {
+                    if (access(abs_path.c_str(), R_OK) != 0) 
+                    {
+                        std::string htmlfile = cli->_response.generateHTML_file("ERROR: forbiden access", 0, 403);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
                         cli->_response.setBody(htmlfile);
@@ -413,13 +362,14 @@ void RequestHandler::check_requested_method(Client* cli)
                     }
                     cli->_response.setHeader("Location", _path + '/');
                     cli->_response.setStatus(307);
-                    throw(301);
+                    throw(307);
                 }
-            
-                if (is_dir_has_index_files(cli) == true) {
-                    if (access(abs_path.c_str(), R_OK) != 0) {
+                if (is_dir_has_index_files(cli) == true) 
+                {
+                    if (access(abs_path.c_str(), R_OK) != 0) 
+                    {
                         
-                        std::string htmlfile = generateHTML_file("ERROR: forbiden access", 0, 403);
+                        std::string htmlfile = cli->_response.generateHTML_file("ERROR: forbiden access", 0, 403);
                         cli->_response.setHeader("Content-Type", "text/html");
                         cli->_response.setHeader("Content-Length", htmlfile.length());
                         cli->_response.setBody(htmlfile);
@@ -428,44 +378,23 @@ void RequestHandler::check_requested_method(Client* cli)
                         cli->setTypeData(WRITEDATA);
                         throw(403);
                     }
-                    if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)  {
-                        std::cout<<"hna1\n\n"<<std::endl;
-
-                                        /*****************************************/
-
-
-                                                    /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
-                                            std::cout << "*******\n";
-                                            // std::cout << cli->_request.getBody()<< "\n";
-                                            std::string cgi_responnse = cgi_execPOST(abs_path, _path, 
-                                                std::to_string(cli->_request.getHeader("Content-Length")->second.size()),
-                                                cli->_request.getBody());
-
-
-                                            std::cout << "*******\n";
-
-                                        /*****************************************/
-
-                                        // check return cgi !!!!!!!!!!
-                                        /*****this just test ====>***/ cli->_response.setStatus(200);
-
-                                        /****************************************/
-                                        std::string htmlfile = generateHTML_file("The file upload was successful.", 1, 200);
-
-                                        cli->_response.setHeader("Content-Type", "text/html");
-                                        cli->_response.setHeader("Content-Length", htmlfile.length());
-                                        cli->_response.setBody(htmlfile);
-                                        cli->_response.generateHeaderResponse();
-                                        cli->setTypeData(WRITEDATA);
-                        /****************************************/
-                        // throw(200);
+                    if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)  
+                    {
+                        std::string uploaddir = cli->getServer().get_locations()[_blockIdx].getUploadDir();
+                        cgi_response = cgi_execPOST(abs_path, _path, 
+                                std::to_string(cli->_request.getHeader("Content-Length")->second.size()),
+                                cli->_request.getBody(), uploaddir);
+                        cli->_response.setStatus(200);
+                        std::string htmlfile =  cli->_response.generateHTML_file("The file upload was successful.", 1, 200);
+                        cli->_response.setHeader("Content-Type", "text/html");
+                        cli->_response.setHeader("Content-Length", htmlfile.length());
+                        cli->_response.setBody(htmlfile);
+                        cli->_response.generateHeaderResponse();
+                        cli->setTypeData(WRITEDATA);
                     }
-                    else {
-                        // std::string htmlfile;
-                        // if (cli->getServer().get_error_pages().find("403") != cli->getServer().get_error_pages().end()) {
-                        //     htmlfile
-                        // }
-                        std::string htmlfile = generateHTML_file("ERROR: NOT Support CGI", 0, 403);
+                    else 
+                    {
+                        std::string htmlfile =  cli->_response.generateHTML_file("ERROR: NOT Support CGI", 0, 403);
                         cli->_response.setStatus(403);
                         cli->_response.setBody(htmlfile);
                         cli->_response.setHeader("Content-Type", "text/html");
@@ -475,10 +404,9 @@ void RequestHandler::check_requested_method(Client* cli)
                         throw(403);
                     }
                 }
-                else {
-                        
-                    std::string htmlfile = generateHTML_file("ERROR: NOT index file", 0, 403);
-                    // cli->_response.setStatus(403);
+                else 
+                {    
+                    std::string htmlfile =  cli->_response.generateHTML_file("ERROR: NOT index file", 0, 403);
                     cli->_response.setBody(htmlfile);
                     cli->_response.setHeader("Content-Type", "text/html");
                     cli->_response.setHeader("Content-Length", htmlfile.length());
@@ -488,46 +416,35 @@ void RequestHandler::check_requested_method(Client* cli)
                     throw(403);
                 } 
             }
-            else {
-                 if (access(abs_path.c_str(), R_OK) != 0) {
-                        std::string htmlfile = generateHTML_file("ERROR: forbiden access", 0, 403);
-                        cli->_response.setHeader("Content-Type", "text/html");
-                        cli->_response.setHeader("Content-Length", htmlfile.length());
-                        cli->_response.setBody(htmlfile);
-                        cli->_response.generateHeaderResponse();
-                        cli->_response.setStatus(403);
-                        cli->setTypeData(WRITEDATA);
-                        throw(403);
-                    }
-                    // check location have or support uploud 
+            else
+            {
+                 if (access(abs_path.c_str(), R_OK) != 0) 
+                 {
+                    std::string htmlfile =  cli->_response.generateHTML_file("ERROR: forbiden access", 0, 403);
+                    cli->_response.setHeader("Content-Type", "text/html");
+                    cli->_response.setHeader("Content-Length", htmlfile.length());
+                    cli->_response.setBody(htmlfile);
+                    cli->_response.generateHeaderResponse();
+                    cli->_response.setStatus(403);
+                    cli->setTypeData(WRITEDATA);
+                    throw(403);
+                }
                     if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)  {
-                                        /*****************************************/
-
-
-                                                    /***************CGI CGI CGI !!!!!!!!!!!!!*****************/
-
-                                        std::string cgi_responnse = cgi_execPOST(abs_path, _path, 
+                                        std::string uploaddir = cli->getServer().get_locations()[_blockIdx].getUploadDir();
+                                        cgi_response = cgi_execPOST(abs_path, _path, 
                                                 std::to_string(cli->_request.getHeader("Content-Length")->second.size()),
-                                                cli->_request.getBody());
-
-                                        /*****************************************/
-
-                                        // check return cgi !!!!!!!!!!
-                                        /*****this just test ====>***/ cli->_response.setStatus(200);
-
-                                        /****************************************/
-                                         std::string htmlfile = generateHTML_file("The file upload was successful.", 1, 200);
+                                                cli->_request.getBody(), uploaddir); 
+                                        cli->_response.setStatus(200);
+                                         std::string htmlfile =  cli->_response.generateHTML_file("The file upload was successful.", 1, 200);
 
                                         cli->_response.setHeader("Content-Type", "text/html");
                                         cli->_response.setHeader("Content-Length", htmlfile.length());
                                         cli->_response.setBody(htmlfile);
                                         cli->_response.generateHeaderResponse();
                                         cli->setTypeData(WRITEDATA);
-                        /****************************************/
-                        // throw(200);
                     }
                     else {
-                        std::string htmlfile = generateHTML_file("ERROR: NOT seport CGI", 0, 403);
+                        std::string htmlfile =  cli->_response.generateHTML_file("ERROR: NOT seport CGI", 0, 403);
                         cli->_response.setStatus(403);
                         cli->_response.setBody(htmlfile);
                         cli->_response.setHeader("Content-Type", "text/html");
@@ -542,14 +459,48 @@ void RequestHandler::check_requested_method(Client* cli)
     else if (cli->_request.getMethod() == "DELETE") 
     {
         get_requested_ressource(cli);
-        handleDeleteRequest(cli, abs_path);
-        cli->_response.setStatus(204);
-        throw(204);
+        if (get_ressource_type(abs_path) == "DIR")
+        {
+            if (_path[_path.length() - 1] != '/')
+            {
+                cli->_response.setStatus(409);
+                throw(409);
+            }
+            if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
+            {
+                if (is_dir_has_index_files(cli) == true)
+                    cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), "");
+                else
+                {
+
+                    cli->_response.setStatus(403);
+                    throw(403);
+                }
+            }
+        }
+        else if (get_ressource_type(abs_path) == "FILE") {
+            if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
+                cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), "");
+            else 
+                handleDeleteRequest(cli, abs_path);
+        }
+        if (get_ressource_type(abs_path) == "DIR" && cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 0)
+            handleDeleteRequest(cli, abs_path);
+        if (cli->getServer().get_locations()[_blockIdx].getCgiSupport() != 1){
+            cli->_response.setStatus(204);
+            throw(204);
+        }
+        cli->_response.setStatus(200);  
+        std::string htmlfile = cgi_response;
+        cli->_response.setHeader("Content-Type", "text/html");
+        cli->_response.setHeader("Content-Length", htmlfile.length());
+        cli->_response.setBody(htmlfile);
+        cli->_response.generateHeaderResponse();
+        cli->setTypeData(WRITEDATA);
     }
     return;
 }
 
-//////////////////////
 void RequestHandler::deleteDirectoryRecursively(Client* cli, const char* dirPath)
 {
      DIR *dir = opendir(dirPath);
@@ -576,34 +527,9 @@ void RequestHandler::deleteDirectoryRecursively(Client* cli, const char* dirPath
 void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
 {
     if (get_ressource_type(abs_path) == "DIR")
-    {
-        if (_path[_path.length() - 1] != '/')
-        {
-            cli->_response.setStatus(409);
-            throw(409);
-        }
-        if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
-        {
-            if (is_dir_has_index_files(cli) == true)
-                std::string cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), "");
-            else
-            {
-                
-                cli->_response.setStatus(403);
-                throw(403);
-            }
-        }
-        else
-            deleteDirectoryRecursively(cli, abs_path.c_str());
-
-    }
+        deleteDirectoryRecursively(cli, abs_path.c_str());
     else
-    {
-        if(cli->getServer().get_locations()[_blockIdx].getCgiSupport() == 1)
-            std::string cgi_response = cgi_exec(abs_path, _path, std::to_string(cli->_request.getHeader("Content-Length")->second.size()), "");
-        else
-            std::remove(abs_path.c_str());  
-    }
+        std::remove(abs_path.c_str());  
 }
 
 
@@ -611,11 +537,9 @@ void RequestHandler::handleDeleteRequest(Client* cli, std::string abs_path)
 bool RequestHandler::is_dir_has_index_files(Client* cli)
 {
     struct stat fileInfo;
-    std::cout << cli->getServer().get_locations()[_blockIdx].getIndexFiles().size() << std::endl;
     for (unsigned int i = 0; i < cli->getServer().get_locations()[_blockIdx].getIndexFiles().size(); i++)
     {
         std::string filePath = abs_path + cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i];
-        std::cout << "\"" << abs_path << "\"" << "\"" << cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i] << "\""<< std::endl;
         if (stat(filePath.c_str(), &fileInfo) == 0 && S_ISREG(fileInfo.st_mode))
         {
             abs_path = abs_path + cli->getServer().get_locations()[_blockIdx].getIndexFiles()[i];
@@ -626,12 +550,10 @@ bool RequestHandler::is_dir_has_index_files(Client* cli)
 }
 
 
-
-////////////////getters/////////////////
 void RequestHandler::get_requested_ressource(Client* cli)
 {
     struct stat fileInfo;
-
+    std::string htmlfile;
     std::string url = cli->_request.getURL();
     std::size_t query_pos = url.find("?");
     
@@ -639,23 +561,16 @@ void RequestHandler::get_requested_ressource(Client* cli)
         _path = url.substr(0, query_pos);
     else
         _path = url;
-    std::cout << "path is here " << _path << std::endl;
+        
     std::string pathExact;
-    if (_blockIdx == -1)
-        pathExact = cli->getServer().get_root();
-    else 
-        pathExact = cli->getServer().get_locations()[_blockIdx].getRoot();
-    // std::cout << cli->getServer().get_roots()[0] << std::endl;
+    pathExact = cli->getServer().get_locations()[_blockIdx].getRoot();
     abs_path = pathExact + _path;
-    std::cout << "abs_path: " << abs_path << std::endl;
     if (stat(abs_path.c_str(), &fileInfo) != 0) {
-        std::string htmlfile = generateHTML_file("ERROR: NOT FOUND", 0, 404);
+        htmlfile =  cli->_response.generateHTML_file("ERROR: NOT FOUND", 0, 404);
+        cli->_response.setBody(htmlfile);  
         cli->_response.setHeader("Content-Type", "text/html");
         cli->_response.setHeader("Content-Length", htmlfile.length());
-        cli->_response.setBody(htmlfile);
-        cli->_response.generateHeaderResponse();
         cli->setTypeData(WRITEDATA);
-        std::cout << "\n\n\n\nERRRRRRRRRRRROR\n\n\n\n";
         cli->_response.setStatus(404);
         throw(404);
     }
@@ -795,7 +710,6 @@ const std::string RequestHandler::getDirListing()
     return (htmlContent);
 }
 
-//////////////////////////////////////////////////
 
 
 void RequestHandler::setStatusMessage(Client* cli)
@@ -842,9 +756,6 @@ void RequestHandler::setStatusMessage(Client* cli)
         break;
     }
 }
-
-
-
 
 
 

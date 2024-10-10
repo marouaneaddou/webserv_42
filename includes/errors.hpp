@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   errors.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 11:27:44 by aech-che          #+#    #+#             */
-/*   Updated: 2024/10/02 11:21:22 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/10/06 15:41:41 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,10 @@ class Errors
         static int valid_cgi_extension(std::string arg);
         static int valid_indexfiles(std::string indexfile);
         static int valid_server_data(Servers &server);
-        static void check_dupservers(std::vector<Servers> serversvec);
         static int valid_return(std::string arg);
         static int valid_cgi_support(std::string arg);
+        static int valid_upload_dir(std::string arg);
+
 };
 
 

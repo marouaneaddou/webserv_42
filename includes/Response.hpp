@@ -2,6 +2,7 @@
 
 #include "includes_util.hpp"
 
+class Client;
 typedef std::map<std::string, std::string>::iterator it_Header;
 class Response {
 public:
@@ -22,7 +23,10 @@ public:
     std::string getStatusMsg() const;
     std::string getBody() const;
     it_Header getHeader(const std::string& key);
+    void generateErrorPage(std::string root, std::string error_page);
     void generateHeaderResponse();
+    std::string generateHTML_file(std::string print, bool type, int status);
+    void generate_ErrorPages(Client *cli);
     void Send(int cli_fd);
 
     /**************** Response *********** */

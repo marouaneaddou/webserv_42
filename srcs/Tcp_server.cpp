@@ -12,12 +12,6 @@ TCPserver::~TCPserver()
     close_server();
 }
 
-void TCPserver::exit_error(const std::string err_msg)
-{
-    std::cout << "ERROR: " << err_msg << std::endl;
-    exit (1);
-}
-
 int TCPserver::start_server(Servers &server)
 {
     int ssocket;
@@ -29,7 +23,6 @@ int TCPserver::start_server(Servers &server)
         memset(&hints, 0, sizeof hints);
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
-        // hints.ai_flags = AI_PASSIVE;
         if ((status = getaddrinfo(server.get_host().c_str(), std::to_string(server.get_ports()[i]).c_str(), &hints, &res)) != 0) {
             std::cerr << "getaddrinfo: " << gai_strerror(status) << std::endl;
             exit(1);

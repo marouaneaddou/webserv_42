@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   locations.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:22:03 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/09/30 02:08:37 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/10/05 21:29:11 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/locations.hpp"
 
-Locations::Locations() : _path(""), _return(""), default_file(""), directory(""), cgi_bin(""), cgi_extension(""), cgi_support(false), directory_listing(false), root("") {}
+Locations::Locations() : _path(""), _return(""), default_file(""), directory(""), cgi_bin(""), cgi_extension(""), cgi_support(false), directory_listing(false), root(""), upload_dir("./upload") {}
 
 Locations::~Locations() {};
 
@@ -104,4 +104,13 @@ bool Locations::getCgiSupport() {
 
 void Locations::setRoot(std::string root) {
     this->root = root;
+}
+
+
+void Locations::setUploadDir(std::string dir) {
+    this->upload_dir = dir;
+}
+
+std::string Locations::getUploadDir() {
+    return upload_dir;
 }

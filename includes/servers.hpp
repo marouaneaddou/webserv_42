@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
+/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:08:28 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/10/01 12:46:45 by ayyouub.py       ###   ########.fr       */
+/*   Updated: 2024/10/06 15:32:01 by mel-gand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ class Servers
                 bool default_server;
                 std::map<std::string, std::string> error_pages;
                 std::vector<std::string> indexFiles;
-                // routers or locations
                 std::vector<Locations> locations;
                 std::vector<std::string> _indexFiles;
                 std::vector<Servers> servers;

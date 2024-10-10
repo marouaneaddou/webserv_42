@@ -6,9 +6,8 @@
 #include "Tcp_server.hpp"
 # include "Client.hpp"
 #include "RequestHandler.hpp"
-#include "StaticFileHandler.hpp"
 
-typedef  std::map<int, Client *>::iterator itClient;
+typedef  std::map<int, Client*>::iterator itClient;
 
 class WebServ
 {
@@ -16,7 +15,6 @@ class WebServ
         int max_fd;
         int _nbytes;
         char _buf[250000];
-        std::string _buffer;
         std::string _firstline;
         std::vector <std::vector<int> > _ports;
         std::vector<TCPserver *> _servers;
@@ -25,7 +23,7 @@ class WebServ
         std::map<int, Client*> _clients;
         std::map<int, Servers> _myconf;
         struct sockaddr_in _sockaddr;
-        RequestHandler* handler;
+        // RequestHandler *handler;
         int _exactLocation;
         std::string _path;
     public:
@@ -33,12 +31,10 @@ class WebServ
         ~WebServ();
         
         void run_servers(std::map<int, std::vector<Servers> > grouped, std::vector<Servers> confs);
-        // void run_servers(std::vector<std::vector<Servers> > confs);
         Servers getConf(int fd, std::map<int, std::vector<Servers> > conf, std::string host);
-        // Servers getConf(int fd, std::vector<std::vector<Servers> > conf);
         void SetListeners();
         int set_non_blocking(int sock);
-        void read_request(int fd_R);
+        int read_request(int fd_R);
         void start_parsing(int fd_R, std::map<int, std::vector<Servers> > grouped);
         RequestHandler* createHandler(Request &request, int &exactLocation, std::string &path);
         bool isPHPCGIRequest(std::string URL);
