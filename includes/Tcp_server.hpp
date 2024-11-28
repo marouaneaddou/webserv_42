@@ -3,7 +3,7 @@
 
 #include "includes_util.hpp"
 #include "../includes/servers.hpp"
-
+#include <cstring>
 
 
 #define MAX_CONNECTIONS 2048
@@ -16,7 +16,7 @@ class TCPserver
         void exit_error(const std::string err_msg);
         std::vector<int> getSocket() ;
         std::vector<int> getCliSocket() ;
-        
+
     private:
         int _backlogs;
 
@@ -29,5 +29,5 @@ class TCPserver
 
 
 
-    
+
 };

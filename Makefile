@@ -16,7 +16,7 @@ OBJ = $(SRC:srcs/%.cpp=$(OBJ_DIR)/%.o)
 
 
 CC = g++
-FLAGS := -Wall -Wextra -Werror -std=c++98 -g
+FLAGS :=
 
 
 all: $(NAME)
@@ -43,4 +43,3 @@ fclean: clean
 
 
 re: fclean all
-

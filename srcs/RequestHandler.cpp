@@ -57,7 +57,7 @@ char **custom_cgi_envpGET(std::string abspath, std::string _path, std::string co
     for (int i = 0; i < envp_size; i++)
     {
         envp[i] = new char[envp_as_vec[i].size() + 1]; 
-        std::strcpy(envp[i], envp_as_vec[i].c_str());
+        strcpy(envp[i], envp_as_vec[i].c_str());
     }
 
     envp[envp_size] = nullptr;
@@ -110,7 +110,7 @@ std::string cgi_exec(std::string abspath, std::string _path, std::string content
                 break;
             } 
             else if (result == -1) {
-                std::cerr << "waitpid error: " << strerror(errno) << std::endl;
+                std::cerr << "waitpid error: " << hstrerror(errno) << std::endl;
                 break;
             }
 
@@ -154,7 +154,7 @@ char ** custom_cgi_envpPOST(std::string abspath, std::string _path, std::string 
 
     for (int i = 0; i < envp_size; i++) {
         envp[i] = new char[envp_as_vec[i].size() + 1]; // Allocate each string
-        std::strcpy(envp[i], envp_as_vec[i].c_str());
+        strcpy(envp[i], envp_as_vec[i].c_str());
     }
 
     envp[envp_size] = nullptr; // Null-terminate the array
@@ -185,7 +185,7 @@ std::string cgi_execPOST(std::string abspath, std::string _path, std::string con
 
     std::ofstream infile(input_file);
     if (!infile) {
-        std::cerr << "Failed to open input file: " << strerror(errno) << std::endl;
+        std::cerr << "Failed to open input file: " << hstrerror(errno) << std::endl;
         return "Internal Server Error";
     }
     infile << body;
@@ -197,7 +197,7 @@ std::string cgi_execPOST(std::string abspath, std::string _path, std::string con
         int out_fd = open(output_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
         
         if (in_fd < 0 || out_fd < 0) {
-            std::cerr << "Failed to open file in child process: " << strerror(errno) << std::endl;
+            std::cerr << "Failed to open file in child process: " << hstrerror(errno) << std::endl;
             exit(1);
         }
         dup2(in_fd, STDIN_FILENO);
@@ -205,7 +205,7 @@ std::string cgi_execPOST(std::string abspath, std::string _path, std::string con
         close(in_fd);
         close(out_fd);
         execve(av[0], const_cast<char **>(av), envp);
-        std::cerr << "execve failed: " << strerror(errno) << std::endl;
+        std::cerr << "execve failed: " << hstrerror(errno) << std::endl;
         exit(1);
     } 
     else if (pid > 0) {
@@ -228,7 +228,7 @@ std::string cgi_execPOST(std::string abspath, std::string _path, std::string con
                 break;
             } 
             else if (result == -1) {
-                std::cerr << "waitpid error: " << strerror(errno) << std::endl;
+                std::cerr << "waitpid error: " << hstrerror(errno) << std::endl;
                 break;
             }
             gettimeofday(&current_time, NULL);
@@ -246,12 +246,12 @@ std::string cgi_execPOST(std::string abspath, std::string _path, std::string con
         }
     }
     else {
-        std::cerr << "Fork failed: " << strerror(errno) << std::endl;
+        std::cerr << "Fork failed: " << hstrerror(errno) << std::endl;
         return "Internal Server Error";
     }
 
     if (unlink(input_file.c_str()) != 0 || unlink(output_file.c_str()) != 0) {
-        std::cerr << "Failed to remove temporary files: " << strerror(errno) << std::endl;
+        std::cerr << "Failed to remove temporary files: " << hstrerror(errno) << std::endl;
     }
     for (int i = 0; envp[i] != NULL; i++) {
         delete[] envp[i];

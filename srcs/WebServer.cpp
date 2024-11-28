@@ -37,7 +37,7 @@ void WebServ::run_servers(std::map<int, std::vector<Servers> > grouped, std::vec
         ready_Wsockets = current_Wsockets;
         int selectResult = select(max_fd + 1, &ready_Rsockets, &ready_Wsockets, NULL, NULL);
         if (selectResult <= 0) {
-            std::cerr << "Error in select(): " << strerror(errno) << std::endl;
+            std::cerr << "Error in select(): " << hstrerror(errno) << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -52,7 +52,7 @@ void WebServ::run_servers(std::map<int, std::vector<Servers> > grouped, std::vec
                     continue;
                 }
                 if (set_non_blocking(new_socket) < 0) {
-                    std::cerr << "Failed to set non-blocking for socket " << new_socket << ": " << strerror(errno) << std::endl;
+                    std::cerr << "Failed to set non-blocking for socket " << new_socket << ": " << hstrerror(errno) << std::endl;
                     close(new_socket);
                     continue;
                 }

@@ -36,13 +36,13 @@ int TCPserver::start_server(Servers &server)
         _Socket.push_back(ssocket);
         if (bind(ssocket, res->ai_addr, res->ai_addrlen) < 0)
         {
-            std::cerr << "Error: " << strerror(errno) << std::endl;
+            std::cerr << "Error: " << hstrerror(errno) << std::endl;
             close(ssocket);
             exit(1);
         }
         if (listen(ssocket, BACKLOGS) < 0)
         {
-            std::cerr << "Error: " << strerror(errno) << std::endl;
+            std::cerr << "Error: " << hstrerror(errno) << std::endl;
             close(ssocket);
             exit(1);
         }

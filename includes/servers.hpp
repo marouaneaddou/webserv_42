@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mel-gand <mel-gand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayyouub.py <aech-che@127.0.0.1>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:08:28 by ayyouub.py        #+#    #+#             */
-/*   Updated: 2024/10/06 15:32:01 by mel-gand         ###   ########.fr       */
+/*   Updated: 2024/11/28 09:17:18 by ayyouub.py       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 #include "includes_util.hpp"
 #include "locations.hpp"
-
+#include <string.h>
 
 class Locations;
 class Servers
