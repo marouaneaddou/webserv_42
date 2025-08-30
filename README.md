@@ -1,0 +1,1 @@
+Webserv is a C++98 web server that implements core features of HTTP/1.1, including request parsing, header management, and response handling. It supports GET, POST, and DELETE methods, serves static files, executes CGI scripts, and uses multiplexing to handle multiple client connections efficiently
